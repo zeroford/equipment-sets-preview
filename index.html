@@ -706,11 +706,12 @@
       border-radius: 12px;
     }
 
-    /* เลเวลเป็นป้ายเล็กมุมซ้ายบนของไอคอน */
+    /* เลเวลเป็นป้ายเล็กกึ่งกลางล่างไอคอน — ขอบล่างเป็นบริเวณที่ทับงานศิลป์น้อยสุด */
     .level-badge {
       position: absolute;
-      left: 4px;
-      top: 4px;
+      left: 50%;
+      bottom: 3px;
+      transform: translateX(-50%);
       padding: 0.04rem 0.36rem;
       border-radius: 999px;
       background: rgba(0, 0, 0, 0.42);
