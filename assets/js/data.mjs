@@ -1,9 +1,11 @@
 import { resolveStatId, toStatNumber } from './stats.mjs';
 import { baseStatForSlot, itemNameFor, resolveGrade } from './catalog.mjs';
+import { computeBaseStat } from './base-stat.mjs';
 
 /**
- * ชีตส่งมาแค่ { level, grade, power, base, subs } — ชื่อของกับ base stat id
- * หาเอาจาก slot + grade (ดู catalog.mjs) ไม่ต้องเก็บซ้ำ
+ * ชีตส่งมาแค่ { level, grade, power, subs } — ที่เหลือคำนวณเอาเอง:
+ * ชื่อของกับชนิด base stat มาจาก slot + grade (catalog.mjs)
+ * ส่วนค่า base stat คำนวณจาก slot + grade + level (base-stat.mjs)
  *
  * @param index ตำแหน่งใน grid (0-based) → slot = index + 1
  */
@@ -14,17 +16,18 @@ function normalizeItem(item, index) {
 
   const slot = index + 1;
   const grade = resolveGrade(item.grade);
+  const level = Number(item.level) || 0;
   const subs = (item.subs || []).map(([type, value]) => [
     resolveStatId(type),
     toStatNumber(value),
   ]);
 
   return {
-    level: Number(item.level) || 0,
+    level,
     grade,
     name: item.name || itemNameFor(slot, grade),
     power: toStatNumber(item.power),
-    stats: [[baseStatForSlot(slot), toStatNumber(item.base)], ...subs],
+    stats: [[baseStatForSlot(slot), computeBaseStat(slot, grade, level) || 0], ...subs],
   };
 }
 

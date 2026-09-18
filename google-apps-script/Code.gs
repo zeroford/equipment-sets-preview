@@ -7,11 +7,11 @@
  *
  * อ่าน 2 แท็บ (header row บรรทัดแรก, ชื่อคอลัมน์ไม่สนตัวพิมพ์/ช่องว่าง/ขีด):
  *   Sets  — setKey | title | order
- *   Items — setKey | slot | level | grade | power | base | sub1Type | sub1Value | sub2Type | sub2Value
+ *   Items — setKey | slot | level | grade | power | sub1Type | sub1Value | sub2Type | sub2Value
  *
  * เก็บเท่าที่จำเป็น ที่เหลือ derive ฝั่ง JS:
  *   grade    9 = legendary, 10 = eternal (พิมพ์ 'eternal' ก็ได้)
- *   base     ค่า base stat เฉยๆ — ชนิดผูกกับ slot อยู่แล้ว (assets/js/catalog.mjs)
+ *   base stat ไม่ต้องเก็บ — คำนวณจาก slot + grade + level (assets/js/base-stat.mjs)
  *   sub*Type stat id เช่น skillAmp (พิมพ์ 'Skill AMP' ก็ได้ — assets/js/stats.mjs)
  *   ชื่อของ  ไม่ต้องเก็บ ผูกกับ (slot, grade); ใส่คอลัมน์ name เพื่อ override ได้
  *
@@ -48,7 +48,7 @@ function doGet() {
  * ซึ่ง Apps Script ไม่ตอบ OPTIONS เลย request ตายก่อนถึงที่นี่
  *
  * body: { key, action: 'updateItem' | 'clearSlot', setKey, slot, item? }
- * item: { level, grade, power, base, baseFormat, subs: [[statId, value, format], …] }
+ * item: { level, grade, power, subs: [[statId, value, format], …] }
  */
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -154,7 +154,6 @@ function writeItem(setKey, slot, item) {
   setCell(layout, row, 'level', Math.round(toNumber(item.level)), '');
   setCell(layout, row, 'grade', item.grade, '');
   setCell(layout, row, 'power', toNumber(item.power), '');
-  setCell(layout, row, 'base', toNumber(item.base), item.baseFormat);
 
   var subs = item.subs || [];
   for (var i = 1; i <= MAX_SUBSTATS; i += 1) {
@@ -241,7 +240,6 @@ function buildItems(rows, setKey) {
       level: Math.round(toNumber(field(row, 'level'))),
       grade: field(row, 'grade'),
       power: toNumber(field(row, 'power')),
-      base: toNumber(field(row, 'base')),
       subs: readSubStats(row),
     };
     var name = field(row, 'name');

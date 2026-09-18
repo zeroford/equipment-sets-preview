@@ -1,5 +1,5 @@
 import { CURVES, GAME_PERCENT_STATS, RATE_BY_SLOT } from './base-stat-data.mjs';
-import { baseStatForSlot } from './catalog.mjs';
+import { GRADE_KEYS, baseStatForSlot } from './catalog.mjs';
 
 /**
  * โบนัสที่บวกทับค่าจากตารางเกม
@@ -27,7 +27,9 @@ function baseBonusForSlot(slot) {
  * คืนค่าในหน่วยที่เก็บจริง (stat แบบ % เป็นเศษส่วน) — ไม่รู้ก็คืน null
  */
 export function computeBaseStat(slot, grade, level) {
-  const rate = (RATE_BY_SLOT[slot - 1] || {})[grade];
+  // รับได้ทั้งเลข (10) และชื่อ ('eternal')
+  const code = Number(grade) || GRADE_KEYS.indexOf(String(grade)) + 1;
+  const rate = (RATE_BY_SLOT[slot - 1] || {})[code];
   const statId = baseStatForSlot(slot);
   const curve = CURVES[statId];
   if (!rate || !curve || !(level >= 1 && level <= curve.length)) {

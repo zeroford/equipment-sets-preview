@@ -199,7 +199,6 @@ export function createEditUi({ onSaved }) {
   }
 
   function collect(form, targetSlot) {
-    const baseStat = baseStatForSlot(targetSlot);
     const subs = [];
     for (let i = 1; i <= SUB_COUNT; i += 1) {
       const statId = form.elements[`sub${i}Type`].value;
@@ -212,8 +211,6 @@ export function createEditUi({ onSaved }) {
       level: Number(form.elements.level.value) || 0,
       grade: Number(form.elements.grade.value),
       power: Number(form.elements.power.value) || 0,
-      base: baseValue(form, targetSlot) || 0,
-      baseFormat: statFormat(baseStat),
       subs,
     };
   }

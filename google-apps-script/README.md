@@ -9,7 +9,8 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ใ
 | level, grade, power, ค่า stat | **ชีต** | เปลี่ยนทุกชิ้น |
 | substat type | **ชีต** | slot เดียวออกได้หลายแบบ |
 | ชื่อของ | `assets/js/catalog.mjs` | fix ตาม (slot, grade) |
-| base stat type | `assets/js/catalog.mjs` | fix ตาม slot |
+| ชนิด base stat | `assets/js/catalog.mjs` | fix ตาม slot |
+| **ค่า** base stat | `assets/js/base-stat.mjs` | คำนวณจาก slot + grade + level |
 | label / % / คั่นหลักพัน | `assets/js/stats.mjs` | เป็นเรื่องแสดงผล |
 | best substat | `assets/js/constants.mjs` | มีแค่ 2 แบบ |
 
@@ -30,9 +31,9 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ใ
 
 ### `Items` — 1 แถว = equipment 1 ชิ้น
 
-| setKey | slot | level | grade | power | base | sub1Type | sub1Value | sub2Type | sub2Value |
-|---|---|---|---|---|---|---|---|---|---|
-| boss | 1 | 97 | 10 | 287.59 | 6043 | skillAmp | 8.53% | critDmg | 14.62% |
+| setKey | slot | level | grade | power | sub1Type | sub1Value | sub2Type | sub2Value |
+|---|---|---|---|---|---|---|---|---|
+| boss | 1 | 97 | 10 | 287.59 | skillAmp | 8.53% | critDmg | 14.62% |
 
 - **`slot`** — ตำแหน่งใน grid 3×4 นับ 1–12 ซ้าย→ขวา บน→ล่าง
 
@@ -46,9 +47,8 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ใ
   **ช่องว่าง = ไม่ต้องมีแถว** (ไม่ใช่แถวเปล่า) → เว็บขึ้นเป็น plate เปล่า
 - **`grade`** — `10` = eternal (ม่วง), `9` = legendary (ทอง) — พิมพ์ `eternal` / `legendary` ก็ได้
 - **`power`** — ใส่ `287.59` เฉยๆ ตัว `M` เว็บเติมให้เอง
-- **`base`** — ค่า base stat; *ชนิด*ของมันผูกกับ slot อยู่แล้ว (slot 1 = ATK, slot 2 = Accuracy, …)
 - **`subNType`** — stat id ของ substat เช่น `skillAmp` ดูรายการทั้งหมดในแท็บ `Stats` (พิมพ์ `Skill AMP` ก็ได้) รองรับถึง `sub5`
-- **`subNValue`** / **`base`** — stat ที่เป็น **%** ให้พิมพ์แบบ `8.53%` ไปเลย (Sheets เก็บเป็น `0.0853` ซึ่งถูกต้อง)
+- **`subNValue`** — stat ที่เป็น **%** ให้พิมพ์แบบ `8.53%` ไปเลย (Sheets เก็บเป็น `0.0853` ซึ่งถูกต้อง)
   ที่เหลือพิมพ์เลขตรงๆ `6043`, `475.6`
 - **`name`** — ไม่ต้องมี; ใส่คอลัมน์นี้เมื่ออยาก override ชื่อเป็นรายชิ้น
 

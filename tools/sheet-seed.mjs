@@ -11,7 +11,6 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { STATS, resolveStatId } from '../assets/js/stats.mjs';
-import { BASE_STAT_BY_SLOT } from '../assets/js/catalog.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'google-apps-script', 'seed');
@@ -45,7 +44,7 @@ function buildSets(sets) {
 }
 
 function buildItems(sets) {
-  const header = ['setKey', 'slot', 'level', 'grade', 'power', 'base'];
+  const header = ['setKey', 'slot', 'level', 'grade', 'power'];
   for (let i = 1; i <= MAX_SUBS; i += 1) {
     header.push(`sub${i}Type`, `sub${i}Value`);
   }
@@ -60,10 +59,7 @@ function buildItems(sets) {
         return; // slot ว่าง = ไม่มีแถวในชีต
       }
       const slot = index + 1;
-      const row = [set.setKey, slot, item.level, item.grade, item.power, item.base];
-      if (isPercent(BASE_STAT_BY_SLOT[index])) {
-        percentCells.push([rows.length + 2, row.length]); // +2 = ข้าม header, เป็น 1-based
-      }
+      const row = [set.setKey, slot, item.level, item.grade, item.power];
       for (let i = 0; i < MAX_SUBS; i += 1) {
         const [type, value] = (item.subs || [])[i] || ['', ''];
         const statId = type === '' ? '' : resolveStatId(type);
