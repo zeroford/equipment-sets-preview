@@ -12,7 +12,7 @@
       --text: #f1f3f5;
       --muted: #868e96;
       --divider: rgba(255, 255, 255, 0.08);
-      --pill-active: #59637a;
+      --pill-active: #3d4450;
       --dock-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
       --dock-scroll-pad: calc(4.35rem + env(safe-area-inset-bottom, 0px));
     }
@@ -111,16 +111,15 @@
       border-radius: 999px;
       background: var(--pill-active);
       box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        0 1px 2px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
       opacity: 0;
       transition: opacity 0.15s ease;
       z-index: 0;
     }
 
     .set-tab[aria-selected="true"] {
-      color: #fff;
-      font-weight: 600;
+      color: #f1f3f5;
     }
 
     .set-tab[aria-selected="true"] .set-tab-indicator {
@@ -202,10 +201,10 @@
     }
     .mode-option[aria-pressed="true"] {
       background: var(--pill-active);
-      color: #fff;
+      color: #f1f3f5;
       box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        0 1px 2px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
     .mode-option svg,
     .mode-option .lucide {
