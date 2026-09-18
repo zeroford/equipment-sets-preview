@@ -56,11 +56,12 @@ python3 tools/sheet-xlsx.py                # → seed/equipment-sets.xlsx (impor
 
 ## GitHub Pages
 
-1. Push repo, Settings → Pages → **GitHub Actions**
-2. ใส่ Web App URL ใน `equipment-sheets-config` ใน `.erb` แล้ว push (หรือใช้ `?webApp=`)
+🌐 <https://zeroford.github.io/equipment-sets-preview/>
+
+push ขึ้น `main` แล้ว [workflow](.github/workflows/pages.yml) จะ render ERB + deploy ให้เอง
 
 ```bash
-git add . && git commit -m "..." && git push -u origin main
+git add . && git commit -m "..." && git push
 ```
 
-URL: `https://YOUR_USER.github.io/equipment-sets-preview/`
+แก้ข้อมูลในชีตอย่างเดียว **ไม่ต้อง push** — เว็บ fetch ใหม่ทุกครั้งที่โหลด
