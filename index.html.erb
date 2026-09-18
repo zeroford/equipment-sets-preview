@@ -128,8 +128,12 @@
       }
       .section {
         display: grid;
-        /* NOTE: กว้างเท่าการ์ด 3 ใบพอดี ไม่ใช้ 1fr — ไม่งั้นแถบ tag ด้านบนจะยืดเกินแนวการ์ด */
-        grid-template-columns: repeat(2, calc(var(--card-max) * 3 + var(--card-gap) * 2));
+        /*
+         * กว้างสุดเท่าการ์ด 3 ใบ ไม่ใช้ 1fr — ไม่งั้นแถบ tag ด้านบนจะยืดเกินแนวการ์ด
+         * NOTE: ต้องเป็น minmax(0, …) ไม่ใช่ค่าตายตัว — ช่วงจอ 1080–1245px
+         * สองคอลัมน์รวมกันกว้างกว่าจอ ถ้าหดไม่ได้จะล้นออกนอกจอทั้งซ้ายและขวา
+         */
+        grid-template-columns: repeat(2, minmax(0, calc(var(--card-max) * 3 + var(--card-gap) * 2)));
         justify-content: center;
         column-gap: 1.5rem;
         align-items: start;
