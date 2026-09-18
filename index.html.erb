@@ -500,6 +500,9 @@
     }
 
     .grid-row-group {
+      /* NOTE: คุมความกว้างที่ระดับ group ไม่ใช่ที่ .grid — แถบ tag จะได้ยาวเท่าการ์ด 3 ใบพอดี */
+      max-width: calc(var(--card-max) * 3 + var(--card-gap) * 2);
+      margin-inline: auto;
       margin-bottom: 1.1rem;
     }
 
@@ -516,7 +519,6 @@
       padding: 0.3rem 0.5rem;
       border-radius: 6px;
       background: rgba(255, 255, 255, 0.04);
-      border-left: 3px solid #6c757d;
       /* NOTE: กันความสูงไว้ให้แถวที่ไม่มี tag ด้วย ไม่งั้นกริดแต่ละแถวเหลื่อมกัน */
       min-height: 2rem;
     }
