@@ -1,6 +1,7 @@
 import { postToWebApp } from './data.mjs';
-import { GRADE_KEYS, baseStatForSlot, itemNameFor, resolveGrade } from './catalog.mjs';
-import { SLOT_TYPES } from './constants.mjs';
+import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
+import { GRADES, SLOT_TYPES } from './constants.mjs';
+import { emptyCellHtml, equipIconPath, renderCard } from './render.mjs';
 import { STATS, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
 
@@ -45,11 +46,18 @@ function slotOptions(selected) {
   return html;
 }
 
+/**
+ * NOTE: โชว์เฉพาะ rarity ที่มีสีกรอบใน GRADES — rarity อื่นยังไม่มีทั้งสีและไฟล์ไอคอน
+ * ในรีโป เลือกไปการ์ดจะพัง อยากเปิดเพิ่มก็ใส่สีใน constants.mjs + วางรูปใน assets
+ */
 function gradeOptions(selected) {
-  return GRADE_KEYS.map(
-    (key, i) =>
-      `<option value="${i + 1}"${key === selected ? ' selected' : ''}>${i + 1} · ${escapeHtml(key)}</option>`,
-  ).join('');
+  return GRADE_KEYS.map((key, i) => [key, i + 1])
+    .filter(([key]) => GRADES[key])
+    .map(
+      ([key, code]) =>
+        `<option value="${code}"${key === selected ? ' selected' : ''}>${code} · ${escapeHtml(key)}</option>`,
+    )
+    .join('');
 }
 
 function statOptions(selected) {
@@ -62,50 +70,71 @@ function statOptions(selected) {
     .join('');
 }
 
-/** ฟอร์มหนึ่งคอลัมน์ = ของชิ้นเดียวใน set นั้น เรียงตาม layout ของการ์ด */
-function columnHtml(set, index, slot) {
+function cardChrome(slot, grade) {
+  const g = GRADES[grade] || GRADES.legendary;
+  return {
+    grade,
+    frame: g.frame,
+    glow: g.glow,
+    name: itemNameFor(slot, grade),
+    icon: equipIconPath({ grade }, slot - 1),
+  };
+}
+
+/** การ์ดของ set นั้นตามจริง ไว้ดูเทียบก่อนกรอก — อ่านอย่างเดียว */
+function previewHtml(set, slot) {
   const item = (set.items || [])[slot - 1] || null;
-  const grade = item ? item.grade : GRADE_KEYS[GRADE_KEYS.length - 1];
+  return `<div class="edit-preview">
+    <p class="edit-col-title">${escapeHtml(set.title)}${item ? '' : ' · empty'}</p>
+    ${item ? renderCard(item, slot - 1, []) : emptyCellHtml(slot - 1)}
+  </div>`;
+}
+
+/**
+ * ฟอร์มกรอกของใหม่ — หน้าตาเป็นการ์ดเหมือนกัน จะได้เห็นว่ากรอกแล้วออกมาหน้าตายังไง
+ *
+ * NOTE: ใช้คลาสเดียวกับการ์ดบนหน้าเว็บ (.card/.name-bar/.stats) ไม่ต้องดูแล layout สองชุด
+ */
+function formCardHtml(slot) {
+  const grade = GRADE_KEYS[GRADE_KEYS.length - 1];
+  const chrome = cardChrome(slot, grade);
   const baseStat = baseStatForSlot(slot);
-  const subs = (item && item.stats ? item.stats.slice(1) : []).slice(0, SUB_COUNT);
-  const p = `s${index}`;
 
   let subRows = '';
   for (let i = 1; i <= SUB_COUNT; i += 1) {
-    const [statId, value] = subs[i - 1] || ['', ''];
-    subRows += `<div class="edit-row edit-row-pair">
-      <label for="${p}Sub${i}Type">Sub ${i}</label>
-      <select id="${p}Sub${i}Type" name="${p}Sub${i}Type"><option value="">— none —</option>${statOptions(statId)}</select>
-      <input id="${p}Sub${i}Value" name="${p}Sub${i}Value" type="number" step="any" value="${
-        statId === '' ? '' : toInput(statId, value)
-      }" aria-label="Sub ${i} value" />
-    </div>`;
+    subRows += `<li>
+      <select name="sub${i}Type" aria-label="Sub ${i} stat"><option value="">— none —</option>${statOptions('')}</select>
+      <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Sub ${i} value" />
+    </li>`;
   }
 
-  return `<div class="edit-col">
-    <p class="edit-col-title">${escapeHtml(set.title)}${item ? '' : ' · empty'}</p>
-    <p class="edit-col-name">${escapeHtml(itemNameFor(slot, grade))}</p>
+  return `<div class="edit-form-card">
+    <p class="edit-col-title">New item</p>
+
+    <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
+      <div class="name-bar">
+        <span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /></span>
+        <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span></span>
+      </div>
+      <div class="card-body">
+        <div class="meta">
+          <span class="level">Lv.<input name="level" type="number" min="1" step="1" class="edit-inline" aria-label="Level" /></span>
+          <span class="meta-power"><input name="power" type="number" step="any" class="edit-inline" aria-label="Power" />M</span>
+        </div>
+        <div class="stat-primary-block">
+          <span class="label">${escapeHtml(statLabel(baseStat))}</span>
+          <span class="value"><input name="base" type="number" step="any" class="edit-inline" aria-label="${escapeHtml(
+            statLabel(baseStat),
+          )}" /></span>
+        </div>
+        <ul class="stats">${subRows}</ul>
+      </div>
+    </article>
 
     <div class="edit-row">
-      <label for="${p}Grade">Rarity</label>
-      <select id="${p}Grade" name="${p}Grade">${gradeOptions(grade)}</select>
+      <label for="editGrade">Rarity</label>
+      <select id="editGrade" name="grade">${gradeOptions(grade)}</select>
     </div>
-    <div class="edit-row">
-      <label for="${p}Level">Lv.</label>
-      <input id="${p}Level" name="${p}Level" type="number" min="1" step="1" value="${item ? item.level : ''}" />
-    </div>
-    <div class="edit-row">
-      <label for="${p}Power">Power (M)</label>
-      <input id="${p}Power" name="${p}Power" type="number" step="any" value="${item ? item.power : ''}" />
-    </div>
-    <div class="edit-row">
-      <label for="${p}Base">${escapeHtml(statLabel(baseStat))}</label>
-      <input id="${p}Base" name="${p}Base" type="number" step="any" value="${
-        item ? toInput(baseStat, item.stats[0][1]) : ''
-      }" />
-    </div>
-    ${subRows}
-    ${item ? `<button type="button" class="edit-remove" data-remove="${index}">Remove from ${escapeHtml(set.title)}</button>` : ''}
   </div>`;
 }
 
@@ -116,7 +145,9 @@ function dialogHtml(pair, slot, needsKey) {
       <select id="editSlot" name="slot">${slotOptions(slot)}</select>
     </div>
 
-    <div class="edit-cols">${pair.map((set, i) => columnHtml(set, i, slot)).join('')}</div>
+    <div class="edit-previews">${pair.map((set) => previewHtml(set, slot)).join('')}</div>
+
+    ${formCardHtml(slot)}
 
     ${
       needsKey
@@ -130,7 +161,12 @@ function dialogHtml(pair, slot, needsKey) {
     <p class="edit-status" id="editStatus"></p>
     <div class="edit-actions">
       <button type="submit" value="cancel">Cancel</button>
-      <button type="submit" value="save">Save</button>
+      ${pair
+        .map(
+          (set, i) =>
+            `<button type="submit" value="replace${i}" class="edit-replace">Replace ${escapeHtml(set.title)}</button>`,
+        )
+        .join('')}
     </div>
   </form>`;
 }
@@ -156,22 +192,21 @@ export function createEditUi({ onSaved }) {
     webAppUrl = payload.webAppUrl || '';
   }
 
-  function collect(form, index, targetSlot) {
-    const p = `s${index}`;
+  function collect(form, targetSlot) {
     const baseStat = baseStatForSlot(targetSlot);
     const subs = [];
     for (let i = 1; i <= SUB_COUNT; i += 1) {
-      const statId = form.elements[`${p}Sub${i}Type`].value;
-      const raw = form.elements[`${p}Sub${i}Value`].value;
+      const statId = form.elements[`sub${i}Type`].value;
+      const raw = form.elements[`sub${i}Value`].value;
       if (statId && raw !== '') {
         subs.push([statId, fromInput(statId, raw), statFormat(statId)]);
       }
     }
     return {
-      level: Number(form.elements[`${p}Level`].value) || 0,
-      grade: Number(form.elements[`${p}Grade`].value),
-      power: Number(form.elements[`${p}Power`].value) || 0,
-      base: fromInput(baseStat, form.elements[`${p}Base`].value || 0),
+      level: Number(form.elements.level.value) || 0,
+      grade: Number(form.elements.grade.value),
+      power: Number(form.elements.power.value) || 0,
+      base: fromInput(baseStat, form.elements.base.value || 0),
       baseFormat: statFormat(baseStat),
       subs,
     };
@@ -226,33 +261,37 @@ export function createEditUi({ onSaved }) {
       renderDialog();
     });
 
-    form.addEventListener('click', async (event) => {
-      const removeBtn = event.target.closest('.edit-remove');
-      if (!removeBtn) {
+    form.addEventListener('change', (event) => {
+      const select = event.target.closest('select[name="grade"]');
+      if (!select) {
         return;
       }
-      event.preventDefault();
-      const set = pair()[Number(removeBtn.dataset.remove)];
-      const ok = await send(form, [{ action: 'clearSlot', setKey: set.setKey, slot }]);
-      if (ok) {
-        renderDialog();
-      }
+      const chrome = cardChrome(slot, GRADE_KEYS[Number(select.value) - 1]);
+      const card = form.querySelector('.edit-card[data-card]');
+      card.className = `card ${chrome.grade} edit-card`;
+      card.style.setProperty('--frame', chrome.frame);
+      card.style.setProperty('--glow', chrome.glow);
+      card.querySelector('.name-bar-text').textContent = chrome.name;
+      card.querySelector('.name-bar-icon').src = chrome.icon;
     });
 
     form.addEventListener('submit', async (event) => {
-      const action = event.submitter && event.submitter.value;
-      if (action !== 'save') {
+      const action = (event.submitter && event.submitter.value) || '';
+      if (!action.startsWith('replace')) {
         return; // method="dialog" ปิดให้เอง
       }
       event.preventDefault();
+      const set = pair()[Number(action.slice('replace'.length))];
       const targetSlot = slot;
-      const requests = pair().map((set, i) => ({
-        action: 'updateItem',
-        setKey: set.setKey,
-        slot: targetSlot,
-        item: collect(form, i, targetSlot),
-      }));
-      if (await send(form, requests)) {
+      const ok = await send(form, [
+        {
+          action: 'updateItem',
+          setKey: set.setKey,
+          slot: targetSlot,
+          item: collect(form, targetSlot),
+        },
+      ]);
+      if (ok) {
         dialog.close();
       }
     });

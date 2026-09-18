@@ -436,10 +436,19 @@
       width: 1.9rem;
       height: 1.9rem;
       object-fit: contain;
-      opacity: 0.85;
+      /* NOTE: แค่ดึงให้สว่างขึ้น ไม่ใช้ brightness(0) invert(1) — อันนั้นได้เงาทึบ รายละเอียดหายหมด */
+      filter: brightness(2.3);
+      opacity: 0.9;
+    }
+    .add-slot:hover img {
+      opacity: 1;
     }
     .edit-dialog {
+      /* NOTE: * { margin: 0 } ข้างบนลบ margin: auto ที่เบราว์เซอร์ใช้จัดกลาง dialog — ต้องใส่คืน */
+      margin: auto;
       width: min(44rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 2rem);
+      overflow: auto;
       padding: 0;
       border: none;
       border-radius: 1rem;
@@ -457,20 +466,82 @@
       gap: 0.85rem;
       padding: 1.15rem;
     }
-    .edit-cols {
+    .edit-previews {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.85rem;
     }
 
-    .edit-col {
+    .edit-preview,
+    .edit-form-card {
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
-      padding: 0.75rem;
-      border: 1px solid var(--divider);
-      border-radius: 0.75rem;
-      background: rgba(0, 0, 0, 0.18);
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    .edit-preview .card,
+    .edit-preview .grid-empty {
+      width: 100%;
+      height: auto;
+      min-height: 11rem;
+    }
+
+    .edit-form-card {
+      /* NOTE: อย่าให้กว้างเต็ม dialog — ช่อง Lv./power จะตกบรรทัดและล้นออกนอกการ์ด */
+      width: 100%;
+      max-width: 22rem;
+      margin-inline: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--divider);
+    }
+
+    /* NOTE: ต้องเป็น .card.edit-card — บล็อกนี้อยู่ก่อน .card ในไฟล์ ถ้าใช้คลาสเดียว
+       specificity เท่ากันแล้ว .card { height: 100% } ที่อยู่ทีหลังจะชนะ */
+    .card.edit-card {
+      width: 100%;
+      height: auto;
+    }
+    .edit-card .level,
+    .edit-card .meta-power {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      min-width: 0;
+    }
+    .edit-card .stats li {
+      grid-template-columns: minmax(0, 1fr) 5.5rem;
+      min-height: 2.4rem;
+      column-gap: 0.4rem;
+    }
+
+    .edit-inline {
+      width: 100%;
+      min-width: 0;
+      padding: 0.15rem 0.35rem;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 0.35rem;
+      background: rgba(0, 0, 0, 0.3);
+      color: inherit;
+      font: inherit;
+      text-align: right;
+    }
+    .edit-card .level .edit-inline {
+      width: 3.6rem;
+    }
+    .edit-card .meta-power .edit-inline {
+      width: 5.5rem;
+    }
+    .edit-card .stats select {
+      width: 100%;
+      min-width: 0;
+      padding: 0.15rem 0.2rem;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 0.35rem;
+      background: rgba(0, 0, 0, 0.3);
+      color: inherit;
+      font: inherit;
+      font-size: 0.72rem;
     }
 
     .edit-col-title {
@@ -481,26 +552,15 @@
       color: #e4e4e7;
     }
 
-    .edit-col-name {
-      margin: -0.35rem 0 0;
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .edit-remove {
-      margin-top: 0.15rem;
-      padding: 0.4rem;
-      border: 1px solid var(--divider);
-      border-radius: 0.5rem;
-      background: transparent;
-      color: #ff8787;
-      font: inherit;
-      font-size: 0.75rem;
-      cursor: pointer;
+    .edit-replace {
+      background: var(--pill-active);
+      border-color: rgba(255, 255, 255, 0.18);
+      color: #f1f3f5;
+      font-weight: 600;
     }
 
     @media (max-width: 40rem) {
-      .edit-cols {
+      .edit-previews {
         grid-template-columns: minmax(0, 1fr);
       }
     }
@@ -509,9 +569,6 @@
       grid-template-columns: 6.5rem 1fr;
       align-items: center;
       gap: 0.6rem;
-    }
-    .edit-row.edit-row-pair {
-      grid-template-columns: 6.5rem 1fr 6.5rem;
     }
     .edit-row > label {
       font-size: 0.8rem;

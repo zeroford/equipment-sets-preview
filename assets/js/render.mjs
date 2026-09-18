@@ -4,7 +4,7 @@ import { escapeHtml, statBestMatch } from './utils.mjs';
 import { formatPower, formatStat, statLabel } from './stats.mjs';
 import { buildSetSummary } from './summary.mjs';
 
-function equipIconPath(item, gridIndex) {
+export function equipIconPath(item, gridIndex) {
   const type = SLOT_TYPES[gridIndex] || 'sword';
   const tier = gradeTier(item.grade);
   const folder = type.charAt(0).toUpperCase() + type.slice(1);
@@ -16,7 +16,7 @@ function platePath(gridIndex) {
   return `assets/plates/icon_plate_${type}.png`;
 }
 
-function renderCard(item, gridIndex, bestStats) {
+export function renderCard(item, gridIndex, bestStats) {
   const g = GRADES[item.grade] || GRADES.legendary;
   const stats = item.stats || [];
   const primary = stats[0] || ['', 0];
@@ -75,7 +75,7 @@ function renderSection(set, setIndex, summary, mode) {
 
 export const COMPARE_KEY = '__compare';
 
-function emptyCellHtml(gridIndex) {
+export function emptyCellHtml(gridIndex) {
   return `<div class="grid-empty" aria-hidden="true"><img class="grid-empty-plate" src="${escapeHtml(platePath(gridIndex))}" alt="" width="72" height="72" decoding="async" /></div>`;
 }
 
