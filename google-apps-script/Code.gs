@@ -5,22 +5,25 @@
  * - Execute as: Me
  * - Who has access: Anyone (อ่านอย่างเดียว)
  *
- * อ่าน 3 แท็บ (header row บรรทัดแรก, ชื่อคอลัมน์ไม่สนตัวพิมพ์/ช่องว่าง/ขีด):
- *   Sets      — setKey | title | order
- *   Items     — setKey | slot | level | grade | name | power | stat1Label | stat1Value | …
- *   BestStats — setKey | row | bestStats | label
+ * อ่าน 2 แท็บ (header row บรรทัดแรก, ชื่อคอลัมน์ไม่สนตัวพิมพ์/ช่องว่าง/ขีด):
+ *   Sets  — setKey | title | order
+ *   Items — setKey | slot | level | grade | power | base | sub1Type | sub1Value | sub2Type | sub2Value
  *
- * NOTE: ใช้ getDisplayValues() ไม่ใช่ getValues() — ค่าอย่าง "8.53%" / "+6,043" ต้องคงรูปตามที่เห็นในชีต
- * ถ้าอ่านเป็นตัวเลขดิบจะกลายเป็น 0.0853 / 6043 แล้วการ์ดจะแสดงผิด
+ * เก็บเท่าที่จำเป็น ที่เหลือ derive ฝั่ง JS:
+ *   grade    9 = legendary, 10 = eternal (พิมพ์ 'eternal' ก็ได้)
+ *   base     ค่า base stat เฉยๆ — ชนิดผูกกับ slot อยู่แล้ว (assets/js/catalog.mjs)
+ *   sub*Type stat code/id (2 หรือ skillAmp หรือ 'Skill AMP' — assets/js/stats.mjs)
+ *   ชื่อของ  ไม่ต้องเก็บ ผูกกับ (slot, grade); ใส่คอลัมน์ name เพื่อ override ได้
+ *
+ * NOTE: ใช้ getValues() ไม่ใช่ getDisplayValues() — stat แบบ % เก็บเป็นเศษส่วน
+ * พิมพ์ 8.53% ชีตเก็บ 0.0853 ซึ่งเป็นค่าที่เราต้องการ ส่วน display จะได้ "8.53%" ซึ่งผิดรูป
  */
 
 var SHEET_SETS = 'Sets';
 var SHEET_ITEMS = 'Items';
-var SHEET_BEST = 'BestStats';
 
 var SLOT_COUNT = 12; // grid 3×4
-var BEST_ROW_COUNT = 4;
-var MAX_STATS_PER_ITEM = 6; // stat1..stat6 (stat1 = base stat)
+var MAX_SUBSTATS = 5;
 
 function doGet() {
   try {
@@ -37,7 +40,6 @@ function buildSets() {
   }
 
   var itemsBySet = groupBySetKey(readTable(SHEET_ITEMS), SHEET_ITEMS);
-  var bestBySet = groupBySetKey(readTable(SHEET_BEST), SHEET_BEST);
   var seen = {};
 
   return setRows
@@ -54,13 +56,10 @@ function buildSets() {
       }
       seen[key] = true;
 
-      var best = buildBest(bestBySet[key] || [], key);
       return {
         setKey: key,
         title: field(row, 'title'),
         items: buildItems(itemsBySet[key] || [], key),
-        bestStatsByRow: best.stats,
-        bestSubstatLabels: best.labels,
       };
     });
 }
@@ -85,67 +84,37 @@ function buildItems(rows, setKey) {
     if (slots[slot - 1]) {
       throw new Error(SHEET_ITEMS + ' (' + setKey + '): slot ' + slot + ' ซ้ำ');
     }
-    slots[slot - 1] = {
+
+    var item = {
       level: Math.round(toNumber(field(row, 'level'))),
-      grade: field(row, 'grade').toLowerCase(),
-      name: field(row, 'name'),
-      stats: readStats(row),
-      power: field(row, 'power'),
+      grade: field(row, 'grade'),
+      power: toNumber(field(row, 'power')),
+      base: toNumber(field(row, 'base')),
+      subs: readSubStats(row),
     };
+    var name = field(row, 'name');
+    if (name !== '') {
+      item.name = name;
+    }
+    slots[slot - 1] = item;
   }
 
   return slots;
 }
 
-/** [[label, value], …] — stat แรกคือ base stat, ที่เหลือเป็น substat */
-function readStats(row) {
-  var stats = [];
-  for (var i = 1; i <= MAX_STATS_PER_ITEM; i += 1) {
-    var label = field(row, 'stat' + i + 'Label');
-    var value = field(row, 'stat' + i + 'Value');
-    if (label === '' && value === '') {
+/** [[stat code/id, ค่า], …] */
+function readSubStats(row) {
+  var subs = [];
+  for (var i = 1; i <= MAX_SUBSTATS; i += 1) {
+    // รับทั้ง sub1Type และ subStat1Type
+    var type = field(row, 'sub' + i + 'Type') || field(row, 'subStat' + i + 'Type');
+    var value = field(row, 'sub' + i + 'Value') || field(row, 'subStat' + i + 'Value');
+    if (type === '' && value === '') {
       continue;
     }
-    stats.push([label, value]);
+    subs.push([type, toNumber(value)]);
   }
-  return stats;
-}
-
-function buildBest(rows, setKey) {
-  var stats = [];
-  var labels = [];
-  var i;
-  for (i = 0; i < BEST_ROW_COUNT; i += 1) {
-    stats.push([]);
-    labels.push('');
-  }
-
-  for (i = 0; i < rows.length; i += 1) {
-    var row = rows[i];
-    var raw = field(row, 'row');
-    var index = Math.round(toNumber(raw));
-    if (!(index >= 1 && index <= BEST_ROW_COUNT)) {
-      throw new Error(
-        SHEET_BEST + ' (' + setKey + '): row ต้องเป็น 1–' + BEST_ROW_COUNT + ' แต่ได้ "' + raw + '"',
-      );
-    }
-    stats[index - 1] = splitStatList(field(row, 'bestStats'));
-    labels[index - 1] = field(row, 'label');
-  }
-
-  return { stats: stats, labels: labels };
-}
-
-/** "Skill AMP · Crit DMG / Accuracy" → ['Skill AMP', 'Crit DMG', 'Accuracy'] */
-function splitStatList(raw) {
-  return String(raw)
-    .split(/[,·\/|]/)
-    .map(function (part) {
-      return part.trim();
-    })
-    .filter(function (part) {
-      return part !== '';
-    });
+  return subs;
 }
 
 /** อ่านทั้งแท็บเป็น array ของ object โดยใช้ header row เป็น key */
@@ -155,7 +124,7 @@ function readTable(name) {
     throw new Error('ไม่พบแท็บ: ' + name);
   }
 
-  var values = sheet.getDataRange().getDisplayValues();
+  var values = sheet.getDataRange().getValues();
   if (values.length < 2) {
     return [];
   }
@@ -207,7 +176,7 @@ function field(row, name) {
 }
 
 function toNumber(raw) {
-  var num = parseFloat(String(raw).replace(/,/g, ''));
+  var num = parseFloat(String(raw).replace(/[,+\s]/g, ''));
   return isNaN(num) ? 0 : num;
 }
 

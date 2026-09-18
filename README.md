@@ -8,12 +8,9 @@ Static preview สำหรับ equipment set cards (Set A / B / C)
 ./render.sh
 ```
 
-เปิด **`index.html`** — ใช้ ES modules ควร serve ผ่าน HTTP (ไม่ใช่ `file://` เปล่าๆ):
+`render.sh` จะเปิดเซิร์ฟเวอร์ให้เองแล้วเปิด <http://localhost:8765/index.html>
 
-```bash
-cd ~/equipment-sets-preview && python3 -m http.server 8765
-# http://localhost:8765/index.html
-```
+⚠️ เปิด `index.html` ด้วย `file://` ตรงๆ จะได้**หน้าว่าง** — ES modules โดน CORS บล็อก ต้อง serve ผ่าน HTTP เท่านั้น
 
 ## โครงสร้าง
 
@@ -25,11 +22,13 @@ cd ~/equipment-sets-preview && python3 -m http.server 8765
 | `assets/equipment/` `assets/plates/` | รูป |
 | `google-apps-script/` | Apps Script Web App (API อ่าน Sheet) |
 | `tools/sheet-seed.mjs` | JSON ในเว็บ → TSV สำหรับ paste ลงชีต |
-| `tools/sheet-xlsx.py` | TSV → .xlsx 3 แท็บ สำหรับ import เข้า Google Sheets |
+| `tools/sheet-xlsx.py` | TSV → .xlsx สำหรับ import เข้า Google Sheets |
 
 ### JS modules
 
-- `constants.mjs` — grade / slot
+- `constants.mjs` — grade / slot / best substat (2 แบบ)
+- `stats.mjs` — catalog ของ stat (code, label, format)
+- `catalog.mjs` — ชื่อของตาม (slot, grade) + base stat ตาม slot
 - `utils.mjs` — escape, stat match
 - `summary.mjs` — รวม stat popover
 - `data.mjs` — normalize JSON, `fetch` Web App
@@ -42,14 +41,15 @@ cd ~/equipment-sets-preview && python3 -m http.server 8765
 1. **สำรองในเว็บ** — `#equipment-sets-data` จาก Ruby ใน `.erb` (ใช้เมื่อโหลด Web App ไม่สำเร็จ)
 2. **Google Sheet** ผ่าน Apps Script Web App — ตั้ง `webAppUrl` ใน `#equipment-sheets-config` หรือ query `?webApp=URL`
 
-ชีตมี 3 แท็บ: `Sets` (setKey/title/order), `Items` (1 แถว = 1 ชิ้น, `slot` 1–12),
-`BestStats` (substat ที่ highlight ของแต่ละแถว)
+ชีตมี 2 แท็บ: `Sets` (setKey/title/order) และ `Items` (1 แถว = 1 ชิ้น, `slot` 1–12)
+เก็บแค่ level / grade / power / ค่า stat / substat type — ชื่อของกับ base stat type
+derive จาก slot+grade ในโค้ด
 
 ใส่ข้อมูลตั้งต้นลงชีตครั้งแรก:
 
 ```bash
 ./render.sh && node tools/sheet-seed.mjs   # → google-apps-script/seed/*.tsv
-python3 tools/sheet-xlsx.py                # → seed/equipment-sets.xlsx (import ทีเดียวได้ 3 แท็บ)
+python3 tools/sheet-xlsx.py                # → seed/equipment-sets.xlsx (import ทีเดียวจบ)
 ```
 
 วิธี set ชีต + deploy ละเอียด → `google-apps-script/README.md`

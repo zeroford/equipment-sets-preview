@@ -1,12 +1,31 @@
-export function buildConfigFromSets(sets) {
-  const hash = {};
-  sets.forEach((set) => {
-    hash[set.setKey] = {
-      rows: set.bestStatsByRow || [],
-      labels: set.bestSubstatLabels || [],
-    };
-  });
-  return hash;
+import { resolveStatId, toStatNumber } from './stats.mjs';
+import { baseStatForSlot, itemNameFor, resolveGrade } from './catalog.mjs';
+
+/**
+ * ชีตส่งมาแค่ { level, grade, power, base, subs } — ชื่อของกับ base stat id
+ * หาเอาจาก slot + grade (ดู catalog.mjs) ไม่ต้องเก็บซ้ำ
+ *
+ * @param index ตำแหน่งใน grid (0-based) → slot = index + 1
+ */
+function normalizeItem(item, index) {
+  if (!item) {
+    return null;
+  }
+
+  const slot = index + 1;
+  const grade = resolveGrade(item.grade);
+  const subs = (item.subs || []).map(([type, value]) => [
+    resolveStatId(type),
+    toStatNumber(value),
+  ]);
+
+  return {
+    level: Number(item.level) || 0,
+    grade,
+    name: item.name || itemNameFor(slot, grade),
+    power: toStatNumber(item.power),
+    stats: [[baseStatForSlot(slot), toStatNumber(item.base)], ...subs],
+  };
 }
 
 export function buildMetaFromSets(sets) {
@@ -25,9 +44,7 @@ export function normalizeSetsPayload(raw) {
   return list.map((set) => ({
     setKey: set.setKey || set.set_key,
     title: set.title,
-    items: set.items || [],
-    bestStatsByRow: set.bestStatsByRow || set.best_stats_by_row || [],
-    bestSubstatLabels: set.bestSubstatLabels || set.best_substat_labels || [],
+    items: (set.items || []).map(normalizeItem),
   }));
 }
 

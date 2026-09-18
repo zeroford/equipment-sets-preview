@@ -1,10 +1,12 @@
-import { GRADES, GRADE_TIER, SLOT_TYPES } from './constants.mjs';
-import { escapeHtml, statBestMatch, statDisplayValue } from './utils.mjs';
+import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
+import { gradeTier } from './catalog.mjs';
+import { escapeHtml, statBestMatch } from './utils.mjs';
+import { formatPower, formatStat, statLabel } from './stats.mjs';
 import { buildSetSummary } from './summary.mjs';
 
 function equipIconPath(item, gridIndex) {
   const type = SLOT_TYPES[gridIndex] || 'sword';
-  const tier = GRADE_TIER[item.grade] || '09';
+  const tier = gradeTier(item.grade);
   const folder = type.charAt(0).toUpperCase() + type.slice(1);
   return `assets/equipment/${folder}/icon_equip_${type}_${tier}.png`;
 }
@@ -17,26 +19,27 @@ function platePath(gridIndex) {
 function renderCard(item, gridIndex, bestStats) {
   const g = GRADES[item.grade] || GRADES.legendary;
   const stats = item.stats || [];
-  const primary = stats[0] || ['', ''];
-  const subRows = stats.slice(1).map(([label, value]) => {
-    const best = statBestMatch(label, bestStats);
-    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-label="${escapeHtml(label)}"><span class="label">${escapeHtml(label)}</span><span class="value">${escapeHtml(statDisplayValue(value))}</span></li>`;
+  const primary = stats[0] || ['', 0];
+  const subRows = stats.slice(1).map(([statId, value]) => {
+    const best = statBestMatch(statId, bestStats);
+    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}</span></li>`;
   });
 
-  return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="30" height="30" decoding="async" /></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="meta"><span class="level">Lv.${escapeHtml(item.level)}</span><span class="meta-power">${escapeHtml(item.power)}</span></div><div class="stat-primary-block"><span class="label">${escapeHtml(primary[0])}</span><span class="value">${escapeHtml(statDisplayValue(primary[1]))}</span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
+  return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="30" height="30" decoding="async" /></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="meta"><span class="level">Lv.${escapeHtml(item.level)}</span><span class="meta-power">${escapeHtml(formatPower(item.power))}</span></div><div class="stat-primary-block"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
 }
 
 function renderSection(set, setIndex, summary) {
   let rowsHtml = '';
   const items = set.items || [];
+  const best = bestSubstatFor(set.setKey);
 
   for (let rowIndex = 0; rowIndex < 4; rowIndex += 1) {
     const rowItems = items.slice(rowIndex * 3, rowIndex * 3 + 3);
     while (rowItems.length < 3) {
       rowItems.push(null);
     }
-    const rowLabel = (set.bestSubstatLabels || [])[rowIndex] || '';
-    const bestStats = (set.bestStatsByRow || [])[rowIndex] || [];
+    const rowLabel = best.labels[rowIndex] || '';
+    const bestStats = best.rows[rowIndex] || [];
     const cells = rowItems.map((item, colIndex) => {
       const gridIndex = rowIndex * 3 + colIndex;
       if (!item) {

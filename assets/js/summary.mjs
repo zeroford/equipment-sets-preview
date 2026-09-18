@@ -1,72 +1,28 @@
-function parsePower(str) {
-  return parseFloat(String(str).trim().replace(/M$/i, '').replace(/,/g, '')) || 0;
-}
-
-function formatPower(total) {
-  return `${total.toFixed(2)}M`;
-}
-
-function parseStatAmount(value) {
-  const raw = String(value).trim();
-  if (raw.includes('%')) {
-    return { kind: 'percent', amount: parseFloat(raw.replace(/%/g, '').replace(/,/g, '')) || 0 };
-  }
-  return { kind: 'flat', amount: parseFloat(raw.replace(/^\+/, '').replace(/,/g, '')) || 0 };
-}
-
-function addWithCommas(integer) {
-  const sign = integer < 0 ? '-' : '';
-  const digits = String(Math.abs(Math.round(integer)))
-    .split('')
-    .reverse()
-    .join('')
-    .replace(/(\d{3})(?=\d)/g, '$1,')
-    .split('')
-    .reverse()
-    .join('');
-  return sign + digits;
-}
-
-function formatFlatTotal(total) {
-  if (Math.abs(total - Math.round(total)) < 0.0001) {
-    return addWithCommas(total);
-  }
-  return total.toFixed(2);
-}
-
-function formatPercentTotal(total) {
-  return `${total.toFixed(2)}%`;
-}
+import { formatPower, formatStat, statLabel } from './stats.mjs';
 
 /**
  * Aggregates equipped item stats for the summary popover.
+ *
+ * NOTE: รวมตาม stat id แล้วค่อย format ทีเดียวตอนท้าย — ไม่ต้อง parse ข้อความอย่าง "8.53%" อีก
  */
 export function buildSetSummary(set) {
   const equipped = (set.items || []).filter(Boolean);
-  const sums = {};
+  const totals = new Map();
 
   equipped.forEach((item) => {
-    (item.stats || []).forEach(([label, value]) => {
-      const parsed = parseStatAmount(value);
-      if (!sums[label]) {
-        sums[label] = { kind: parsed.kind, total: parsed.amount };
-      } else {
-        sums[label].total += parsed.amount;
-      }
+    (item.stats || []).forEach(([statId, value]) => {
+      totals.set(statId, (totals.get(statId) || 0) + value);
     });
   });
 
-  const aggregatedStats = Object.keys(sums)
-    .sort()
-    .map((label) => {
-      const entry = sums[label];
-      const display =
-        entry.kind === 'percent' ? formatPercentTotal(entry.total) : formatFlatTotal(entry.total);
-      return { label, display };
-    });
+  // NOTE: เรียงด้วย < > ดิบๆ ไม่ใช่ localeCompare — ให้ลำดับตรงกับของเดิม
+  const aggregatedStats = Array.from(totals, ([statId, total]) => ({
+    label: statLabel(statId),
+    display: formatStat(statId, total),
+  })).sort((a, b) => (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));
 
   const totalPower = formatPower(
-    equipped.reduce((sum, item) => sum + parsePower(item.power), 0),
+    equipped.reduce((sum, item) => sum + item.power, 0),
   );
 
   return { setKey: set.setKey, aggregatedStats, totalPower };

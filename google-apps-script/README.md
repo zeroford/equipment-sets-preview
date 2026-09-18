@@ -1,13 +1,24 @@
 # Google Apps Script Web App
 
-Sheet เป็นแหล่งข้อมูลจริง — แก้ item ในชีตแล้ว refresh เว็บ ไม่ต้อง push ใหม่
+Sheet เป็นแหล่งข้อมูลจริง — แก้ในชีตแล้ว refresh เว็บ ไม่ต้อง push ใหม่
 
-## 1. โครงชีต — 3 แท็บ
+หลักคิด: **ชีตเก็บเฉพาะที่เปลี่ยนจริงต่อชิ้น** ส่วนที่ fix ตาม slot/grade อยู่แล้วไป derive ในโค้ด
 
-ชื่อแท็บต้องตรงเป๊ะ (`Sets` / `Items` / `BestStats`) ส่วนชื่อ**คอลัมน์**ในบรรทัดแรก
-ไม่สนตัวพิมพ์เล็กใหญ่ ช่องว่าง หรือขีด (`setKey` = `Set Key` = `set_key`) และสลับลำดับคอลัมน์ได้
+| ของ | อยู่ที่ไหน | เพราะ |
+|---|---|---|
+| level, grade, power, ค่า stat | **ชีต** | เปลี่ยนทุกชิ้น |
+| substat type | **ชีต** | slot เดียวออกได้หลายแบบ |
+| ชื่อของ | `assets/js/catalog.mjs` | fix ตาม (slot, grade) |
+| base stat type | `assets/js/catalog.mjs` | fix ตาม slot |
+| label / % / คั่นหลักพัน | `assets/js/stats.mjs` | เป็นเรื่องแสดงผล |
+| best substat | `assets/js/constants.mjs` | มีแค่ 2 แบบ |
 
-### แท็บ `Sets` — มีกี่ set, ชื่ออะไร, เรียงยังไง
+## 1. โครงชีต — 2 แท็บ
+
+ชื่อแท็บต้องตรง (`Sets` / `Items`) ส่วนชื่อ**คอลัมน์**บรรทัดแรกไม่สนตัวพิมพ์/ช่องว่าง/ขีด
+(`setKey` = `Set Key` = `set_key`) และสลับลำดับคอลัมน์ได้
+
+### `Sets`
 
 | setKey | title | order |
 |--------|-------|-------|
@@ -15,16 +26,15 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ it
 | pve | Set B | 2 |
 | set3 | Set C | 3 |
 
-- `setKey` — คีย์ภายใน ใช้อ้างจากอีก 2 แท็บ อย่าเปลี่ยนพร่ำเพรื่อ (`pve`/`boss` ผูกกับ badge PvE/Boss ในหน้าเว็บ)
-- `order` — ลำดับ tab น้อยไปมาก
+`setKey` ใช้อ้างจากแท็บ `Items` — `pve`/`boss` ผูกกับ badge และปุ่ม swap ในหน้าเว็บ อย่าเปลี่ยนพร่ำเพรื่อ
 
-### แท็บ `Items` — 1 แถว = equipment 1 ชิ้น
+### `Items` — 1 แถว = equipment 1 ชิ้น
 
-| setKey | slot | level | grade | name | power | stat1Label | stat1Value | stat2Label | stat2Value | stat3Label | stat3Value |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| boss | 1 | 97 | eternal | Axe-Spear of Blind Destruction | 287.59M | ATK | +6,043 | Skill AMP | 8.53% | CRIT DMG | 14.62% |
+| setKey | slot | level | grade | power | base | sub1Type | sub1Value | sub2Type | sub2Value |
+|---|---|---|---|---|---|---|---|---|---|
+| boss | 1 | 97 | 10 | 287.59 | 6043 | 2 | 8.53% | 3 | 14.62% |
 
-- `slot` — ตำแหน่งใน grid 3×4 **นับ 1–12 ซ้ายไปขวา บนลงล่าง**
+- **`slot`** — ตำแหน่งใน grid 3×4 นับ 1–12 ซ้าย→ขวา บน→ล่าง
 
   |  |  |  |
   |---|---|---|
@@ -33,44 +43,32 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ it
   | 7 necklace | 8 ring | 9 brooch |
   | 10 artifact | 11 book | 12 food |
 
-  **ช่องว่าง = ไม่ต้องมีแถว** (ไม่ใช่แถวเปล่า) — slot ที่ไม่มีใน `Items` จะขึ้นเป็น plate เปล่า
-- `grade` — `eternal` (ม่วง) หรือ `legendary` (ทอง) เท่านั้น
-- `stat1` = base stat (โชว์ตัวใหญ่), `stat2` เป็นต้นไป = substat (โชว์เป็น list) — เพิ่มได้ถึง `stat6`
-- `power`, `stat*Value` เป็น **ข้อความล้วน** ใส่ยังไงโชว์อย่างนั้น (`+` นำหน้าจะถูกตัดตอนแสดงผล)
+  **ช่องว่าง = ไม่ต้องมีแถว** (ไม่ใช่แถวเปล่า) → เว็บขึ้นเป็น plate เปล่า
+- **`grade`** — `10` = eternal (ม่วง), `9` = legendary (ทอง) — พิมพ์ `eternal` / `legendary` ก็ได้
+- **`power`** — ใส่ `287.59` เฉยๆ ตัว `M` เว็บเติมให้เอง
+- **`base`** — ค่า base stat; *ชนิด*ของมันผูกกับ slot อยู่แล้ว (slot 1 = ATK, slot 2 = Accuracy, …)
+- **`subNType`** — code ของ substat ดูแท็บ `Stats` (พิมพ์ `skillAmp` หรือ `Skill AMP` ก็ได้) รองรับถึง `sub5`
+- **`subNValue`** / **`base`** — stat ที่เป็น **%** ให้พิมพ์แบบ `8.53%` ไปเลย (Sheets เก็บเป็น `0.0853` ซึ่งถูกต้อง)
+  ที่เหลือพิมพ์เลขตรงๆ `6043`, `475.6`
+- **`name`** — ไม่ต้องมี; ใส่คอลัมน์นี้เมื่ออยาก override ชื่อเป็นรายชิ้น
 
-### แท็บ `BestStats` — เน้น substat ที่ดีของแต่ละแถว (row 1–4)
+### `Stats` — แท็บอ้างอิง (สคริปต์ไม่ได้อ่าน)
 
-| setKey | row | bestStats | label |
-|---|---|---|---|
-| boss | 1 | Skill AMP, Accuracy | Skill AMP / Accuracy |
-| boss | 2 | DMG Reduction, CRIT RES | DMG Reduction / CRIT RES |
-
-- `bestStats` — คั่นด้วย `,` `·` `/` หรือ `|` ก็ได้; substat ที่ตรงจะถูก highlight (เทียบแบบไม่สนตัวพิมพ์)
-- `label` — ข้อความ caption เหนือแถวนั้น ใส่อะไรก็ได้
-- set ที่ไม่ต้องการ highlight ข้ามได้เลย (ไม่มีแถว = ไม่ highlight)
+ตาราง code → id → label → format ไว้เปิดดูว่าเลขไหนคือ stat อะไร
+เพิ่ม stat ใหม่ต้องไปเพิ่มใน `assets/js/stats.mjs` ด้วย
 
 ## 2. ใส่ข้อมูลตั้งต้น (ไม่ต้องพิมพ์เอง)
 
 ```bash
-./render.sh && node tools/sheet-seed.mjs   # → google-apps-script/seed/*.tsv
-python3 tools/sheet-xlsx.py                # → seed/equipment-sets.xlsx
+./render.sh && node tools/sheet-seed.mjs && python3 tools/sheet-xlsx.py
 ```
 
-แปลงจาก JSON ที่ฝังอยู่ในเว็บตอนนี้ (3 sets / 22 items)
+ได้ `google-apps-script/seed/equipment-sets.xlsx` (3 sets / 22 items) แปลงจากข้อมูลที่ฝังอยู่ในเว็บ
 
-### วิธี A — import .xlsx (แนะนำ, ได้ครบ 3 แท็บทีเดียว)
+ลากลง Google Drive → คลิกขวา → Open with → **Google Sheets**
+ช่อง % ตั้ง format มาให้แล้ว เปิดมาจะเห็น `8.53%` ไม่ใช่ `0.0853`
 
-ลาก `equipment-sets.xlsx` ลง Google Drive → คลิกขวา → Open with → Google Sheets  
-ทุกเซลล์ตั้งเป็น text มาแล้ว ค่าอย่าง `8.53%` / `+6,043` จะไม่โดนแปลง
-
-(ถ้าจะ import เข้าชีตเดิม: File → Import → Upload → **Insert new sheet(s)**)
-
-### วิธี B — paste TSV ทีละแท็บ
-
-1. สร้างแท็บชื่อตรงกับไฟล์
-2. เลือกทั้งชีต → Format → Number → **Plain text**
-   ⚠️ **ต้องทำก่อน paste** ไม่งั้น Sheets จะแปลง `8.53%` เป็น `0.0853` และ `+6,043` เป็น `6043`
-3. เปิดไฟล์ `.tsv` → copy ทั้งหมด → paste ที่ **A1**
+(import เข้าชีตเดิม: File → Import → Upload → **Insert new sheet(s)**)
 
 ## 3. Deploy Script
 
@@ -90,22 +88,19 @@ python3 tools/sheet-xlsx.py                # → seed/equipment-sets.xlsx
 sheets_config_json = { 'webAppUrl' => 'https://script.google.com/macros/s/....../exec' }.to_json
 ```
 
-ทดสอบโดยไม่แก้ไฟล์:
+ทดสอบโดยไม่แก้ไฟล์: `index.html?webApp=https://script.google.com/macros/s/....../exec`
 
-```
-index.html?webApp=https://script.google.com/macros/s/....../exec
-```
-
-โหลด Web App ไม่สำเร็จ → เว็บ fallback ไป JSON ที่ฝังไว้ แล้วขึ้นข้อความ error บนหน้า
+โหลดไม่สำเร็จ → เว็บ fallback ไป JSON ที่ฝังไว้ แล้วขึ้น error บนหน้า
 
 ## 5. เช็ก / แก้ปัญหา
 
-เปิด URL `/exec` ตรงๆ ในเบราว์เซอร์ ควรเห็น `{"sets":[...]}`
+เปิด URL `/exec` ตรงๆ ควรเห็น `{"sets":[{"setKey":"boss",...}]}`
 
 | อาการ | สาเหตุ |
 |---|---|
 | `{"error":"ไม่พบแท็บ: Items"}` | ชื่อแท็บไม่ตรง |
 | `{"error":"... slot ต้องเป็น 1–12 ..."}` | `slot` ว่าง/เกินช่วง — ช่องว่างให้ลบทั้งแถว |
-| stat โชว์ `0.0853` | ไม่ได้ตั้ง Plain text ก่อน paste |
-| หน้าเว็บขึ้น error แต่ยังเห็นการ์ด | fallback ไป JSON ในหน้าเว็บ — ดูข้อความ error |
+| stat % โชว์ `853.00%` | พิมพ์ `8.53` ในช่องที่ไม่ได้ format เป็น % — พิมพ์ `8.53%` แทน |
+| ชื่อของขึ้นเป็น `staff` / `armor` | (slot, grade) นั้นยังไม่มีในตาราง `catalog.mjs` |
+| การ์ดว่าง ทั้งที่ข้อมูลมี | เปิดด้วย `file://` — ES modules โดน CORS ต้อง serve ผ่าน HTTP (`./render.sh`) |
 | แก้ชีตแล้วเว็บไม่เปลี่ยน | เว็บใส่ `?t=` กัน cache อยู่แล้ว ลอง hard refresh / ดู `/exec` ตรงๆ |

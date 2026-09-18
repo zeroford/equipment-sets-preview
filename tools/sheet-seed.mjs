@@ -3,17 +3,19 @@
  * สำหรับ paste ลง Google Sheet ครั้งแรก — ไม่ต้องพิมพ์ item ทีละตัว
  *
  *   node tools/sheet-seed.mjs
- *   → google-apps-script/seed/{Sets,Items,BestStats}.tsv
+ *   → google-apps-script/seed/{Sets,Items,Stats}.tsv + percent-cells.json
  *
  * แต่ละไฟล์ = 1 แท็บ: copy ทั้งไฟล์ แล้ว paste ลง A1 ของแท็บชื่อเดียวกัน
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { STATS, resolveStatId } from '../assets/js/stats.mjs';
+import { BASE_STAT_BY_SLOT } from '../assets/js/catalog.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'google-apps-script', 'seed');
-const MAX_STATS = 3; // base stat + 2 substat ตามข้อมูลปัจจุบัน
+const MAX_SUBS = 2; // substat ต่อชิ้นตามข้อมูลปัจจุบัน
 
 function readEmbeddedSets() {
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
@@ -43,53 +45,62 @@ function buildSets(sets) {
 }
 
 function buildItems(sets) {
-  const header = ['setKey', 'slot', 'level', 'grade', 'name', 'power'];
-  for (let i = 1; i <= MAX_STATS; i += 1) {
-    header.push(`stat${i}Label`, `stat${i}Value`);
+  const header = ['setKey', 'slot', 'level', 'grade', 'power', 'base'];
+  for (let i = 1; i <= MAX_SUBS; i += 1) {
+    header.push(`sub${i}Type`, `sub${i}Value`);
   }
 
+  // NOTE: เก็บตำแหน่งเซลล์ที่เป็น % ไว้ให้ sheet-xlsx.py ตั้ง format ถูก (ค่าเก็บเป็นเศษส่วน)
+  const percentCells = [];
   const rows = [];
+
   sets.forEach((set) => {
     (set.items || []).forEach((item, index) => {
       if (!item) {
         return; // slot ว่าง = ไม่มีแถวในชีต
       }
-      const row = [set.setKey, index + 1, item.level, item.grade, item.name, item.power];
-      for (let i = 0; i < MAX_STATS; i += 1) {
-        const [label, value] = (item.stats || [])[i] || ['', ''];
-        row.push(label, value);
+      const slot = index + 1;
+      const row = [set.setKey, slot, item.level, item.grade, item.power, item.base];
+      if (isPercent(BASE_STAT_BY_SLOT[index])) {
+        percentCells.push([rows.length + 2, row.length]); // +2 = ข้าม header, เป็น 1-based
+      }
+      for (let i = 0; i < MAX_SUBS; i += 1) {
+        const [code, value] = (item.subs || [])[i] || ['', ''];
+        row.push(code, value);
+        if (code !== '' && isPercent(resolveStatId(code))) {
+          percentCells.push([rows.length + 2, row.length]);
+        }
       }
       rows.push(row);
     });
   });
 
-  return tsv([header, ...rows]);
+  return { tsv: tsv([header, ...rows]), percentCells };
 }
 
-function buildBestStats(sets) {
-  const rows = [];
-  sets.forEach((set) => {
-    for (let i = 0; i < 4; i += 1) {
-      rows.push([
-        set.setKey,
-        i + 1,
-        ((set.bestStatsByRow || [])[i] || []).join(', '),
-        (set.bestSubstatLabels || [])[i] || '',
-      ]);
-    }
-  });
-  return tsv([['setKey', 'row', 'bestStats', 'label'], ...rows]);
+function isPercent(statId) {
+  return Boolean(STATS[statId]) && STATS[statId].format === 'percent';
+}
+
+/** แท็บอ้างอิงเฉยๆ — Code.gs ไม่ได้อ่าน แต่ช่วยให้เปิดชีตแล้วรู้ว่า code ไหนคืออะไร */
+function buildStatsLegend() {
+  const rows = Object.keys(STATS)
+    .map((id) => [STATS[id].code, id, STATS[id].label, STATS[id].format])
+    .sort((a, b) => a[0] - b[0]);
+  return tsv([['code', 'id', 'label', 'format'], ...rows]);
 }
 
 const sets = readEmbeddedSets();
 mkdirSync(OUT_DIR, { recursive: true });
+const items = buildItems(sets);
 const files = {
   'Sets.tsv': buildSets(sets),
-  'Items.tsv': buildItems(sets),
-  'BestStats.tsv': buildBestStats(sets),
+  'Items.tsv': items.tsv,
+  'Stats.tsv': buildStatsLegend(),
 };
 Object.entries(files).forEach(([name, content]) => {
   writeFileSync(join(OUT_DIR, name), content);
   console.log(`${name.padEnd(14)} ${content.trim().split('\n').length - 1} rows`);
 });
+writeFileSync(join(OUT_DIR, 'percent-cells.json'), JSON.stringify(items.percentCells));
 console.log(`→ ${OUT_DIR}`);

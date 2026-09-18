@@ -1,4 +1,5 @@
-import { buildConfigFromSets, buildMetaFromSets } from './data.mjs';
+import { buildMetaFromSets } from './data.mjs';
+import { bestSubstatFor } from './constants.mjs';
 import { statBestMatch } from './utils.mjs';
 
 /**
@@ -6,7 +7,6 @@ import { statBestMatch } from './utils.mjs';
  */
 export function createBestSubstatUi() {
   let swapped = false;
-  let config = {};
   let setMeta = {};
   let activeSetKey = '';
   let btn = null;
@@ -21,7 +21,7 @@ export function createBestSubstatUi() {
   }
 
   function configForSet(setKey) {
-    return config[sourceKeyForSet(setKey)] || { rows: [], labels: [] };
+    return bestSubstatFor(sourceKeyForSet(setKey));
   }
 
   function modeBadgeLabel(setKey) {
@@ -79,11 +79,11 @@ export function createBestSubstatUi() {
         const rowIndex = Number(group.dataset.rowIndex);
         const caption = group.querySelector('.row-best-caption');
         if (caption) {
-          caption.textContent = (cfg.labels[rowIndex] || '').toString();
+          caption.textContent = cfg.labels[rowIndex] || '';
         }
         const bestStats = cfg.rows[rowIndex] || [];
-        group.querySelectorAll('.stats [data-stat-label]').forEach((el) => {
-          el.classList.toggle('stat-row-best', statBestMatch(el.dataset.statLabel, bestStats));
+        group.querySelectorAll('.stats [data-stat-id]').forEach((el) => {
+          el.classList.toggle('stat-row-best', statBestMatch(el.dataset.statId, bestStats));
         });
       });
     });
@@ -94,7 +94,6 @@ export function createBestSubstatUi() {
   }
 
   function configure(sets) {
-    config = buildConfigFromSets(sets);
     setMeta = buildMetaFromSets(sets);
   }
 

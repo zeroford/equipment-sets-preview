@@ -6,15 +6,6 @@ export function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-export function statDisplayValue(raw) {
-  return String(raw).replace(/^\+/, '');
-}
-
-export function normalizeStatLabel(label) {
-  return String(label).trim().toUpperCase().replace(/\s+/g, ' ');
-}
-
-export function statBestMatch(label, bestList) {
-  const key = normalizeStatLabel(label);
-  return (bestList || []).some((best) => normalizeStatLabel(best) === key);
+export function statBestMatch(statId, bestList) {
+  return (bestList || []).includes(statId);
 }
