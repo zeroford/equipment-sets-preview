@@ -816,7 +816,7 @@
       column-gap: 0.5rem;
       position: relative;
       min-height: 2.6rem;
-      padding: 0.25rem 0.55rem 0.25rem 0.3rem;
+      padding: 0.25rem 0.55rem 0.25rem 0.55rem;
       font-size: 0.79rem;
       border-bottom: 1px solid var(--divider);
     }
@@ -830,11 +830,12 @@
     .stats li:last-child { border-bottom: none; }
 
     /* NOTE: substat ที่ไม่ตรง best ให้จางลง เกรดถึงจะเด่นออกมา (.stat-row-best ทับอีกที) */
-    /* จุดมุมขวาบนของแถว substat: ฟ้า = โรลติดขอบบน 10%, แดง = ติดขอบล่าง 10% */
+    /*
+     * จุดต่อท้ายชื่อ substat: ฟ้า = โรลติดขอบบน 10%, แดง = ติดขอบล่าง 10%
+     * NOTE: เคยลอยมุมขวาบน แต่ไปซ้อนแนวเดียวกับค่าและช่วงค่า เลยดูรก
+     */
     .stat-flag {
-      position: absolute;
-      top: 0.3rem;
-      right: 0.3rem;
+      flex-shrink: 0;
       width: 0.34rem;
       height: 0.34rem;
       border-radius: 50%;
@@ -865,6 +866,9 @@
     }
 
     .stats .label {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
       color: rgba(255, 255, 255, 0.5);
       font-weight: 500;
       /* เล็กกว่าตัวเลขนิดนึง — ชื่อเป็นข้อมูลรอง ค่าเป็นตัวหลัก */
