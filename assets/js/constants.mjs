@@ -53,6 +53,9 @@ const BEST_SUBSTAT_PROFILES = {
 export const MODES = ['pve', 'boss'];
 export const MODE_LABELS = { pve: 'PvE', boss: 'Boss' };
 
+/** ชื่อ icon ของ lucide (โหลดจาก CDN ใน .erb) */
+export const MODE_ICONS = { pve: 'flame', boss: 'swords' };
+
 /**
  * โหมดตั้งต้นของแต่ละ set — set ที่ไม่มีในนี้ = ไม่มีโหมด (ไม่ highlight, ไม่มี toggle)
  *

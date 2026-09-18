@@ -1,4 +1,4 @@
-import { MODES, MODE_LABELS, bestSubstatFor, defaultModeFor } from './constants.mjs';
+import { MODES, MODE_ICONS, MODE_LABELS, bestSubstatFor, defaultModeFor } from './constants.mjs';
 import { buildMetaFromSets } from './data.mjs';
 import { statBestMatch } from './utils.mjs';
 
@@ -61,8 +61,13 @@ export function createSetModeUi() {
     }
     toggle.innerHTML = MODES.map(
       (m) =>
-        `<button type="button" class="mode-option" data-mode="${m}" aria-pressed="${m === mode}">${MODE_LABELS[m]}</button>`,
+        `<button type="button" class="mode-option" data-mode="${m}" aria-pressed="${m === mode}"><i data-lucide="${MODE_ICONS[m]}" aria-hidden="true"></i>${MODE_LABELS[m]}</button>`,
     ).join('');
+
+    // NOTE: ต้องเรียกทุกครั้งที่เขียน innerHTML ใหม่ — lucide แทน <i data-lucide> ด้วย <svg> ตอนถูกเรียกเท่านั้น
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   }
 
   function applyHighlights() {
