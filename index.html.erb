@@ -92,6 +92,9 @@
       --text: #f1f3f5;
       --muted: #868e96;
       --divider: rgba(255, 255, 255, 0.08);
+      /* tab bar ล่าง = ตัวเลือกหลัก, toggle/ปุ่ม Save = ระดับรอง */
+      --tab-active: #ffffff;
+      --tab-active-text: #18181b;
       --pill-active: #3f3f46;
       --card-max: 175px;
       --card-gap: 1rem;
@@ -213,17 +216,15 @@
       position: absolute;
       inset: 0;
       border-radius: 999px;
-      background: var(--pill-active);
-      box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.3),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      background: var(--tab-active);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
       opacity: 0;
       transition: opacity 0.15s ease;
       z-index: 0;
     }
 
     .set-tab[aria-selected="true"] {
-      color: #ecedee;
+      color: var(--tab-active-text);
       font-weight: 600;
     }
 
@@ -267,8 +268,8 @@
     .dock-fab svg,
     .dock-fab .lucide {
       display: block;
-      width: 1.35rem;
-      height: 1.35rem;
+      width: 1.1rem;
+      height: 1.1rem;
     }
 
     /* ── toggle PvE / Boss ลอยมุมขวาบน ───────────────────────── */
@@ -288,14 +289,15 @@
     .mode-option {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.525rem 1.2rem;
+      gap: 0.4rem;
+      height: 1.625rem;
+      padding: 0 1rem;
       border: none;
       border-radius: 999px;
       background: transparent;
       color: #a1a1aa;
       font: inherit;
-      font-size: 1.125rem;
+      font-size: 0.95rem;
       font-weight: 600;
       letter-spacing: 0.02em;
       cursor: pointer;
@@ -314,8 +316,8 @@
     .mode-option svg,
     .mode-option .lucide {
       display: block;
-      width: 1.35rem;
-      height: 1.35rem;
+      width: 1.1rem;
+      height: 1.1rem;
     }
 
     /* ── ระหว่างรอ API ────────────────────────────────────────── */
