@@ -6,25 +6,39 @@ import { subStatRange, subStatRatio } from './base-stat.mjs';
 import { buildSetSummary } from './summary.mjs';
 
 /**
- * จุดบอกคุณภาพโรล — ยิ่งใกล้ขอบบนของช่วงยิ่งหายาก
- * ชั้นบนเรียงจากดีสุดลงมา เพราะ find() หยุดที่ชั้นแรกที่ผ่าน
+ * เครื่องหมายบอกคุณภาพโรล ต่อท้ายตัวเลข substat
+ *
+ * เรียงจากชั้นหายากสุดลงมาทั้งฝั่งบนและฝั่งล่าง เพราะ find() หยุดที่ชั้นแรกที่ผ่าน
+ * (ไม่งั้น bottom 10% จะโดน bottom 25% กินไปก่อน)
  */
-const HIGH_TIERS = [
-  [0.95, 'is-top5'],
-  [0.9, 'is-top10'],
-  [0.8, 'is-top20'],
+const ROLL_TIERS = [
+  { test: (r) => r >= 0.95, cls: 'is-top5', icon: 'star' },
+  { test: (r) => r >= 0.9, cls: 'is-top10', icon: 'chevronsUp' },
+  { test: (r) => r >= 0.75, cls: 'is-top25', icon: 'chevronUp' },
+  { test: (r) => r <= 0.1, cls: 'is-bot10', icon: 'chevronsDown' },
+  { test: (r) => r <= 0.25, cls: 'is-bot25', icon: 'chevronDown' },
 ];
-const LOW_TIER = 0.25;
 
-function rollTierClass(ratio) {
+// path ชุด lucide (viewBox 24) — star เป็นรูปทึบคนละ viewBox เลยไปอยู่ใน sprite ของหน้า
+const CHEVRON_PATHS = {
+  chevronUp: '<path d="m18 15-6-6-6 6"/>',
+  chevronsUp: '<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>',
+  chevronDown: '<path d="m6 9 6 6 6-6"/>',
+  chevronsDown: '<path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/>',
+};
+
+function rollMarkHtml(ratio) {
   if (ratio === null) {
     return '';
   }
-  if (ratio <= LOW_TIER) {
-    return 'is-bot20';
+  const tier = ROLL_TIERS.find(({ test }) => test(ratio));
+  if (!tier) {
+    return '';
   }
-  const tier = HIGH_TIERS.find(([min]) => ratio >= min);
-  return tier ? tier[1] : '';
+  if (tier.icon === 'star') {
+    return `<svg class="roll-mark ${tier.cls}" viewBox="0 0 616 560" aria-hidden="true"><use href="#roll-star" /></svg>`;
+  }
+  return `<svg class="roll-mark ${tier.cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CHEVRON_PATHS[tier.icon]}</svg>`;
 }
 
 export function equipIconPath(item, gridIndex) {
@@ -51,10 +65,9 @@ export function renderCard(item, gridIndex, bestStats) {
       ? `<small class="stat-range">${escapeHtml(formatStatRange(statId, range[0], range[1]))}</small>`
       : '';
 
-    // จุดบอกว่าโรลได้ดีแค่ไหน — เทียบกับช่วงที่เป็นไปได้ของ stat ตัวนั้น
-    const tier = rollTierClass(subStatRatio(gridIndex + 1, item.grade, statId, value));
-    const flag = tier ? `<span class="stat-flag ${tier}" aria-hidden="true"></span>` : '';
-    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span>${flag}</li>`;
+    // เครื่องหมายบอกว่าโรลได้ดีแค่ไหน — เทียบกับช่วงที่เป็นไปได้ของ stat ตัวนั้น
+    const mark = rollMarkHtml(subStatRatio(gridIndex + 1, item.grade, statId, value));
+    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${mark}${rangeHtml}</span></li>`;
   });
 
   return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">Lv.${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="primary-cell"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></span><span class="primary-cell is-power"><span class="label">Power</span><span class="value">${escapeHtml(formatPower(item.power))}</span></span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
