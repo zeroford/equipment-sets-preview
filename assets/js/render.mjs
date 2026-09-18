@@ -7,19 +7,23 @@ import { buildSetSummary } from './summary.mjs';
 
 /**
  * จุดบอกคุณภาพโรล — ยิ่งใกล้ขอบบนของช่วงยิ่งหายาก
- * เรียงจากชั้นดีสุดลงมา เพราะ find() หยุดที่ชั้นแรกที่ผ่าน
+ * ชั้นบนเรียงจากดีสุดลงมา เพราะ find() หยุดที่ชั้นแรกที่ผ่าน
  */
-const ROLL_TIERS = [
+const HIGH_TIERS = [
   [0.95, 'is-top5'],
   [0.9, 'is-top10'],
   [0.8, 'is-top20'],
 ];
+const LOW_TIER = 0.2;
 
 function rollTierClass(ratio) {
   if (ratio === null) {
     return '';
   }
-  const tier = ROLL_TIERS.find(([min]) => ratio >= min);
+  if (ratio <= LOW_TIER) {
+    return 'is-bot20';
+  }
+  const tier = HIGH_TIERS.find(([min]) => ratio >= min);
   return tier ? tier[1] : '';
 }
 
