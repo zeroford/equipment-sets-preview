@@ -279,7 +279,7 @@ export function createEditUi({ onSaved }) {
       const value = baseValue(form, slot);
       cell.textContent = value === null ? '—' : formatStat(baseStatForSlot(slot), value);
       const level = Number(form.elements.level.value);
-      form.querySelector('[data-level-badge]').textContent = level > 0 ? level : '—';
+      form.querySelector('[data-level-badge]').textContent = level > 0 ? `Lv.${level}` : '—';
       const power = Number(form.elements.power.value);
       form.querySelector('[data-power-badge]').textContent = power > 0 ? formatPower(power) : '—';
     };
