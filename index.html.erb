@@ -848,7 +848,7 @@
       align-items: flex-start;
       gap: 0.4rem;
       /* NOTE: padding ขวาต้องเท่า .stats li ไม่งั้น Power หลุดแนวตัวเลข substat */
-      padding: 0 1rem 0 0.3rem;
+      padding: 0 0.45rem 0 0.3rem;
       margin-top: 0.05rem;
       margin-bottom: 0.6rem;
     }
@@ -893,9 +893,8 @@
       grid-template-columns: 1fr auto;
       align-items: center;
       column-gap: 0.5rem;
-      position: relative;
       min-height: 2.25rem;
-      padding: 0.1rem 1rem 0.1rem 0.45rem;
+      padding: 0.1rem 0.45rem;
       font-size: 0.79rem;
     }
 
@@ -914,16 +913,14 @@
      * NOTE: ใช้ drop-shadow ไม่ใช่ box-shadow — box-shadow เรืองเป็นกรอบสี่เหลี่ยม
      * รอบไอคอน ไม่ใช่รอบตัวรูป
      *
-     * NOTE: ลอยอยู่ในช่อง padding ขวาของแถว ไม่กินพื้นที่ — ตัวเลข substat เลยชิดขวา
-     * ตรงแนวเดียวกันทุกแถว ไม่ว่าแถวนั้นจะมีเครื่องหมายหรือไม่
+     * NOTE: อยู่ในสายตัวอักษรหน้าตัวเลข — แถวที่มีเครื่องหมายตัวเลขจะถอยซ้ายตาม
+     * ความกว้างไอคอน ไม่ได้ชิดขวาตรงแนวเดียวกับแถวที่ไม่มี
      */
     .roll-mark {
-      position: absolute;
-      right: 0.15rem;
-      top: 50%;
-      transform: translateY(-50%);
       width: 0.88em;
       height: 0.88em;
+      margin-right: 0.2em;
+      vertical-align: -0.1em;
     }
     .roll-mark.is-top25 {
       color: #4dabf7;
@@ -936,6 +933,7 @@
     .roll-mark.is-top5 {
       width: 0.68em;
       height: 0.68em;
+      vertical-align: -0.02em;
       color: #fcc419;
       filter: drop-shadow(0 0 4px rgba(252, 196, 25, 0.9));
     }
