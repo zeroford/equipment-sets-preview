@@ -72,7 +72,12 @@
     }
   end.to_json
 
-  sheets_config_json = { 'webAppUrl' => '' }.to_json
+  # NOTE: URL นี้เป็น public read-only endpoint โดยตั้งใจ (Who has access: Anyone)
+  # ไม่ใช่ความลับ — ใครเปิดหน้าเว็บก็เห็นใน HTML อยู่แล้ว
+  sheets_config_json = {
+    'webAppUrl' =>
+      'https://script.google.com/macros/s/AKfycbw7PadlOwS_HfJKhU9g8Tacz-fPNewAbdV4JvLMsu_iHrfDAAzXEUWpceiuad1EDfVo/exec',
+  }.to_json
 %>
 <!DOCTYPE html>
 <html lang="th">
