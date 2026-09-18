@@ -52,6 +52,9 @@
       pointer-events: none;
     }
 
+    .set-tabs-list:empty {
+      display: none;
+    }
     .set-tabs-list {
       display: flex;
       width: 100%;
@@ -211,15 +214,16 @@
 
     /* ── ระหว่างรอ API ────────────────────────────────────────── */
     .page-loading {
+      position: fixed;
+      inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 70vh;
     }
     .page-loading-spinner {
-      width: 1.75rem;
-      height: 1.75rem;
-      border: 2px solid rgba(255, 255, 255, 0.16);
+      width: 3rem;
+      height: 3rem;
+      border: 3px solid rgba(255, 255, 255, 0.14);
       border-top-color: rgba(255, 255, 255, 0.55);
       border-radius: 50%;
       animation: page-spin 0.7s linear infinite;
@@ -242,6 +246,9 @@
       left: auto;
       bottom: calc(var(--dock-bottom) + 3.85rem);
       z-index: 1002;
+    }
+    .edit-fab[hidden] {
+      display: none !important;
     }
     .edit-fab[aria-pressed="true"] {
       background: rgba(255, 255, 255, 0.38);
