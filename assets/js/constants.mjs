@@ -14,15 +14,13 @@ export const SLOT_TYPES = [
 // ที่นี่เหลือแค่สีของกรอบการ์ด — มีรูปเฉพาะ legendary/eternal
 
 /**
- * Best substat ต่อแถว (grid 4 แถว) — มีแค่ 2 แบบ เลยฝังไว้แทนที่จะอ่านจาก Sheet
+ * Best substat ต่อแถว (grid 4 แถว) — มีแค่ 2 โหมด เลยฝังไว้แทนที่จะอ่านจาก Sheet
  *
- * key = setKey; set ที่ไม่มีในนี้ (เช่น set3) = ไม่ highlight
+ * key = โหมด (ตรงกับที่โชว์บนปุ่ม toggle) ไม่ใช่ setKey
  * rows = stat id (ดู stats.mjs), labels = caption เหนือแถว (ข้อความอิสระ)
- * NOTE: ค่าเป็นแบบ "หลังสลับ" ที่ .erb ทำไว้ — `boss` จึงเป็นชุดสาย Accuracy
- * ปุ่ม swap ใน UI สลับระหว่าง 2 profile นี้
  */
 const BEST_SUBSTAT_PROFILES = {
-  boss: {
+  pve: {
     rows: [
       ['skillAmp', 'accuracy'],
       ['dmgReduction', 'critRes'],
@@ -36,7 +34,7 @@ const BEST_SUBSTAT_PROFILES = {
       'Focus / Skill Haste',
     ],
   },
-  pve: {
+  boss: {
     rows: [
       ['skillAmp', 'critDmg'],
       ['dmgReduction', 'critRes'],
@@ -52,8 +50,23 @@ const BEST_SUBSTAT_PROFILES = {
   },
 };
 
+export const MODES = ['pve', 'boss'];
+export const MODE_LABELS = { pve: 'PvE', boss: 'Boss' };
+
+/**
+ * โหมดตั้งต้นของแต่ละ set — set ที่ไม่มีในนี้ = ไม่มีโหมด (ไม่ highlight, ไม่มี toggle)
+ *
+ * NOTE: setKey 'boss' ตั้งต้นเป็นโหมด pve เพราะ .erb สลับชุด equipment ระหว่าง
+ * pve/boss ไว้ตั้งแต่แรก — ชื่อ setKey เลยไม่ตรงกับโหมด
+ */
+const DEFAULT_MODE_BY_SET = { boss: 'pve', pve: 'boss' };
+
 const EMPTY_BEST_SUBSTAT = { rows: [], labels: [] };
 
-export function bestSubstatFor(setKey) {
-  return BEST_SUBSTAT_PROFILES[setKey] || EMPTY_BEST_SUBSTAT;
+export function defaultModeFor(setKey) {
+  return DEFAULT_MODE_BY_SET[setKey] || '';
+}
+
+export function bestSubstatFor(mode) {
+  return BEST_SUBSTAT_PROFILES[mode] || EMPTY_BEST_SUBSTAT;
 }

@@ -48,8 +48,8 @@ const gradeOptions = (selected) =>
 function subRow(index, statId, value) {
   return `<div class="edit-row edit-row-pair">
     <label for="editSub${index}Type">substat ${index}</label>
-    <select id="editSub${index}Type" name="sub${index}Type"><option value="">— ไม่มี —</option>${statOptions(statId)}</select>
-    <input id="editSub${index}Value" name="sub${index}Value" type="number" step="any" value="${value}" aria-label="ค่า substat ${index}" />
+    <select id="editSub${index}Type" name="sub${index}Type"><option value="">— none —</option>${statOptions(statId)}</select>
+    <input id="editSub${index}Value" name="sub${index}Value" type="number" step="any" value="${value}" aria-label="substat ${index} value" />
   </div>`;
 }
 
@@ -66,7 +66,7 @@ function dialogHtml(setKey, slot, item, needsKey) {
 
   return `<form method="dialog">
     <h2 class="edit-title">${escapeHtml(itemNameFor(slot, grade))}</h2>
-    <p class="edit-sub">${escapeHtml(setKey)} · slot ${slot}${item ? '' : ' · ช่องว่าง'}</p>
+    <p class="edit-sub">${escapeHtml(setKey)} · slot ${slot}${item ? '' : ' · empty'}</p>
 
     <div class="edit-row">
       <label for="editLevel">Level</label>
@@ -89,16 +89,16 @@ function dialogHtml(setKey, slot, item, needsKey) {
       needsKey
         ? `<div class="edit-row">
       <label for="editKey">Edit key</label>
-      <input id="editKey" name="editKey" type="password" autocomplete="off" placeholder="ตั้งไว้ใน Script Properties" />
+      <input id="editKey" name="editKey" type="password" autocomplete="off" placeholder="set in Script Properties" />
     </div>`
         : ''
     }
 
     <p class="edit-status" id="editStatus"></p>
     <div class="edit-actions">
-      ${item ? '<button type="submit" value="clear">ลบออก</button>' : ''}
-      <button type="submit" value="cancel">ยกเลิก</button>
-      <button type="submit" value="save">บันทึก</button>
+      ${item ? '<button type="submit" value="clear">Remove</button>' : ''}
+      <button type="submit" value="cancel">Cancel</button>
+      <button type="submit" value="save">Save</button>
     </div>
   </form>`;
 }
@@ -157,7 +157,7 @@ export function createEditUi({ onSaved }) {
     const key = keyField ? keyField.value.trim() : readStoredKey();
     if (!key) {
       status.dataset.tone = 'error';
-      status.textContent = 'ต้องใส่ edit key ก่อน';
+      status.textContent = 'Edit key required';
       return false;
     }
 
@@ -165,7 +165,7 @@ export function createEditUi({ onSaved }) {
       btn.disabled = true;
     });
     status.dataset.tone = '';
-    status.textContent = 'กำลังบันทึก…';
+    status.textContent = 'Saving…';
 
     try {
       const body = { key, action, setKey, slot };
@@ -179,7 +179,7 @@ export function createEditUi({ onSaved }) {
       return true;
     } catch (err) {
       status.dataset.tone = 'error';
-      status.textContent = (err && err.message) || 'บันทึกไม่สำเร็จ';
+      status.textContent = (err && err.message) || 'Save failed';
       form.querySelectorAll('button').forEach((btn) => {
         btn.disabled = false;
       });

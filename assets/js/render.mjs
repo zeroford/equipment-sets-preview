@@ -28,10 +28,10 @@ function renderCard(item, gridIndex, bestStats) {
   return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="30" height="30" decoding="async" /></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="meta"><span class="level">Lv.${escapeHtml(item.level)}</span><span class="meta-power">${escapeHtml(formatPower(item.power))}</span></div><div class="stat-primary-block"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
 }
 
-function renderSection(set, setIndex, summary) {
+function renderSection(set, setIndex, summary, mode) {
   let rowsHtml = '';
   const items = set.items || [];
-  const best = bestSubstatFor(set.setKey);
+  const best = bestSubstatFor(mode);
 
   for (let rowIndex = 0; rowIndex < 4; rowIndex += 1) {
     const rowItems = items.slice(rowIndex * 3, rowIndex * 3 + 3);
@@ -57,12 +57,7 @@ function renderSection(set, setIndex, summary) {
     )
     .join('');
 
-  const badgeHtml =
-    set.setKey === 'set3'
-      ? ''
-      : `<span class="section-mode-badge">${escapeHtml(set.setKey === 'pve' ? 'Boss' : 'PvE')}</span>`;
-
-  return `<section class="section" data-set-key="${escapeHtml(set.setKey)}" role="tabpanel" id="panel-${escapeHtml(set.setKey)}" aria-labelledby="tab-${escapeHtml(set.setKey)}"${setIndex === 0 ? '' : ' hidden'}><div class="summary-hover summary-float"><button type="button" class="dock-fab glass-chip" aria-label="สรุป stat รวม"><i data-lucide="info" aria-hidden="true"></i></button><div class="summary-popover" role="tooltip"><div class="summary-table-wrap"><table class="summary-table"><tbody>${summaryRows}</tbody></table></div></div></div><div class="section-header"><div class="section-title-row"><h2 class="section-title">${escapeHtml(set.title)}</h2>${badgeHtml}</div></div>${rowsHtml}</section>`;
+  return `<section class="section" data-set-key="${escapeHtml(set.setKey)}" role="tabpanel" id="panel-${escapeHtml(set.setKey)}" aria-labelledby="tab-${escapeHtml(set.setKey)}"${setIndex === 0 ? '' : ' hidden'}><div class="summary-hover summary-float"><button type="button" class="dock-fab glass-chip" aria-label="Total stats"><i data-lucide="info" aria-hidden="true"></i></button><div class="summary-popover" role="tooltip"><div class="summary-table-wrap"><table class="summary-table"><tbody>${summaryRows}</tbody></table></div></div></div><div class="section-header"><div class="section-title-row"><h2 class="section-title">${escapeHtml(set.title)}</h2></div></div>${rowsHtml}</section>`;
 }
 
 function renderTabs(sets) {
@@ -77,7 +72,7 @@ function renderTabs(sets) {
 /**
  * Renders set panels and tab bar into the page shell.
  */
-export function renderAppShell(sets, loadError) {
+export function renderAppShell(sets, loadError, modeFor) {
   const page = document.getElementById('equipmentPage');
   const tabList = document.getElementById('setTabList');
   if (!page || !tabList) {
@@ -90,7 +85,7 @@ export function renderAppShell(sets, loadError) {
 
   page.innerHTML =
     errorHtml +
-    sets.map((set, index) => renderSection(set, index, buildSetSummary(set))).join('');
+    sets.map((set, index) => renderSection(set, index, buildSetSummary(set), modeFor(set.setKey))).join('');
 
   tabList.innerHTML = renderTabs(sets);
 

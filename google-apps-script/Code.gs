@@ -57,7 +57,7 @@ function doPost(e) {
     requireEditKey(body.key);
 
     if (!lock.tryLock(15000)) {
-      throw new Error('มีคนกำลังแก้อยู่ ลองใหม่อีกครั้ง');
+      throw new Error('Another edit is in progress — try again');
     }
 
     if (body.action === 'clearSlot') {
@@ -65,7 +65,7 @@ function doPost(e) {
     } else if (body.action === 'updateItem') {
       writeItem(body.setKey, body.slot, body.item || {});
     } else {
-      throw new Error('ไม่รู้จัก action: ' + body.action);
+      throw new Error('Unknown action: ' + body.action);
     }
 
     // คืน sets ชุดใหม่ไปเลย หน้าเว็บจะได้ไม่ต้องยิง GET ตามอีกรอบ
@@ -80,10 +80,10 @@ function doPost(e) {
 function requireEditKey(given) {
   var expected = PropertiesService.getScriptProperties().getProperty('EDIT_KEY');
   if (!expected) {
-    throw new Error('ยังไม่ได้ตั้ง EDIT_KEY ใน Script Properties — การเขียนถูกปิดไว้');
+    throw new Error('EDIT_KEY is not set in Script Properties — writing is disabled');
   }
   if (String(given || '') !== expected) {
-    throw new Error('edit key ไม่ถูกต้อง');
+    throw new Error('Wrong edit key');
   }
 }
 
@@ -97,7 +97,7 @@ var NUMBER_FORMATS = {
 function itemsSheetLayout() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_ITEMS);
   if (!sheet) {
-    throw new Error('ไม่พบแท็บ: ' + SHEET_ITEMS);
+    throw new Error('Sheet tab not found: ' + SHEET_ITEMS);
   }
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(normalizeKey);
   var columns = {};
@@ -119,7 +119,7 @@ function findItemRow(layout, setKey, slot) {
   var setCol = columnIndex(layout, 'setKey');
   var slotCol = columnIndex(layout, 'slot');
   if (setCol < 0 || slotCol < 0) {
-    throw new Error(SHEET_ITEMS + ': ต้องมีคอลัมน์ setKey และ slot');
+    throw new Error(SHEET_ITEMS + ': needs setKey and slot columns');
   }
 
   var values = layout.sheet.getDataRange().getValues();
@@ -136,11 +136,11 @@ function findItemRow(layout, setKey, slot) {
 
 function writeItem(setKey, slot, item) {
   if (!setKey) {
-    throw new Error('ไม่ได้ระบุ setKey');
+    throw new Error('setKey is missing');
   }
   var slotNumber = Math.round(toNumber(slot));
   if (!(slotNumber >= 1 && slotNumber <= SLOT_COUNT)) {
-    throw new Error('slot ต้องเป็น 1–' + SLOT_COUNT);
+    throw new Error('slot must be 1-' + SLOT_COUNT);
   }
 
   var layout = itemsSheetLayout();
@@ -188,7 +188,7 @@ function setCell(layout, row, name, value, format) {
 function buildSets() {
   var setRows = readTable(SHEET_SETS);
   if (!setRows.length) {
-    throw new Error(SHEET_SETS + ' ว่าง (ต้องมีอย่างน้อย 1 set)');
+    throw new Error(SHEET_SETS + ' is empty (needs at least 1 set)');
   }
 
   var itemsBySet = groupBySetKey(readTable(SHEET_ITEMS), SHEET_ITEMS);
@@ -204,7 +204,7 @@ function buildSets() {
     .map(function (row) {
       var key = field(row, 'setKey');
       if (seen[key]) {
-        throw new Error(SHEET_SETS + ': setKey ซ้ำ "' + key + '"');
+        throw new Error(SHEET_SETS + ': duplicate setKey "' + key + '"');
       }
       seen[key] = true;
 
@@ -230,11 +230,11 @@ function buildItems(rows, setKey) {
     var slot = Math.round(toNumber(raw));
     if (!(slot >= 1 && slot <= SLOT_COUNT)) {
       throw new Error(
-        SHEET_ITEMS + ' (' + setKey + '): slot ต้องเป็น 1–' + SLOT_COUNT + ' แต่ได้ "' + raw + '"',
+        SHEET_ITEMS + ' (' + setKey + '): slot must be 1-' + SLOT_COUNT + ' but got "' + raw + '"',
       );
     }
     if (slots[slot - 1]) {
-      throw new Error(SHEET_ITEMS + ' (' + setKey + '): slot ' + slot + ' ซ้ำ');
+      throw new Error(SHEET_ITEMS + ' (' + setKey + '): slot ' + slot + ' is duplicated');
     }
 
     var item = {
@@ -273,7 +273,7 @@ function readSubStats(row) {
 function readTable(name) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
   if (!sheet) {
-    throw new Error('ไม่พบแท็บ: ' + name);
+    throw new Error('Sheet tab not found: ' + name);
   }
 
   var values = sheet.getDataRange().getValues();
@@ -305,7 +305,7 @@ function groupBySetKey(rows, sheetName) {
   for (var i = 0; i < rows.length; i += 1) {
     var key = field(rows[i], 'setKey');
     if (key === '') {
-      throw new Error(sheetName + ': มีแถวที่ setKey ว่าง');
+      throw new Error(sheetName + ': a row has an empty setKey');
     }
     if (!grouped[key]) {
       grouped[key] = [];

@@ -1,15 +1,15 @@
 import { loadSetsPayload } from './data.mjs';
 import { renderAppShell } from './render.mjs';
-import { createBestSubstatUi } from './best-substat.mjs';
+import { createSetModeUi } from './set-mode.mjs';
 import { createEditUi } from './edit.mjs';
 import { escapeHtml } from './utils.mjs';
 
-const bestSubstatUi = createBestSubstatUi();
+const setModeUi = createSetModeUi();
 
 function paint(sets, loadError) {
-  renderAppShell(sets, loadError);
-  bestSubstatUi.configure(sets);
-  bestSubstatUi.bind();
+  setModeUi.configure(sets);
+  renderAppShell(sets, loadError, setModeUi.modeFor);
+  setModeUi.bind();
 }
 
 const editUi = createEditUi({ onSaved: (sets) => paint(sets, '') });
@@ -17,23 +17,20 @@ const editUi = createEditUi({ onSaved: (sets) => paint(sets, '') });
 async function bootstrap() {
   const payload = await loadSetsPayload();
   if (!payload.sets.length) {
-    throw new Error('ไม่มีข้อมูล set เลย');
+    throw new Error('No equipment sets found');
   }
   paint(payload.sets, payload.loadError);
   editUi.configure(payload);
   editUi.bind();
 }
 
-// NOTE: ไม่มีตรงนี้ = error ตอน bootstrap จะเงียบสนิท หน้าเว็บว่างโดยไม่บอกอะไร
+// NOTE: ไม่มีตรงนี้ = error ตอน bootstrap จะเงียบสนิท หน้าเว็บค้างที่ loading
 bootstrap().catch((err) => {
   const page = document.getElementById('equipmentPage');
   if (page) {
-    page.insertAdjacentHTML(
-      'afterbegin',
-      `<p class="page-load-error" role="status">เปิดหน้าไม่สำเร็จ: ${escapeHtml(
-        (err && err.message) || String(err),
-      )}</p>`,
-    );
+    page.innerHTML = `<p class="page-load-error" role="status">Could not load the page: ${escapeHtml(
+      (err && err.message) || String(err),
+    )}</p>`;
   }
   throw err;
 });

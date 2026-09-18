@@ -119,7 +119,7 @@ export async function loadSetsPayload() {
     const message = err && err.message ? err.message : 'error';
     return {
       sets: embeddedSets,
-      loadError: `โหลด Google Apps Script Web App ไม่สำเร็จ — ใช้ข้อมูลสำรองในเว็บ (${message})`,
+      loadError: `Could not load the Web App — showing built-in fallback data (${message})`,
     };
   }
 }
