@@ -715,7 +715,7 @@
       padding: 0.04rem 0.36rem;
       border-radius: 999px;
       background: rgba(0, 0, 0, 0.42);
-      font-size: 0.58rem;
+      font-size: 0.52rem;
       font-weight: 700;
       line-height: 1.3;
       text-align: center;
@@ -769,7 +769,7 @@
       align-items: flex-start;
       gap: 0.4rem;
       /* NOTE: padding ซ้ายต้องเท่า .stats li ไม่งั้นชื่อ base stat กับชื่อ substat ไม่ตรงแนวกัน */
-      padding: 0 0.3rem;
+      padding: 0 0.9rem 0 0.3rem;
       margin-top: 0.05rem;
       margin-bottom: 0.6rem;
     }
@@ -816,7 +816,7 @@
       column-gap: 0.5rem;
       position: relative;
       min-height: 2.6rem;
-      padding: 0.25rem 0.55rem 0.25rem 0.55rem;
+      padding: 0.25rem 0.9rem 0.25rem 0.3rem;
       font-size: 0.79rem;
       border-bottom: 1px solid var(--divider);
     }
@@ -831,11 +831,15 @@
 
     /* NOTE: substat ที่ไม่ตรง best ให้จางลง เกรดถึงจะเด่นออกมา (.stat-row-best ทับอีกที) */
     /*
-     * จุดต่อท้ายชื่อ substat: ฟ้า = โรลติดขอบบน 10%, แดง = ติดขอบล่าง 10%
-     * NOTE: เคยลอยมุมขวาบน แต่ไปซ้อนแนวเดียวกับค่าและช่วงค่า เลยดูรก
+     * จุดมุมขวาบนของแถว substat: ฟ้า = โรลติดขอบบน 10%, แดง = ติดขอบล่าง 10%
+     *
+     * NOTE: จุดอยู่นอกแนวตัวเลข — .stats li เว้น padding ขวา 0.9rem ไว้เป็นช่องของจุด
+     * ตัวเลขทุกตัวในการ์ด (power + ค่า substat + ช่วงค่า) เลยชิดขวาตรงแนวเดียวกันหมด
      */
     .stat-flag {
-      flex-shrink: 0;
+      position: absolute;
+      top: 0.32rem;
+      right: 0.28rem;
       width: 0.34rem;
       height: 0.34rem;
       border-radius: 50%;
@@ -866,9 +870,6 @@
     }
 
     .stats .label {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
       color: rgba(255, 255, 255, 0.5);
       font-weight: 500;
       /* เล็กกว่าตัวเลขนิดนึง — ชื่อเป็นข้อมูลรอง ค่าเป็นตัวหลัก */

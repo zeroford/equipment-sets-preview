@@ -39,7 +39,7 @@ export function renderCard(item, gridIndex, bestStats) {
       ratio === null || (ratio < HIGH_ROLL && ratio > LOW_ROLL)
         ? ''
         : `<span class="stat-flag ${ratio >= HIGH_ROLL ? 'is-high' : 'is-low'}" aria-hidden="true"></span>`;
-    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}${flag}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span></li>`;
+    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span>${flag}</li>`;
   });
 
   return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">Lv.${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="primary-cell"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></span><span class="primary-cell is-power"><span class="label">Power</span><span class="value">${escapeHtml(formatPower(item.power))}</span></span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
