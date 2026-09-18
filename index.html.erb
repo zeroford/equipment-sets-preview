@@ -382,16 +382,61 @@
     }
 
     /* ── โหมดแก้ไข ───────────────────────────────────────────── */
-    .edit-fab {
+    /* NOTE: ระดับเดียวกับปุ่ม i ฝั่งซ้าย — เมื่อก่อนต้องยกขึ้นหลบปุ่ม swap ที่ตอนนี้ไม่มีแล้ว */
+    .add-menu {
       position: fixed;
       right: 1rem;
-      left: auto;
-      /* NOTE: ระดับเดียวกับปุ่ม i ฝั่งซ้าย — เมื่อก่อนต้องยกขึ้นหลบปุ่ม swap ที่ตอนนี้ไม่มีแล้ว */
       bottom: var(--dock-bottom);
       z-index: 1002;
     }
-    .edit-fab[hidden] {
+    .add-menu[hidden] {
       display: none !important;
+    }
+
+    /* เมนูเลือก slot — โผล่ตอน hover ปุ่ม + หรือกดปุ่ม (จอสัมผัสไม่มี hover) */
+    .add-menu-grid {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 0.5rem);
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.25rem;
+      padding: 0.35rem;
+      border-radius: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(0.25rem);
+      transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+    }
+    .add-menu:hover .add-menu-grid,
+    .add-menu:focus-within .add-menu-grid,
+    .add-menu.is-open .add-menu-grid {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    .add-slot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.65rem;
+      background: rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .add-slot:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+    .add-slot img {
+      width: 1.9rem;
+      height: 1.9rem;
+      object-fit: contain;
+      opacity: 0.85;
     }
     .edit-dialog {
       width: min(44rem, calc(100vw - 2rem));
@@ -1018,16 +1063,19 @@
 </head>
 <body>
   <div class="mode-toggle" id="setModeToggle" role="group" aria-label="Set mode" hidden></div>
-  <button
-    type="button"
-    class="dock-fab glass-chip edit-fab"
-    id="editModeToggle"
-    aria-label="Add or edit an item"
-    title="Add or edit an item"
-    hidden
-  >
-    <i data-lucide="plus" aria-hidden="true"></i>
-  </button>
+  <div class="add-menu" id="addMenu" hidden>
+    <div class="add-menu-grid glass-chip" id="addSlotGrid" role="menu" aria-label="Pick a slot"></div>
+    <button
+      type="button"
+      class="dock-fab glass-chip edit-fab"
+      id="editModeToggle"
+      aria-label="Add or edit an item"
+      aria-expanded="false"
+      title="Add or edit an item"
+    >
+      <i data-lucide="plus" aria-hidden="true"></i>
+    </button>
+  </div>
   <dialog class="edit-dialog" id="editDialog"></dialog>
   <div class="page" id="equipmentPage">
     <div class="page-loading" role="status" aria-label="Loading">

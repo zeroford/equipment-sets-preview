@@ -145,6 +145,7 @@ export function createEditUi({ onSaved }) {
   let webAppUrl = '';
   let sets = [];
   let dialog = null;
+  let menu = null;
   let trigger = null;
   let slot = 1;
 
@@ -257,21 +258,62 @@ export function createEditUi({ onSaved }) {
     });
   }
 
+  function slotButtonsHtml() {
+    let html = '';
+    for (let n = 1; n <= SLOT_COUNT; n += 1) {
+      const type = SLOT_TYPES[n - 1] || '';
+      const name = titleCase(type);
+      html += `<button type="button" class="add-slot" role="menuitem" data-slot="${n}" title="${escapeHtml(
+        name,
+      )}" aria-label="${escapeHtml(name)}"><img src="assets/plates/icon_plate_${escapeHtml(
+        type,
+      )}.png" alt="" width="30" height="30" decoding="async" /></button>`;
+    }
+    return html;
+  }
+
+  function closeMenu() {
+    menu.classList.remove('is-open');
+    trigger.setAttribute('aria-expanded', 'false');
+  }
+
   function bind() {
     dialog = document.getElementById('editDialog');
+    menu = document.getElementById('addMenu');
     trigger = document.getElementById('editModeToggle');
-    if (!dialog || !trigger) {
+    const grid = document.getElementById('addSlotGrid');
+    if (!dialog || !menu || !trigger || !grid) {
       return;
     }
 
-    trigger.hidden = !webAppUrl || pair().length < 2;
-    if (trigger.hidden) {
+    menu.hidden = !webAppUrl || pair().length < 2;
+    if (menu.hidden) {
       return;
     }
 
+    grid.innerHTML = slotButtonsHtml();
+
+    // จอสัมผัสไม่มี hover เลยให้กดปุ่มเปิด/ปิดเมนูได้ด้วย
     trigger.addEventListener('click', () => {
+      const open = menu.classList.toggle('is-open');
+      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    grid.addEventListener('click', (event) => {
+      const btn = event.target.closest('.add-slot');
+      if (!btn) {
+        return;
+      }
+      slot = Number(btn.dataset.slot) || 1;
+      closeMenu();
       renderDialog();
       dialog.showModal();
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!menu.contains(event.target)) {
+        closeMenu();
+      }
     });
   }
 
