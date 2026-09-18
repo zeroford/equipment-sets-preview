@@ -768,8 +768,9 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 0.4rem;
-      padding: 0 0.55rem;
-      margin-bottom: 0.5rem;
+      /* NOTE: padding ซ้ายต้องเท่า .stats li ไม่งั้นชื่อ base stat กับชื่อ substat ไม่ตรงแนวกัน */
+      padding: 0 0.35rem;
+      margin-bottom: 0.35rem;
     }
 
     .primary-cell {
@@ -819,7 +820,7 @@
       column-gap: 0.5rem;
       position: relative;
       min-height: 2.6rem;
-      padding: 0.25rem 0.8rem 0.25rem 0.55rem;
+      padding: 0.25rem 0.6rem 0.25rem 0.35rem;
       font-size: 0.79rem;
       border-bottom: 1px solid var(--divider);
     }
@@ -870,6 +871,8 @@
     .stats .label {
       color: rgba(255, 255, 255, 0.5);
       font-weight: 500;
+      /* เล็กกว่าตัวเลขนิดนึง — ชื่อเป็นข้อมูลรอง ค่าเป็นตัวหลัก */
+      font-size: 0.72rem;
       justify-self: start;
     }
 
