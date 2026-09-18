@@ -73,13 +73,57 @@ function renderSection(set, setIndex, summary, mode) {
   return `<section class="section" data-set-key="${escapeHtml(set.setKey)}" role="tabpanel" id="panel-${escapeHtml(set.setKey)}" aria-labelledby="tab-${escapeHtml(set.setKey)}"${setIndex === 0 ? '' : ' hidden'}><div class="summary-hover summary-float"><button type="button" class="dock-fab glass-chip" aria-label="Total stats"><i data-lucide="info" aria-hidden="true"></i></button><div class="summary-popover" role="tooltip"><div class="summary-table-wrap"><table class="summary-table"><tbody>${summaryRows}</tbody></table></div></div></div><div class="section-header"><div class="section-title-row"><h2 class="section-title">${escapeHtml(set.title)}</h2></div></div>${rowsHtml}</section>`;
 }
 
-function renderTabs(sets) {
-  return sets
-    .map(
-      (set, index) =>
-        `<button type="button" class="set-tab" role="tab" id="tab-${escapeHtml(set.setKey)}" data-set-key="${escapeHtml(set.setKey)}" aria-selected="${index === 0 ? 'true' : 'false'}" aria-controls="panel-${escapeHtml(set.setKey)}"><span class="set-tab-indicator" aria-hidden="true"></span><span class="set-tab-label">${escapeHtml(set.title)}</span></button>`,
-    )
-    .join('');
+const COMPARE_KEY = '__compare';
+
+function emptyCellHtml(gridIndex) {
+  return `<div class="grid-empty" aria-hidden="true"><img class="grid-empty-plate" src="${escapeHtml(platePath(gridIndex))}" alt="" width="72" height="72" decoding="async" /></div>`;
+}
+
+/**
+ * แท็บ Compare — เอา slot เดียวกันของสอง set มาวางข้างกัน
+ *
+ * NOTE: highlight ของแต่ละใบยังใช้โหมดของ set ตัวเอง ไม่ได้บังคับให้เหมือนกัน
+ * จะได้เห็นว่าแต่ละ set มองหา substat คนละชุด
+ */
+function renderCompareSection(sets, modeFor) {
+  const pair = sets.slice(0, 2);
+  const bestOf = pair.map((set) => bestSubstatFor(modeFor(set.setKey)));
+
+  let groupsHtml = '';
+  for (let slot = 1; slot <= 12; slot += 1) {
+    const gridIndex = slot - 1;
+    if (!pair.some((set) => (set.items || [])[gridIndex])) {
+      continue; // ไม่มีของทั้งสอง set ก็ไม่ต้องโชว์ช่องนี้
+    }
+
+    const slotName = SLOT_TYPES[gridIndex] || '';
+    const cells = pair
+      .map((set, i) => {
+        const item = (set.items || [])[gridIndex];
+        const bestStats = bestOf[i].rows[Math.floor(gridIndex / 3)] || [];
+        const card = item ? renderCard(item, gridIndex, bestStats) : emptyCellHtml(gridIndex);
+        return `<div class="compare-cell"><span class="compare-set">${escapeHtml(set.title)}</span>${card}</div>`;
+      })
+      .join('');
+
+    groupsHtml += `<div class="grid-row-group compare-group"><p class="row-best-caption"><span class="best-label">${escapeHtml(
+      slotName.charAt(0).toUpperCase() + slotName.slice(1),
+    )}</span></p><div class="grid compare-grid">${cells}</div></div>`;
+  }
+
+  return `<section class="section compare" data-set-key="${COMPARE_KEY}" role="tabpanel" id="panel-${COMPARE_KEY}" aria-labelledby="tab-${COMPARE_KEY}" hidden>${groupsHtml}</section>`;
+}
+
+function tabHtml(key, title, selected) {
+  return `<button type="button" class="set-tab" role="tab" id="tab-${escapeHtml(key)}" data-set-key="${escapeHtml(key)}" aria-selected="${selected ? 'true' : 'false'}" aria-controls="panel-${escapeHtml(key)}"><span class="set-tab-indicator" aria-hidden="true"></span><span class="set-tab-label">${escapeHtml(title)}</span></button>`;
+}
+
+function renderTabs(sets, withCompare) {
+  const tabs = sets.map((set, index) => tabHtml(set.setKey, set.title, index === 0));
+  if (withCompare) {
+    tabs.push(tabHtml(COMPARE_KEY, 'Compare', false));
+  }
+  return tabs.join('');
 }
 
 /**
@@ -96,11 +140,17 @@ export function renderAppShell(sets, loadError, modeFor) {
     ? `<p class="page-load-error" role="status">${escapeHtml(loadError)}</p>`
     : '';
 
+  // ต้องมีอย่างน้อย 2 set ถึงจะมีอะไรให้เทียบ
+  const withCompare = sets.length >= 2;
+
   page.innerHTML =
     errorHtml +
-    sets.map((set, index) => renderSection(set, index, buildSetSummary(set), modeFor(set.setKey))).join('');
+    sets
+      .map((set, index) => renderSection(set, index, buildSetSummary(set), modeFor(set.setKey)))
+      .join('') +
+    (withCompare ? renderCompareSection(sets, modeFor) : '');
 
-  tabList.innerHTML = renderTabs(sets);
+  tabList.innerHTML = renderTabs(sets, withCompare);
 
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();

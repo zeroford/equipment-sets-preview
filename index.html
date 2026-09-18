@@ -720,6 +720,38 @@
       font-weight: 600;
     }
 
+    /* ── แท็บ Compare ─────────────────────────────────────────── */
+    .section.compare {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0 1.5rem;
+    }
+
+    .compare-group {
+      /* กว้างเท่าการ์ด 2 ใบ ไม่ใช่ 3 เหมือนแถวปกติ */
+      max-width: calc(var(--card-max) * 2 + var(--card-gap));
+    }
+
+    .compare-grid {
+      grid-template-columns: repeat(2, minmax(0, var(--card-max)));
+    }
+
+    .compare-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+
+    .compare-set {
+      padding-left: 0.2rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
     .grid-empty {
       display: flex;
       align-items: center;

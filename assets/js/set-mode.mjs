@@ -74,6 +74,10 @@ export function createSetModeUi() {
   function applyHighlights() {
     panels.forEach((section) => {
       const setKey = section.dataset.setKey;
+      // NOTE: panel ที่ไม่มีโหมด (Compare, set ที่ยังไม่ตั้งโหมด) วาดมาครบแล้วตั้งแต่ render
+      if (!modeFor(setKey)) {
+        return;
+      }
       const best = bestSubstatFor(modeFor(setKey));
       const meta = setMeta[setKey];
 
