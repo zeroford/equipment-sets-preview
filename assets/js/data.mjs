@@ -59,6 +59,28 @@ function resolveWebAppUrl(sheetsConfig) {
   ).trim();
 }
 
+/**
+ * เขียนกลับผ่าน doPost
+ *
+ * NOTE: ต้องเป็น text/plain — application/json ทำให้เบราว์เซอร์ยิง OPTIONS preflight
+ * ซึ่ง Apps Script ไม่ตอบ request เลยตายก่อนถึงสคริปต์
+ */
+export async function postToWebApp(url, body) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`Web App HTTP ${res.status}`);
+  }
+  const payload = await res.json();
+  if (payload.error) {
+    throw new Error(payload.error);
+  }
+  return normalizeSetsPayload(payload.sets || []);
+}
+
 export async function fetchSetsFromWebApp(url) {
   const sep = url.includes('?') ? '&' : '?';
   const res = await fetch(`${url}${sep}t=${Date.now()}`);
@@ -83,7 +105,7 @@ export async function loadSetsPayload() {
   const webAppUrl = resolveWebAppUrl(sheetsConfig);
 
   if (!webAppUrl) {
-    return { sets: embeddedSets, loadError: '' };
+    return { sets: embeddedSets, loadError: '', webAppUrl: '' };
   }
 
   try {
@@ -92,7 +114,7 @@ export async function loadSetsPayload() {
     if (!sets.length) {
       throw new Error('Web App returned empty sets');
     }
-    return { sets, loadError: '' };
+    return { sets, loadError: '', webAppUrl };
   } catch (err) {
     const message = err && err.message ? err.message : 'error';
     return {

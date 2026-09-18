@@ -191,6 +191,131 @@
       display: none !important;
     }
 
+    /* ── โหมดแก้ไข ───────────────────────────────────────────── */
+    .edit-fab {
+      position: fixed;
+      right: 1rem;
+      left: auto;
+      bottom: calc(var(--dock-bottom) + 3.85rem);
+      z-index: 1002;
+    }
+    .edit-fab[aria-pressed="true"] {
+      background: rgba(139, 92, 246, 0.85);
+      border-color: rgba(196, 181, 253, 0.6);
+      color: #fff;
+    }
+    /* การ์ดกดได้เฉพาะตอนเปิดโหมดแก้ไข */
+    body.is-editing .card,
+    body.is-editing .grid-empty {
+      cursor: pointer;
+      outline: 1px dashed rgba(196, 181, 253, 0.45);
+      outline-offset: 2px;
+    }
+    body.is-editing .card:hover,
+    body.is-editing .grid-empty:hover {
+      outline-color: rgba(196, 181, 253, 0.9);
+    }
+
+    .edit-dialog {
+      width: min(26rem, calc(100vw - 2rem));
+      padding: 0;
+      border: none;
+      border-radius: 1rem;
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    }
+    .edit-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(3px);
+    }
+    .edit-dialog form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      padding: 1.15rem;
+    }
+    .edit-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .edit-sub {
+      margin: -0.55rem 0 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .edit-row {
+      display: grid;
+      grid-template-columns: 6.5rem 1fr;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .edit-row.edit-row-pair {
+      grid-template-columns: 6.5rem 1fr 6.5rem;
+    }
+    .edit-row > label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .edit-dialog input,
+    .edit-dialog select {
+      width: 100%;
+      padding: 0.45rem 0.6rem;
+      border: 1px solid var(--divider);
+      border-radius: 0.5rem;
+      background: rgba(0, 0, 0, 0.28);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.85rem;
+    }
+    .edit-dialog input:focus,
+    .edit-dialog select:focus {
+      outline: 2px solid rgba(139, 92, 246, 0.7);
+      outline-offset: 1px;
+    }
+    .edit-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 0.25rem;
+    }
+    .edit-actions button {
+      padding: 0.5rem 0.95rem;
+      border: 1px solid var(--divider);
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .edit-actions button[value="save"] {
+      background: #8b5cf6;
+      border-color: #8b5cf6;
+      font-weight: 600;
+    }
+    .edit-actions button[value="clear"] {
+      margin-right: auto;
+      color: #ff8787;
+    }
+    .edit-actions button[disabled] {
+      opacity: 0.55;
+      cursor: progress;
+    }
+    .edit-status {
+      margin: 0;
+      min-height: 1.1rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .edit-status[data-tone="error"] {
+      color: #ff8787;
+    }
+    .edit-status[data-tone="ok"] {
+      color: #69db7c;
+    }
+
     .section { margin-bottom: 1.5rem; }
 
     .section:last-child {
@@ -609,6 +734,18 @@
   >
     <i data-lucide="arrow-down-up" aria-hidden="true"></i>
   </button>
+  <button
+    type="button"
+    class="dock-fab glass-chip edit-fab"
+    id="editModeToggle"
+    aria-pressed="false"
+    aria-label="โหมดแก้ไข"
+    title="โหมดแก้ไข — กดการ์ดเพื่อแก้"
+    hidden
+  >
+    <i data-lucide="pencil" aria-hidden="true"></i>
+  </button>
+  <dialog class="edit-dialog" id="editDialog"></dialog>
   <div class="page" id="equipmentPage"></div>
   <nav class="set-tabs" aria-label="เลือก equipment set">
     <div class="set-tabs-list glass-chip" id="setTabList" role="tablist"></div>

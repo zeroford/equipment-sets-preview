@@ -12,6 +12,9 @@ export function createBestSubstatUi() {
   let btn = null;
   let tabs = [];
   let panels = [];
+  // NOTE: bind() ถูกเรียกใหม่ทุกครั้งที่ re-render (เช่นหลังบันทึกจากโหมดแก้ไข)
+  // tab/panel ถูกสร้างใหม่ทุกรอบ แต่ปุ่ม swap เป็นของเดิมใน shell — ผูก listener ซ้ำไม่ได้
+  let swapBound = false;
 
   function sourceKeyForSet(setKey) {
     if (setKey === 'set3') {
@@ -109,7 +112,8 @@ export function createBestSubstatUi() {
       });
     });
 
-    if (btn) {
+    if (btn && !swapBound) {
+      swapBound = true;
       btn.addEventListener('click', () => {
         swapped = !swapped;
         applyBestSubstat();
