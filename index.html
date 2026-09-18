@@ -694,14 +694,15 @@
 
     .stats li:last-child { border-bottom: none; }
 
+    /* NOTE: substat ที่ไม่ตรง best ให้จางลง เกรดถึงจะเด่นออกมา (.stat-row-best ทับอีกที) */
     .stats .label {
-      color: #ced4da;
+      color: rgba(255, 255, 255, 0.5);
       font-weight: 500;
       justify-self: start;
     }
 
     .stats .value {
-      color: #fff;
+      color: rgba(255, 255, 255, 0.65);
       font-weight: 600;
       text-align: right;
       justify-self: end;
