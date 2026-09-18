@@ -206,9 +206,11 @@
       right: 1rem;
       z-index: 1002;
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.4rem;
+      align-items: center;
+      /* NOTE: wrap ไว้ด้วย จอแคบสองแคปซูลจะได้ตกบรรทัดแทนที่จะล้นออกนอกจอ */
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.5rem;
     }
     .mode-toggle[hidden] {
       display: none;
