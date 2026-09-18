@@ -683,7 +683,7 @@
         var(--frame) 100%
       );
       border-radius: 0;
-      padding: 8px;
+      padding: 8px 8px 6px;
       box-sizing: border-box;
       text-align: left;
       font-size: 0.87rem;
@@ -768,8 +768,8 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 0.4rem;
-      /* NOTE: padding ซ้ายต้องเท่า .stats li ไม่งั้นชื่อ base stat กับชื่อ substat ไม่ตรงแนวกัน */
-      padding: 0 0.9rem 0 0.3rem;
+      /* NOTE: padding ต้องเท่า .stats li ไม่งั้นชื่อ base stat กับชื่อ substat ไม่ตรงแนวกัน */
+      padding: 0 0.3rem;
       margin-top: 0.05rem;
       margin-bottom: 0.6rem;
     }
@@ -816,7 +816,7 @@
       column-gap: 0.5rem;
       position: relative;
       min-height: 2.6rem;
-      padding: 0.25rem 0.9rem 0.25rem 0.3rem;
+      padding: 0.25rem 0.45rem;
       font-size: 0.79rem;
       border-bottom: 1px solid var(--divider);
     }
@@ -833,13 +833,13 @@
     /*
      * จุดมุมขวาบนของแถว substat: ฟ้า = โรลติดขอบบน 10%, แดง = ติดขอบล่าง 10%
      *
-     * NOTE: จุดอยู่นอกแนวตัวเลข — .stats li เว้น padding ขวา 0.9rem ไว้เป็นช่องของจุด
-     * ตัวเลขทุกตัวในการ์ด (power + ค่า substat + ช่วงค่า) เลยชิดขวาตรงแนวเดียวกันหมด
+     * NOTE: ลอยทับมุมแถว ไม่กินพื้นที่ — ตัวเลขทุกตัวในการ์ด (power + ค่า substat
+     * + ช่วงค่า) เลยชิดขวาตรงแนวเดียวกันหมด
      */
     .stat-flag {
       position: absolute;
-      top: 0.32rem;
-      right: 0.28rem;
+      top: 0.3rem;
+      right: 0.25rem;
       width: 0.34rem;
       height: 0.34rem;
       border-radius: 50%;

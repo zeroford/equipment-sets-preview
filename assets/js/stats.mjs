@@ -19,7 +19,7 @@ export const STATS = {
   critRate: { label: 'CRIT%', format: 'percent' },
   critDmg: { label: 'CRIT DMG', format: 'percent' },
   critRes: { label: 'CRIT RES', format: 'percent' },
-  dmgReduction: { label: 'DMG Reduction', format: 'percent' },
+  dmgReduction: { label: 'DMG RDN', format: 'percent' },
 
   accuracy: { label: 'Accuracy', format: 'decimal' },
   evasion: { label: 'Evasion', format: 'decimal' },
@@ -32,12 +32,20 @@ function normalizeKey(raw) {
   return String(raw).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+// ชื่อเต็มที่ชีตอาจพิมพ์มา แต่ label ที่แสดงย่อกว่านั้น
+const ALIASES = {
+  dmgReduction: ['DMG Reduction'],
+};
+
 // NOTE: รับได้ทั้ง id (`skillAmp`) และ label (`Skill AMP`) — ชีตพิมพ์แบบไหนมาก็ได้
 const STAT_ID_BY_KEY = (() => {
   const index = {};
   Object.keys(STATS).forEach((id) => {
     index[normalizeKey(id)] = id;
     index[normalizeKey(STATS[id].label)] = id;
+    (ALIASES[id] || []).forEach((alias) => {
+      index[normalizeKey(alias)] = id;
+    });
   });
   return index;
 })();
