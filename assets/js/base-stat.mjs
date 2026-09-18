@@ -1,4 +1,4 @@
-import { CURVES, GAME_PERCENT_STATS, RATE_BY_SLOT } from './base-stat-data.mjs';
+import { CURVES, GAME_PERCENT_STATS, RATE_BY_SLOT, SUB_RANGES } from './base-stat-data.mjs';
 import { GRADE_KEYS, baseStatForSlot } from './catalog.mjs';
 
 /**
@@ -10,6 +10,13 @@ import { GRADE_KEYS, baseStatForSlot } from './catalog.mjs';
  * base = ค่าตาราง × rate × (1 + baseBonus)
  */
 const DEFAULT_BONUS = 1.05;
+
+const DEFAULT_SUB_BONUS = 1.3;
+
+const SUB_BONUS_BY_SLOT = {
+  4: 0.7, // helmet
+  5: 0.7, // armor
+};
 
 const BONUS_BY_SLOT = {
   4: 0.57, // helmet
@@ -40,4 +47,19 @@ export function computeBaseStat(slot, grade, level) {
   // NOTE: หาร 100 ตาม format ของ "ไฟล์เกม" ไม่ใช่ format ที่เราใช้โชว์
   // เช่น Accuracy เกมบอก percent (11600) แต่เราเก็บ/โชว์เป็นเลขธรรมดา (475.60)
   return GAME_PERCENT_STATS.includes(statId) ? value / 100 : value;
+}
+
+/**
+ * ช่วงค่าที่ substat ตัวนั้นออกได้ [min, max] — ไม่รู้ก็คืน null
+ *
+ * NOTE: ตารางเก็บค่าดิบ ของจริงโดนบวกอีกชั้นเหมือน base stat (คนละตัวเลขกัน)
+ */
+export function subStatRange(slot, grade, statId) {
+  const code = Number(grade) || GRADE_KEYS.indexOf(String(grade)) + 1;
+  const range = ((SUB_RANGES[slot - 1] || {})[code] || {})[statId];
+  if (!range) {
+    return null;
+  }
+  const bonus = 1 + (slot in SUB_BONUS_BY_SLOT ? SUB_BONUS_BY_SLOT[slot] : DEFAULT_SUB_BONUS);
+  return [range[0] * bonus, range[1] * bonus];
 }

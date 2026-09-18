@@ -119,6 +119,7 @@ writeFileSync(join(ROOT, 'assets', 'js', 'catalog.mjs'), out);
 
 // ── ตารางค่า base stat ต่อ level + ตัวคูณตาม rarity ────────────────────
 const rateBySlot = Array.from({ length: SLOT_COUNT }, () => ({}));
+const subRanges = Array.from({ length: SLOT_COUNT }, () => ({}));
 const curves = {};
 // stat ที่ไฟล์เกมบอกว่าเป็น percent — ค่าในตารางเป็นหน่วยเปอร์เซ็นต์ ต้องหาร 100
 const gamePercent = [];
@@ -128,6 +129,18 @@ data.equipments.forEach((item) => {
   const grade = gradeByRarity.get(item.rarity);
   const option = item.mainOptions[0];
   rateBySlot[slot - 1][grade] = option.rate;
+
+  // ช่วงค่าที่ substat แต่ละตัวออกได้ (ค่าดิบ ยังไม่คูณโบนัส)
+  const ranges = {};
+  item.subOptions.forEach((sub) => {
+    const id = resolveStatId(data.stats[sub.statId].names.en);
+    // NOTE: ปัดด้วย — 3.6 / 100 ได้ 0.036000000000000004
+    const scale = data.stats[sub.statId].format === 'percent' ? 100 : 1;
+    ranges[id] = [sub.min / scale, sub.max / scale].map((v) => Math.round(v * 1e6) / 1e6);
+  });
+  if (Object.keys(ranges).length) {
+    subRanges[slot - 1][grade] = ranges;
+  }
 
   const statId = resolveStatId(data.stats[option.statId].names.en);
   if (!curves[statId]) {
@@ -165,9 +178,17 @@ export const CURVES = ${JSON.stringify(curves)};
  * NOTE: ไม่ตรงกับ format ของเราเสมอไป เช่น Accuracy เกมบอก percent แต่เราโชว์เป็นเลขธรรมดา
  */
 export const GAME_PERCENT_STATS = ${JSON.stringify(gamePercent)};
+
+/**
+ * slot → grade → stat id → [min, max] ของ substat (ค่าดิบ หน่วยเดียวกับที่เราเก็บ)
+ * ยังไม่คูณโบนัส — คูณตอนใช้ใน base-stat.mjs
+ */
+export const SUB_RANGES = ${JSON.stringify(subRanges)};
 `;
 writeFileSync(join(ROOT, 'assets', 'js', 'base-stat-data.mjs'), dataOut);
-console.log(`base-stat-data.mjs ← ${Object.keys(curves).length} stat × ${Object.values(curves)[0].length} level`);
+console.log(
+  `base-stat-data.mjs ← ${Object.keys(curves).length} stat × ${Object.values(curves)[0].length} level + ช่วง substat`,
+);
 console.log(
   `catalog.mjs ← ${data.equipments.length} ชิ้น (${gradeKeys.length} grade × ${SLOT_COUNT} slot)`,
 );

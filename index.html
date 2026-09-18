@@ -828,8 +828,8 @@
       grid-template-columns: 1fr auto;
       align-items: center;
       column-gap: 0.5rem;
-      min-height: 2.1rem;
-      padding: 0 0.55rem;
+      min-height: 2.6rem;
+      padding: 0.25rem 0.55rem;
       font-size: 0.79rem;
       border-bottom: 1px solid var(--divider);
     }
@@ -843,6 +843,22 @@
     .stats li:last-child { border-bottom: none; }
 
     /* NOTE: substat ที่ไม่ตรง best ให้จางลง เกรดถึงจะเด่นออกมา (.stat-row-best ทับอีกที) */
+    /* ช่วงค่าที่เป็นไปได้ของ substat — เล็กและจาง อยู่ใต้ตัวเลขฝั่งขวา */
+    .stat-range {
+      display: block;
+      margin-top: 0.1rem;
+      font-size: 0.62rem;
+      font-weight: 400;
+      line-height: 1.1;
+      text-align: right;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+    .stat-row-best .stat-range {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
     .stats .label {
       color: rgba(255, 255, 255, 0.5);
       font-weight: 500;
