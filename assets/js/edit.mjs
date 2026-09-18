@@ -115,12 +115,18 @@ function formCardHtml(slot) {
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
       <div class="name-bar">
         <span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="40" height="40" decoding="async" /><span class="level-badge" data-level-badge>—</span></span>
-        <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span><span class="power-badge" data-power-badge>—</span></span>
+        <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span></span>
       </div>
       <div class="card-body">
         <div class="stat-primary-block">
-          <span class="label">${escapeHtml(statLabel(baseStat))}</span>
-          <span class="value" data-base-display>—</span>
+          <span class="primary-cell">
+            <span class="label">${escapeHtml(statLabel(baseStat))}</span>
+            <span class="value" data-base-display>—</span>
+          </span>
+          <span class="primary-cell is-power">
+            <span class="label">Power</span>
+            <span class="value" data-power-badge>—</span>
+          </span>
         </div>
         <ul class="stats">${subRows}</ul>
       </div>

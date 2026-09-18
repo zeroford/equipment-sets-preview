@@ -742,22 +742,6 @@
       min-height: calc(1.15em * 2);
     }
 
-    /* power เป็นป้ายขาวใต้ชื่อ */
-    .power-badge {
-      flex-shrink: 0;
-      max-width: 100%;
-      padding: 0.05rem 0.4rem;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.55);
-      font-size: 0.56rem;
-      font-weight: 700;
-      line-height: 1.35;
-      letter-spacing: 0.01em;
-      color: #18181b;
-      text-shadow: none;
-      white-space: nowrap;
-    }
-
     .name-bar-text {
       width: 100%;
       line-height: 1.15;
@@ -778,17 +762,29 @@
       color: #422006;
     }
 
-    /* base stat ไม่มีกรอบ — ชื่ออยู่บน ค่าอยู่ล่าง ชิดขวาทั้งคู่ */
+    /* base stat ชิดซ้าย / power ชิดขวา — ทรงเดียวกัน ชื่อบน ค่าล่าง ไม่มีกรอบ */
     .stat-primary-block {
       display: flex;
-      flex-direction: column;
-      gap: 0.05rem;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.4rem;
       padding: 0 0.55rem;
       margin-bottom: 0.5rem;
     }
 
+    .primary-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+      min-width: 0;
+      align-items: flex-start;
+    }
+
+    .primary-cell.is-power {
+      align-items: flex-end;
+    }
+
     .stat-primary-block .label {
-      align-self: flex-end;
       color: rgba(255, 255, 255, 0.5);
       font-weight: 600;
       font-size: 0.68rem;
@@ -797,12 +793,17 @@
     }
 
     .stat-primary-block .value {
-      align-self: flex-end;
       color: #fff;
       font-weight: 700;
       font-size: 1.05rem;
       line-height: 1.15;
-      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* power เป็นข้อมูลรอง เล็กกว่า base stat นิดหน่อย */
+    .primary-cell.is-power .value {
+      font-size: 0.92rem;
+      color: rgba(255, 255, 255, 0.8);
     }
 
     .stats {
