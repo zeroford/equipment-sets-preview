@@ -28,6 +28,18 @@ function renderCard(item, gridIndex, bestStats) {
   return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="meta"><span class="level">Lv.${escapeHtml(item.level)}</span><span class="meta-power">${escapeHtml(formatPower(item.power))}</span></div><div class="stat-primary-block"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
 }
 
+/**
+ * แถบ best substat เหนือแต่ละแถว — 1 stat = 1 tag
+ *
+ * NOTE: สร้างจาก rows (ชุดเดียวกับที่ใช้ตัดสินว่า substat ไหน highlight)
+ * ไม่ได้ใช้ข้อความ label แยกอีกแล้ว ป้ายกับ highlight เลยตรงกันเสมอ
+ */
+export function bestTagsHtml(statIds) {
+  return (statIds || [])
+    .map((statId) => `<span class="best-tag">${escapeHtml(statLabel(statId))}</span>`)
+    .join('');
+}
+
 function renderSection(set, setIndex, summary, mode) {
   let rowsHtml = '';
   const items = set.items || [];
@@ -38,7 +50,6 @@ function renderSection(set, setIndex, summary, mode) {
     while (rowItems.length < 3) {
       rowItems.push(null);
     }
-    const rowLabel = best.labels[rowIndex] || '';
     const bestStats = best.rows[rowIndex] || [];
     const cells = rowItems.map((item, colIndex) => {
       const gridIndex = rowIndex * 3 + colIndex;
@@ -47,7 +58,7 @@ function renderSection(set, setIndex, summary, mode) {
       }
       return renderCard(item, gridIndex, bestStats);
     });
-    rowsHtml += `<div class="grid-row-group" data-row-index="${rowIndex}"><p class="row-best-caption">${escapeHtml(rowLabel)}</p><div class="grid">${cells.join('')}</div></div>`;
+    rowsHtml += `<div class="grid-row-group" data-row-index="${rowIndex}"><p class="row-best-caption">${bestTagsHtml(bestStats)}</p><div class="grid">${cells.join('')}</div></div>`;
   }
 
   const summaryRows = (summary.aggregatedStats || [])

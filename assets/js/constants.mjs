@@ -17,7 +17,7 @@ export const SLOT_TYPES = [
  * Best substat ต่อแถว (grid 4 แถว) — มีแค่ 2 โหมด เลยฝังไว้แทนที่จะอ่านจาก Sheet
  *
  * key = โหมด (ตรงกับที่โชว์บนปุ่ม toggle) ไม่ใช่ setKey
- * rows = stat id (ดู stats.mjs), labels = caption เหนือแถว (ข้อความอิสระ)
+ * rows = stat id (ดู stats.mjs) — ใช้ทั้ง highlight และ tag เหนือแถว
  */
 const BEST_SUBSTAT_PROFILES = {
   pve: {
@@ -27,12 +27,6 @@ const BEST_SUBSTAT_PROFILES = {
       ['skillAmp', 'critDmg', 'accuracy', 'focus', 'skillHaste'],
       ['focus', 'skillHaste'],
     ],
-    labels: [
-      'Skill AMP / Accuracy',
-      'DMG Reduction / CRIT RES',
-      'Skill AMP · Crit DMG · Accuracy · Focus / Skill Haste',
-      'Focus / Skill Haste',
-    ],
   },
   boss: {
     rows: [
@@ -40,12 +34,6 @@ const BEST_SUBSTAT_PROFILES = {
       ['dmgReduction', 'critRes'],
       ['skillAmp', 'critDmg', 'skillHaste'],
       ['dmgReduction', 'skillHaste'],
-    ],
-    labels: [
-      'Skill AMP / Crit DMG',
-      'DMG Reduction / CRIT RES',
-      'Skill AMP · Crit DMG / Skill Haste',
-      'DMG Reduction / Skill Haste',
     ],
   },
 };
@@ -64,7 +52,7 @@ export const MODE_ICONS = { pve: 'flame', boss: 'swords' };
  */
 const DEFAULT_MODE_BY_SET = { boss: 'pve', pve: 'boss' };
 
-const EMPTY_BEST_SUBSTAT = { rows: [], labels: [] };
+const EMPTY_BEST_SUBSTAT = { rows: [] };
 
 export function defaultModeFor(setKey) {
   return DEFAULT_MODE_BY_SET[setKey] || '';

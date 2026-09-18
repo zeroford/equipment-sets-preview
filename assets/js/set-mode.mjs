@@ -1,6 +1,7 @@
 import { MODES, MODE_ICONS, MODE_LABELS, bestSubstatFor, defaultModeFor } from './constants.mjs';
 import { buildMetaFromSets } from './data.mjs';
 import { statBestMatch } from './utils.mjs';
+import { bestTagsHtml } from './render.mjs';
 
 const MODE_STORAGE = 'equipment-sets-mode';
 
@@ -83,11 +84,11 @@ export function createSetModeUi() {
 
       section.querySelectorAll('.grid-row-group').forEach((group) => {
         const rowIndex = Number(group.dataset.rowIndex);
+        const bestStats = best.rows[rowIndex] || [];
         const caption = group.querySelector('.row-best-caption');
         if (caption) {
-          caption.textContent = best.labels[rowIndex] || '';
+          caption.innerHTML = bestTagsHtml(bestStats);
         }
-        const bestStats = best.rows[rowIndex] || [];
         group.querySelectorAll('.stats [data-stat-id]').forEach((el) => {
           el.classList.toggle('stat-row-best', statBestMatch(el.dataset.statId, bestStats));
         });
