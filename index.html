@@ -829,26 +829,30 @@
 
     /* NOTE: substat ที่ไม่ตรง best ให้จางลง เกรดถึงจะเด่นออกมา (.stat-row-best ทับอีกที) */
     /*
-     * จุดมุมขวาบนของแถว substat: ฟ้า = โรลติดขอบบน 10%, แดง = ติดขอบล่าง 10%
+     * จุดมุมขวาบนของแถว substat: ฟ้า = top 20%, ม่วง = top 10%, ส้ม = top 5%
      *
      * NOTE: ลอยทับมุมแถว ไม่กินพื้นที่ — ตัวเลขทุกตัวในการ์ด (power + ค่า substat
      * + ช่วงค่า) เลยชิดขวาตรงแนวเดียวกันหมด
      */
     .stat-flag {
       position: absolute;
-      top: 0.3rem;
-      right: 0.25rem;
-      width: 0.34rem;
-      height: 0.34rem;
+      top: 0.2rem;
+      right: 0.15rem;
+      width: 0.3rem;
+      height: 0.3rem;
       border-radius: 50%;
     }
-    .stat-flag.is-high {
+    .stat-flag.is-top20 {
       background: #4dabf7;
       box-shadow: 0 0 4px rgba(77, 171, 247, 0.8);
     }
-    .stat-flag.is-low {
-      background: #ff6b6b;
-      box-shadow: 0 0 4px rgba(255, 107, 107, 0.7);
+    .stat-flag.is-top10 {
+      background: #c084fc;
+      box-shadow: 0 0 4px rgba(192, 132, 252, 0.8);
+    }
+    .stat-flag.is-top5 {
+      background: #fab005;
+      box-shadow: 0 0 5px rgba(250, 176, 5, 0.85);
     }
 
     /* ช่วงค่าที่เป็นไปได้ของ substat — เล็กและจาง อยู่ใต้ตัวเลขฝั่งขวา */

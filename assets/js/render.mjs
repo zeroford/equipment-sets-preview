@@ -5,9 +5,23 @@ import { formatPower, formatStat, formatStatRange, statLabel } from './stats.mjs
 import { subStatRange, subStatRatio } from './base-stat.mjs';
 import { buildSetSummary } from './summary.mjs';
 
-// โรลติดขอบบน/ล่าง 10% ของช่วง
-const HIGH_ROLL = 0.9;
-const LOW_ROLL = 0.1;
+/**
+ * จุดบอกคุณภาพโรล — ยิ่งใกล้ขอบบนของช่วงยิ่งหายาก
+ * เรียงจากชั้นดีสุดลงมา เพราะ find() หยุดที่ชั้นแรกที่ผ่าน
+ */
+const ROLL_TIERS = [
+  [0.95, 'is-top5'],
+  [0.9, 'is-top10'],
+  [0.8, 'is-top20'],
+];
+
+function rollTierClass(ratio) {
+  if (ratio === null) {
+    return '';
+  }
+  const tier = ROLL_TIERS.find(([min]) => ratio >= min);
+  return tier ? tier[1] : '';
+}
 
 export function equipIconPath(item, gridIndex) {
   const type = SLOT_TYPES[gridIndex] || 'sword';
@@ -33,12 +47,9 @@ export function renderCard(item, gridIndex, bestStats) {
       ? `<small class="stat-range">${escapeHtml(formatStatRange(statId, range[0], range[1]))}</small>`
       : '';
 
-    // จุดบอกว่าโรลได้ดี/แย่ — เทียบกับช่วงที่เป็นไปได้ของ stat ตัวนั้น
-    const ratio = subStatRatio(gridIndex + 1, item.grade, statId, value);
-    const flag =
-      ratio === null || (ratio < HIGH_ROLL && ratio > LOW_ROLL)
-        ? ''
-        : `<span class="stat-flag ${ratio >= HIGH_ROLL ? 'is-high' : 'is-low'}" aria-hidden="true"></span>`;
+    // จุดบอกว่าโรลได้ดีแค่ไหน — เทียบกับช่วงที่เป็นไปได้ของ stat ตัวนั้น
+    const tier = rollTierClass(subStatRatio(gridIndex + 1, item.grade, statId, value));
+    const flag = tier ? `<span class="stat-flag ${tier}" aria-hidden="true"></span>` : '';
     return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span>${flag}</li>`;
   });
 
