@@ -52,16 +52,24 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ it
 ## 2. ใส่ข้อมูลตั้งต้น (ไม่ต้องพิมพ์เอง)
 
 ```bash
-./render.sh && node tools/sheet-seed.mjs
+./render.sh && node tools/sheet-seed.mjs   # → google-apps-script/seed/*.tsv
+python3 tools/sheet-xlsx.py                # → seed/equipment-sets.xlsx
 ```
 
-ได้ `google-apps-script/seed/{Sets,Items,BestStats}.tsv` — แปลงจาก JSON ที่ฝังอยู่ในเว็บตอนนี้
+แปลงจาก JSON ที่ฝังอยู่ในเว็บตอนนี้ (3 sets / 22 items)
 
-ในชีต **ทำทีละแท็บ**:
+### วิธี A — import .xlsx (แนะนำ, ได้ครบ 3 แท็บทีเดียว)
+
+ลาก `equipment-sets.xlsx` ลง Google Drive → คลิกขวา → Open with → Google Sheets  
+ทุกเซลล์ตั้งเป็น text มาแล้ว ค่าอย่าง `8.53%` / `+6,043` จะไม่โดนแปลง
+
+(ถ้าจะ import เข้าชีตเดิม: File → Import → Upload → **Insert new sheet(s)**)
+
+### วิธี B — paste TSV ทีละแท็บ
 
 1. สร้างแท็บชื่อตรงกับไฟล์
-2. เลือกทั้งชีต → Format → Number → **Plain text**  
-   ⚠️ **ต้องทำก่อน paste** ไม่งั้น Sheets จะแปลง `8.53%` เป็นตัวเลข `0.0853` และ `+6,043` เป็น `6043`
+2. เลือกทั้งชีต → Format → Number → **Plain text**
+   ⚠️ **ต้องทำก่อน paste** ไม่งั้น Sheets จะแปลง `8.53%` เป็น `0.0853` และ `+6,043` เป็น `6043`
 3. เปิดไฟล์ `.tsv` → copy ทั้งหมด → paste ที่ **A1**
 
 ## 3. Deploy Script

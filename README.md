@@ -25,6 +25,7 @@ cd ~/equipment-sets-preview && python3 -m http.server 8765
 | `assets/equipment/` `assets/plates/` | รูป |
 | `google-apps-script/` | Apps Script Web App (API อ่าน Sheet) |
 | `tools/sheet-seed.mjs` | JSON ในเว็บ → TSV สำหรับ paste ลงชีต |
+| `tools/sheet-xlsx.py` | TSV → .xlsx 3 แท็บ สำหรับ import เข้า Google Sheets |
 
 ### JS modules
 
@@ -48,6 +49,7 @@ cd ~/equipment-sets-preview && python3 -m http.server 8765
 
 ```bash
 ./render.sh && node tools/sheet-seed.mjs   # → google-apps-script/seed/*.tsv
+python3 tools/sheet-xlsx.py                # → seed/equipment-sets.xlsx (import ทีเดียวได้ 3 แท็บ)
 ```
 
 วิธี set ชีต + deploy ละเอียด → `google-apps-script/README.md`
