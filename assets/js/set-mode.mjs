@@ -1,7 +1,7 @@
 import { MODES, MODE_ICONS, MODE_LABELS, bestSubstatFor, defaultModeFor } from './constants.mjs';
 import { buildMetaFromSets } from './data.mjs';
 import { statBestMatch } from './utils.mjs';
-import { bestTagsHtml } from './render.mjs';
+import { COMPARE_KEY, bestTagsHtml } from './render.mjs';
 
 const MODE_STORAGE = 'equipment-sets-mode';
 
@@ -31,6 +31,7 @@ function storeModes(modes) {
 export function createSetModeUi() {
   let modes = {};
   let setMeta = {};
+  let compareSets = [];
   let activeSetKey = '';
   let toggle = null;
   let tabs = [];
@@ -48,22 +49,46 @@ export function createSetModeUi() {
       modes[set.setKey] = MODES.includes(chosen) && fallback ? chosen : fallback;
     });
     setMeta = buildMetaFromSets(sets);
+    compareSets = sets.slice(0, 2).filter((set) => defaultModeFor(set.setKey));
+  }
+
+  /**
+   * ปุ่มโหมดหนึ่งชุด
+   *
+   * label = ชื่อ set ที่อยู่ในแคปซูลเดียวกัน กดไม่ได้ (ใช้ในแท็บ Compare
+   * ที่มีสองชุดพร้อมกัน จะได้รู้ว่าชุดไหนคุมอะไร)
+   */
+  function modeGroupHtml(setKey, label) {
+    const mode = modeFor(setKey);
+    const iconOnly = Boolean(label);
+    const buttons = MODES.map(
+      (m) =>
+        `<button type="button" class="mode-option${iconOnly ? ' icon-only' : ''}" data-set-key="${setKey}" data-mode="${m}" aria-pressed="${
+          m === mode
+        }"${iconOnly ? ` aria-label="${label} ${MODE_LABELS[m]}" title="${MODE_LABELS[m]}"` : ''}><i data-lucide="${
+          MODE_ICONS[m]
+        }" aria-hidden="true"></i>${iconOnly ? '' : MODE_LABELS[m]}</button>`,
+    ).join('');
+    const labelHtml = label ? `<span class="mode-group-label">${label}</span>` : '';
+    return `<div class="mode-group glass-chip">${labelHtml}${buttons}</div>`;
   }
 
   function renderToggle() {
     if (!toggle) {
       return;
     }
-    const mode = modeFor(activeSetKey);
-    toggle.hidden = !mode;
-    if (!mode) {
-      toggle.innerHTML = '';
-      return;
+
+    // แท็บ Compare คุมได้ทั้งสอง set พร้อมกัน เลยโชว์สองแถว
+    if (activeSetKey === COMPARE_KEY) {
+      toggle.hidden = compareSets.length < 2;
+      toggle.innerHTML = toggle.hidden
+        ? ''
+        : compareSets.map((set) => modeGroupHtml(set.setKey, set.title)).join('');
+    } else {
+      const mode = modeFor(activeSetKey);
+      toggle.hidden = !mode;
+      toggle.innerHTML = mode ? modeGroupHtml(activeSetKey, '') : '';
     }
-    toggle.innerHTML = MODES.map(
-      (m) =>
-        `<button type="button" class="mode-option" data-mode="${m}" aria-pressed="${m === mode}"><i data-lucide="${MODE_ICONS[m]}" aria-hidden="true"></i>${MODE_LABELS[m]}</button>`,
-    ).join('');
 
     // NOTE: ต้องเรียกทุกครั้งที่เขียน innerHTML ใหม่ — lucide แทน <i data-lucide> ด้วย <svg> ตอนถูกเรียกเท่านั้น
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -141,10 +166,12 @@ export function createSetModeUi() {
       toggleBound = true;
       toggle.addEventListener('click', (event) => {
         const btn = event.target.closest('.mode-option');
-        if (!btn || !activeSetKey) {
+        // ปุ่มบอกเองว่าคุม set ไหน — ในแท็บ Compare ปุ่มคนละแถวคุมคนละ set
+        const targetKey = btn && btn.dataset.setKey;
+        if (!targetKey) {
           return;
         }
-        modes[activeSetKey] = btn.dataset.mode;
+        modes[targetKey] = btn.dataset.mode;
         storeModes(modes);
         renderToggle();
         applyHighlights();

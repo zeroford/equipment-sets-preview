@@ -73,7 +73,7 @@ function renderSection(set, setIndex, summary, mode) {
   return `<section class="section" data-set-key="${escapeHtml(set.setKey)}" role="tabpanel" id="panel-${escapeHtml(set.setKey)}" aria-labelledby="tab-${escapeHtml(set.setKey)}"${setIndex === 0 ? '' : ' hidden'}><div class="summary-hover summary-float"><button type="button" class="dock-fab glass-chip" aria-label="Total stats"><i data-lucide="info" aria-hidden="true"></i></button><div class="summary-popover" role="tooltip"><div class="summary-table-wrap"><table class="summary-table"><tbody>${summaryRows}</tbody></table></div></div></div><div class="section-header"><div class="section-title-row"><h2 class="section-title">${escapeHtml(set.title)}</h2></div></div>${rowsHtml}</section>`;
 }
 
-const COMPARE_KEY = '__compare';
+export const COMPARE_KEY = '__compare';
 
 function emptyCellHtml(gridIndex) {
   return `<div class="grid-empty" aria-hidden="true"><img class="grid-empty-plate" src="${escapeHtml(platePath(gridIndex))}" alt="" width="72" height="72" decoding="async" /></div>`;
