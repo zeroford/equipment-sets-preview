@@ -12,7 +12,7 @@
  * เก็บเท่าที่จำเป็น ที่เหลือ derive ฝั่ง JS:
  *   grade    9 = legendary, 10 = eternal (พิมพ์ 'eternal' ก็ได้)
  *   base     ค่า base stat เฉยๆ — ชนิดผูกกับ slot อยู่แล้ว (assets/js/catalog.mjs)
- *   sub*Type stat code/id (2 หรือ skillAmp หรือ 'Skill AMP' — assets/js/stats.mjs)
+ *   sub*Type stat id เช่น skillAmp (พิมพ์ 'Skill AMP' ก็ได้ — assets/js/stats.mjs)
  *   ชื่อของ  ไม่ต้องเก็บ ผูกกับ (slot, grade); ใส่คอลัมน์ name เพื่อ override ได้
  *
  * NOTE: ใช้ getValues() ไม่ใช่ getDisplayValues() — stat แบบ % เก็บเป็นเศษส่วน

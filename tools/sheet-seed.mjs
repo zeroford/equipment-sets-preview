@@ -65,9 +65,10 @@ function buildItems(sets) {
         percentCells.push([rows.length + 2, row.length]); // +2 = ข้าม header, เป็น 1-based
       }
       for (let i = 0; i < MAX_SUBS; i += 1) {
-        const [code, value] = (item.subs || [])[i] || ['', ''];
-        row.push(code, value);
-        if (code !== '' && isPercent(resolveStatId(code))) {
+        const [type, value] = (item.subs || [])[i] || ['', ''];
+        const statId = type === '' ? '' : resolveStatId(type);
+        row.push(statId, value);
+        if (isPercent(statId)) {
           percentCells.push([rows.length + 2, row.length]);
         }
       }
@@ -82,12 +83,12 @@ function isPercent(statId) {
   return Boolean(STATS[statId]) && STATS[statId].format === 'percent';
 }
 
-/** แท็บอ้างอิงเฉยๆ — Code.gs ไม่ได้อ่าน แต่ช่วยให้เปิดชีตแล้วรู้ว่า code ไหนคืออะไร */
+/** แท็บอ้างอิงเฉยๆ — Code.gs ไม่ได้อ่าน แต่ช่วยให้รู้ว่ามี stat id อะไรให้ใช้บ้าง */
 function buildStatsLegend() {
   const rows = Object.keys(STATS)
-    .map((id) => [STATS[id].code, id, STATS[id].label, STATS[id].format])
-    .sort((a, b) => a[0] - b[0]);
-  return tsv([['code', 'id', 'label', 'format'], ...rows]);
+    .map((id) => [id, STATS[id].label, STATS[id].format])
+    .sort((a, b) => a[0].localeCompare(b[0]));
+  return tsv([['id', 'label', 'format'], ...rows]);
 }
 
 const sets = readEmbeddedSets();

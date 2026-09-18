@@ -32,7 +32,7 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ใ
 
 | setKey | slot | level | grade | power | base | sub1Type | sub1Value | sub2Type | sub2Value |
 |---|---|---|---|---|---|---|---|---|---|
-| boss | 1 | 97 | 10 | 287.59 | 6043 | 2 | 8.53% | 3 | 14.62% |
+| boss | 1 | 97 | 10 | 287.59 | 6043 | skillAmp | 8.53% | critDmg | 14.62% |
 
 - **`slot`** — ตำแหน่งใน grid 3×4 นับ 1–12 ซ้าย→ขวา บน→ล่าง
 
@@ -47,14 +47,14 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ใ
 - **`grade`** — `10` = eternal (ม่วง), `9` = legendary (ทอง) — พิมพ์ `eternal` / `legendary` ก็ได้
 - **`power`** — ใส่ `287.59` เฉยๆ ตัว `M` เว็บเติมให้เอง
 - **`base`** — ค่า base stat; *ชนิด*ของมันผูกกับ slot อยู่แล้ว (slot 1 = ATK, slot 2 = Accuracy, …)
-- **`subNType`** — code ของ substat ดูแท็บ `Stats` (พิมพ์ `skillAmp` หรือ `Skill AMP` ก็ได้) รองรับถึง `sub5`
+- **`subNType`** — stat id ของ substat เช่น `skillAmp` ดูรายการทั้งหมดในแท็บ `Stats` (พิมพ์ `Skill AMP` ก็ได้) รองรับถึง `sub5`
 - **`subNValue`** / **`base`** — stat ที่เป็น **%** ให้พิมพ์แบบ `8.53%` ไปเลย (Sheets เก็บเป็น `0.0853` ซึ่งถูกต้อง)
   ที่เหลือพิมพ์เลขตรงๆ `6043`, `475.6`
 - **`name`** — ไม่ต้องมี; ใส่คอลัมน์นี้เมื่ออยาก override ชื่อเป็นรายชิ้น
 
 ### `Stats` — แท็บอ้างอิง (สคริปต์ไม่ได้อ่าน)
 
-ตาราง code → id → label → format ไว้เปิดดูว่าเลขไหนคือ stat อะไร
+ตาราง id → label → format ไว้เปิดดูว่ามี stat id อะไรให้ใช้บ้าง
 เพิ่ม stat ใหม่ต้องไปเพิ่มใน `assets/js/stats.mjs` ด้วย
 
 ## 2. ใส่ข้อมูลตั้งต้น (ไม่ต้องพิมพ์เอง)

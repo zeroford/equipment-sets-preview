@@ -27,7 +27,7 @@ Static preview สำหรับ equipment set cards (Set A / B / C)
 ### JS modules
 
 - `constants.mjs` — grade / slot / best substat (2 แบบ)
-- `stats.mjs` — catalog ของ stat (code, label, format)
+- `stats.mjs` — catalog ของ stat (id, label, format)
 - `catalog.mjs` — ชื่อของตาม (slot, grade) + base stat ตาม slot
 - `utils.mjs` — escape, stat match
 - `summary.mjs` — รวม stat popover

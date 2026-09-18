@@ -1,44 +1,43 @@
 /**
  * Stat catalog — สะพานระหว่าง id ที่เก็บในชีต กับ label + วิธี format ตอนแสดงผล
  *
- * ชีตเก็บ **code หรือ id + ตัวเลขล้วน** — ไม่ต้องเก็บ "8.53%" / "+6,043" เป็นข้อความ
+ * ชีตเก็บ **id + ตัวเลขล้วน** (`skillAmp` / `0.0853`) — ไม่ต้องเก็บ "8.53%" เป็นข้อความ
  *
  * format:
  *   int     → 6,043   (คั่นหลักพัน ปัดเป็นจำนวนเต็ม)
  *   decimal → 475.60  (ทศนิยม 2 ตำแหน่ง)
  *   percent → 8.53%   **เก็บเป็นเศษส่วน 0.0853** (พิมพ์ 8.53% ในชีตแล้ว Sheets เก็บแบบนี้เอง)
  *
- * code = เลขที่ใช้ในชีต, id = ชื่อที่ใช้ในโค้ด — เพิ่ม stat ใหม่ = เพิ่ม 1 บรรทัดตรงนี้
+ * เพิ่ม stat ใหม่ = เพิ่ม 1 บรรทัดตรงนี้
  */
 export const STATS = {
-  atk: { code: 1, label: 'ATK', format: 'int' },
-  def: { code: 6, label: 'DEF', format: 'int' },
-  hp: { code: 9, label: 'HP', format: 'int' },
+  atk: { label: 'ATK', format: 'int' },
+  def: { label: 'DEF', format: 'int' },
+  hp: { label: 'HP', format: 'int' },
 
-  skillAmp: { code: 2, label: 'Skill AMP', format: 'percent' },
-  critRate: { code: 5, label: 'CRIT%', format: 'percent' },
-  critDmg: { code: 3, label: 'CRIT DMG', format: 'percent' },
-  critRes: { code: 8, label: 'CRIT RES', format: 'percent' },
-  dmgReduction: { code: 7, label: 'DMG Reduction', format: 'percent' },
+  skillAmp: { label: 'Skill AMP', format: 'percent' },
+  critRate: { label: 'CRIT%', format: 'percent' },
+  critDmg: { label: 'CRIT DMG', format: 'percent' },
+  critRes: { label: 'CRIT RES', format: 'percent' },
+  dmgReduction: { label: 'DMG Reduction', format: 'percent' },
 
-  accuracy: { code: 4, label: 'Accuracy', format: 'decimal' },
-  evasion: { code: 10, label: 'Evasion', format: 'decimal' },
-  focus: { code: 11, label: 'Focus', format: 'decimal' },
-  resistance: { code: 12, label: 'Resistance', format: 'decimal' },
-  skillHaste: { code: 13, label: 'Skill Haste', format: 'decimal' },
+  accuracy: { label: 'Accuracy', format: 'decimal' },
+  evasion: { label: 'Evasion', format: 'decimal' },
+  focus: { label: 'Focus', format: 'decimal' },
+  resistance: { label: 'Resistance', format: 'decimal' },
+  skillHaste: { label: 'Skill Haste', format: 'decimal' },
 };
 
 function normalizeKey(raw) {
   return String(raw).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-// NOTE: รับได้ทั้ง code (`2`), id (`skillAmp`) และ label (`Skill AMP`) — ชีตพิมพ์แบบไหนมาก็ได้
+// NOTE: รับได้ทั้ง id (`skillAmp`) และ label (`Skill AMP`) — ชีตพิมพ์แบบไหนมาก็ได้
 const STAT_ID_BY_KEY = (() => {
   const index = {};
   Object.keys(STATS).forEach((id) => {
     index[normalizeKey(id)] = id;
     index[normalizeKey(STATS[id].label)] = id;
-    index[normalizeKey(STATS[id].code)] = id;
   });
   return index;
 })();

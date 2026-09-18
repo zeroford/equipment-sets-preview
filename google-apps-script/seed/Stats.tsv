@@ -1,14 +1,14 @@
-code	id	label	format
-1	atk	ATK	int
-2	skillAmp	Skill AMP	percent
-3	critDmg	CRIT DMG	percent
-4	accuracy	Accuracy	decimal
-5	critRate	CRIT%	percent
-6	def	DEF	int
-7	dmgReduction	DMG Reduction	percent
-8	critRes	CRIT RES	percent
-9	hp	HP	int
-10	evasion	Evasion	decimal
-11	focus	Focus	decimal
-12	resistance	Resistance	decimal
-13	skillHaste	Skill Haste	decimal
+id	label	format
+accuracy	Accuracy	decimal
+atk	ATK	int
+critDmg	CRIT DMG	percent
+critRate	CRIT%	percent
+critRes	CRIT RES	percent
+def	DEF	int
+dmgReduction	DMG Reduction	percent
+evasion	Evasion	decimal
+focus	Focus	decimal
+hp	HP	int
+resistance	Resistance	decimal
+skillAmp	Skill AMP	percent
+skillHaste	Skill Haste	decimal
