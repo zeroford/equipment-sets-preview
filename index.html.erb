@@ -947,6 +947,11 @@
       gap: 0 1.5rem;
     }
 
+    /* NOTE: section เป็น flex — หัวข้อต้องกินเต็มบรรทัด ไม่งั้นไปเบียดอยู่ข้างกล่องแรก */
+    .section.compare .section-header {
+      width: 100%;
+    }
+
     .compare-group {
       /* กว้างเท่าการ์ด 2 ใบ ไม่ใช่ 3 เหมือนแถวปกติ */
       max-width: calc(var(--card-max) * 2 + var(--card-gap));

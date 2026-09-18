@@ -114,7 +114,10 @@ function renderCompareSection(sets, modeFor) {
     )}</span></p><div class="grid compare-grid">${cells}</div></div>`;
   }
 
-  return `<section class="section compare" data-set-key="${COMPARE_KEY}" role="tabpanel" id="panel-${COMPARE_KEY}" aria-labelledby="tab-${COMPARE_KEY}" hidden>${groupsHtml}</section>`;
+  const header =
+    '<div class="section-header"><div class="section-title-row"><h2 class="section-title">Compare</h2></div></div>';
+
+  return `<section class="section compare" data-set-key="${COMPARE_KEY}" role="tabpanel" id="panel-${COMPARE_KEY}" aria-labelledby="tab-${COMPARE_KEY}" hidden>${header}${groupsHtml}</section>`;
 }
 
 function tabHtml(key, title, selected) {
