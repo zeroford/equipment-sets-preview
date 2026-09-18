@@ -14,7 +14,7 @@ const HIGH_TIERS = [
   [0.9, 'is-top10'],
   [0.8, 'is-top20'],
 ];
-const LOW_TIER = 0.2;
+const LOW_TIER = 0.25;
 
 function rollTierClass(ratio) {
   if (ratio === null) {
