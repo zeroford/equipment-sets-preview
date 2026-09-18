@@ -857,32 +857,31 @@
       color: #422006;
     }
 
+    /* base stat ไม่มีกรอบ — ชื่ออยู่บน ค่าอยู่ล่างชิดขวา */
     .stat-primary-block {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      border-radius: 8px;
-      min-height: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
       padding: 0 0.55rem;
       margin-bottom: 0.5rem;
-      background: rgba(0, 0, 0, 0.15);
     }
 
     .stat-primary-block .label {
-      color: #ced4da;
-      font-weight: 700;
-      font-size: 0.85rem;
-      line-height: 1.15;
-      align-self: center;
+      align-self: flex-start;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 600;
+      font-size: 0.68rem;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
     }
 
     .stat-primary-block .value {
+      align-self: flex-end;
       color: #fff;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       line-height: 1.15;
       text-align: right;
-      align-self: center;
     }
 
     .stats {
