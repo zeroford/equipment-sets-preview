@@ -531,8 +531,9 @@
       align-items: center;
       gap: 0.35rem;
       margin-bottom: 0.5rem;
-      padding: 0.3rem 0.5rem;
-      border-radius: 6px;
+      /* NOTE: ขอบมนเต็ม ต้องเพิ่ม padding แนวนอนด้วย ไม่งั้น tag แรกไปทับส่วนโค้ง */
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
       background: rgba(255, 255, 255, 0.06);
       /* NOTE: กันความสูงไว้ให้แถวที่ไม่มี tag ด้วย ไม่งั้นกริดแต่ละแถวเหลื่อมกัน */
       min-height: 2.25rem;
@@ -542,11 +543,10 @@
     .best-tag {
       display: inline-flex;
       align-items: center;
-      height: 1.625rem;
-      padding: 0 0.7rem;
+      padding: 0.4rem 0.7rem;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.1);
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 500;
       line-height: 1;
       color: #e4e4e7;
@@ -605,7 +605,8 @@
     }
 
     .card.eternal .level {
-      color: #d8b4fe;
+      /* NOTE: โทนเดียวกับ name-bar และ highlight — ผูกกับ --glow ทั้งหมด */
+      color: var(--glow);
     }
 
     /*
@@ -616,10 +617,10 @@
       /* แถบสว่างกลาง เข้มหัวท้าย — ทรงเดียวกับป้าย Eternal ในเกม */
       background: linear-gradient(
         180deg,
-        color-mix(in srgb, var(--frame) 82%, #6b21a8) 0%,
-        color-mix(in srgb, var(--glow) 68%, var(--frame)) 42%,
-        color-mix(in srgb, var(--glow) 52%, var(--frame)) 60%,
-        color-mix(in srgb, var(--frame) 86%, #6b21a8) 100%
+        color-mix(in srgb, var(--frame) 90%, #7e22ce) 0%,
+        color-mix(in srgb, var(--glow) 80%, var(--frame)) 42%,
+        color-mix(in srgb, var(--glow) 64%, var(--frame)) 60%,
+        color-mix(in srgb, var(--frame) 94%, #7e22ce) 100%
       );
     }
 
