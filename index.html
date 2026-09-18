@@ -13,6 +13,8 @@
       --muted: #868e96;
       --divider: rgba(255, 255, 255, 0.08);
       --pill-active: #3f3f46;
+      --card-max: 185px;
+      --card-gap: 1rem;
       --dock-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
       --dock-scroll-pad: calc(4.35rem + env(safe-area-inset-bottom, 0px));
     }
@@ -40,13 +42,15 @@
     .page { max-width: 1200px; margin: 0 auto; }
 
     /* จอกว้าง: วาง row-group เป็น 2 คอลัมน์ ได้การ์ด 3 3 / 3 3 แทนที่จะเรียงลงยาว 4 แถว */
-    @media (min-width: 1200px) {
+    @media (min-width: 1080px) {
       .page {
-        max-width: 1680px;
+        max-width: none;
       }
       .section {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        /* NOTE: กว้างเท่าการ์ด 3 ใบพอดี ไม่ใช้ 1fr — ไม่งั้นแถบ tag ด้านบนจะยืดเกินแนวการ์ด */
+        grid-template-columns: repeat(2, calc(var(--card-max) * 3 + var(--card-gap) * 2));
+        justify-content: center;
         column-gap: 1.5rem;
         align-items: start;
       }
@@ -458,9 +462,10 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
+      grid-template-columns: repeat(3, minmax(0, var(--card-max)));
+      gap: var(--card-gap);
       align-items: stretch;
+      justify-content: center;
       --equipment-card-min-height: 212px;
     }
 
