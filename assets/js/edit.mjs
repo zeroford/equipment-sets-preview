@@ -114,14 +114,10 @@ function formCardHtml(slot) {
 
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
       <div class="name-bar">
-        <span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /></span>
+        <span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /><span class="level-badge" data-level-badge>—</span></span>
         <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span></span>
       </div>
       <div class="card-body">
-        <div class="meta">
-          <span class="level">Lv.<input name="level" type="number" min="1" step="1" class="edit-inline" aria-label="Level" /></span>
-          <span class="meta-power"><input name="power" type="number" step="any" class="edit-inline" aria-label="Power" />M</span>
-        </div>
         <div class="stat-primary-block">
           <span class="label">${escapeHtml(statLabel(baseStat))}</span>
           <span class="value" data-base-display>—</span>
@@ -130,6 +126,10 @@ function formCardHtml(slot) {
       </div>
     </article>
 
+    <div class="edit-row">
+      <label for="editLevel">Lv.</label>
+      <input id="editLevel" name="level" type="number" min="1" step="1" />
+    </div>
     <div class="edit-row">
       <label for="editGrade">Rarity</label>
       <select id="editGrade" name="grade">${gradeOptions(grade)}</select>
@@ -210,7 +210,6 @@ export function createEditUi({ onSaved }) {
     return {
       level: Number(form.elements.level.value) || 0,
       grade: Number(form.elements.grade.value),
-      power: Number(form.elements.power.value) || 0,
       subs,
     };
   }
@@ -268,6 +267,8 @@ export function createEditUi({ onSaved }) {
       const cell = form.querySelector('[data-base-display]');
       const value = baseValue(form, slot);
       cell.textContent = value === null ? '—' : formatStat(baseStatForSlot(slot), value);
+      const level = Number(form.elements.level.value);
+      form.querySelector('[data-level-badge]').textContent = level > 0 ? level : '—';
     };
     refreshBase();
     form.elements.level.addEventListener('input', refreshBase);

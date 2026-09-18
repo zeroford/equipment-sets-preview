@@ -90,11 +90,6 @@ export function formatStat(statId, value) {
   }
 }
 
-/** 287.59 → "287.59M" */
-export function formatPower(value) {
-  return `${toStatNumber(value).toFixed(2)}M`;
-}
-
 /** ช่วงค่า a~b — stat แบบ % ใส่เครื่องหมายตัวเดียวท้ายสุด (7.36~9.20% ไม่ใช่ 7.36%~9.20%) */
 export function formatStatRange(statId, low, high) {
   const from = formatStat(statId, low);

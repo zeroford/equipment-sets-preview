@@ -8,43 +8,43 @@
   #   subs   [[stat id, ค่า], …] — id ดู assets/js/stats.mjs
   #   percent เก็บเป็นเศษส่วน (0.0853 = 8.53%)
   # ชื่อของก็ไม่ต้องเก็บ — ผูกกับ (slot, grade) อยู่แล้ว
-  Item = Struct.new(:level, :grade, :power, :subs)
+  Item = Struct.new(:level, :grade, :subs)
 
   sets = [
     {
       set_key: 'boss',
       title: 'Set A',
       items: [
-        Item.new(97, 10, 287.59, [['skillAmp', 0.0853], ['critDmg', 0.1462]]),
-        Item.new(98, 10, 218.42, [['skillAmp', 0.0871], ['accuracy', 160.91]]),
-        Item.new(101, 10, 185.72, [['skillAmp', 0.0885], ['critDmg', 0.1239]]),
-        Item.new(99, 10, 103.56, [['dmgReduction', 0.0433], ['critRes', 0.1462]]),
-        Item.new(99, 9, 209.31, [['dmgReduction', 0.0343], ['critRes', 0.1329]]),
-        Item.new(97, 10, 250.07, [['dmgReduction', 0.0621], ['critRes', 0.206]]),
-        Item.new(99, 9, 179.87, [['skillAmp', 0.0731], ['focus', 167.72]]),
-        Item.new(94, 10, 213.84, [['critRate', 0.2125], ['skillAmp', 0.092]]),
-        Item.new(97, 10, 209.82, [['accuracy', 151.5], ['skillAmp', 0.0862]]),
-        Item.new(101, 10, 179.85, [['dmgReduction', 0.0609], ['critRes', 0.2182]]),
-        Item.new(100, 10, 152.61, [['focus', 214.46], ['skillHaste', 4.6]]),
-        Item.new(96, 10, 155.27, [['dmgReduction', 0.063], ['resistance', 140.08]]),
+        Item.new(97, 10, [['skillAmp', 0.0853], ['critDmg', 0.1462]]),
+        Item.new(98, 10, [['skillAmp', 0.0871], ['accuracy', 160.91]]),
+        Item.new(101, 10, [['skillAmp', 0.0885], ['critDmg', 0.1239]]),
+        Item.new(99, 10, [['dmgReduction', 0.0433], ['critRes', 0.1462]]),
+        Item.new(99, 9, [['dmgReduction', 0.0343], ['critRes', 0.1329]]),
+        Item.new(97, 10, [['dmgReduction', 0.0621], ['critRes', 0.206]]),
+        Item.new(99, 9, [['skillAmp', 0.0731], ['focus', 167.72]]),
+        Item.new(94, 10, [['critRate', 0.2125], ['skillAmp', 0.092]]),
+        Item.new(97, 10, [['accuracy', 151.5], ['skillAmp', 0.0862]]),
+        Item.new(101, 10, [['dmgReduction', 0.0609], ['critRes', 0.2182]]),
+        Item.new(100, 10, [['focus', 214.46], ['skillHaste', 4.6]]),
+        Item.new(96, 10, [['dmgReduction', 0.063], ['resistance', 140.08]]),
       ],
     },
     {
       set_key: 'pve',
       title: 'Set B',
       items: [
-        Item.new(94, 9, 184.58, [['skillAmp', 0.0729], ['accuracy', 110.54]]),
-        Item.new(89, 9, 125.07, [['skillAmp', 0.0717], ['accuracy', 135.48]]),
-        Item.new(91, 10, 119.28, [['critDmg', 0.1265], ['accuracy', 157.18]]),
-        Item.new(93, 10, 73.94, [['dmgReduction', 0.0476], ['critRes', 0.1252]]),
-        Item.new(94, 10, 143.46, [['evasion', 54.63], ['dmgReduction', 0.0436]]),
+        Item.new(94, 9, [['skillAmp', 0.0729], ['accuracy', 110.54]]),
+        Item.new(89, 9, [['skillAmp', 0.0717], ['accuracy', 135.48]]),
+        Item.new(91, 10, [['critDmg', 0.1265], ['accuracy', 157.18]]),
+        Item.new(93, 10, [['dmgReduction', 0.0476], ['critRes', 0.1252]]),
+        Item.new(94, 10, [['evasion', 54.63], ['dmgReduction', 0.0436]]),
         nil,
-        Item.new(96, 10, 135.2, [['focus', 191.38], ['skillHaste', 4.6]]),
-        Item.new(95, 9, 113.99, [['skillAmp', 0.0708], ['accuracy', 143.99]]),
-        Item.new(93, 9, 148.09, [['resistance', 77.94], ['skillAmp', 0.0731]]),
+        Item.new(96, 10, [['focus', 191.38], ['skillHaste', 4.6]]),
+        Item.new(95, 9, [['skillAmp', 0.0708], ['accuracy', 143.99]]),
+        Item.new(93, 9, [['resistance', 77.94], ['skillAmp', 0.0731]]),
         nil,
-        Item.new(85, 9, 110.69, [['focus', 176.64], ['critRes', 0.1639]]),
-        Item.new(90, 9, 110.74, [['focus', 187.04], ['critRes', 0.149]]),
+        Item.new(85, 9, [['focus', 176.64], ['critRes', 0.1639]]),
+        Item.new(90, 9, [['focus', 187.04], ['critRes', 0.149]]),
       ],
     },
     {
@@ -64,7 +64,6 @@
         {
           'level' => item.level,
           'grade' => item.grade,
-          'power' => item.power,
           'subs' => item.subs,
         }
       end,
@@ -512,12 +511,6 @@
       height: auto;
     }
     .edit-card .level,
-    .edit-card .meta-power {
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-      min-width: 0;
-    }
     .edit-card .stats li {
       grid-template-columns: minmax(0, 1fr) 5.5rem;
       min-height: 2.4rem;
@@ -537,9 +530,6 @@
     }
     .edit-card .level .edit-inline {
       width: 3.6rem;
-    }
-    .edit-card .meta-power .edit-inline {
-      width: 5.5rem;
     }
     .edit-card .stats select {
       width: 100%;
@@ -746,34 +736,6 @@
 
     .card-body { padding: 8px; }
 
-    .meta {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      column-gap: 0.75rem;
-      margin-inline: -8px;
-      padding: 4px 16px;
-      margin-bottom: 0.55rem;
-    }
-
-    .level {
-      justify-self: start;
-      align-self: center;
-      font-size: 1.02rem;
-      font-weight: 600;
-      line-height: 1;
-      color: #dee2e6;
-    }
-
-    .card.legendary .level {
-      color: #fb923c;
-    }
-
-    .card.eternal .level {
-      /* NOTE: โทนเดียวกับ name-bar และ highlight — ผูกกับ --glow ทั้งหมด */
-      color: var(--glow);
-    }
-
     /*
      * eternal เป็นเกรดสูงสุด — ให้เด่นกว่าเกรดอื่นด้วยไล่สีที่ name-bar
      */
@@ -788,17 +750,6 @@
       );
     }
 
-
-    .meta-power {
-      justify-self: end;
-      align-self: center;
-      font-size: 1.02rem;
-      font-weight: 700;
-      line-height: 1;
-      color: #fff;
-      letter-spacing: -0.02em;
-      white-space: nowrap;
-    }
 
     .name-bar {
       display: flex;
@@ -821,6 +772,8 @@
     }
 
     .name-bar-icon-wrap {
+      position: relative;
+      overflow: hidden;
       flex-shrink: 0;
       width: 45px;
       height: 45px;
@@ -829,6 +782,22 @@
       justify-content: center;
       background: rgba(255, 255, 255, 0.5);
       border-radius: 12px;
+    }
+
+    /* เลเวลเป็นแถบจางพาดล่างไอคอน — overflow: hidden ของ wrap ตัดให้โค้งตามมุม */
+    .level-badge {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0.08rem 0;
+      background: rgba(0, 0, 0, 0.42);
+      font-size: 0.6rem;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center;
+      color: #fff;
+      letter-spacing: 0.02em;
     }
 
     .name-bar-icon {

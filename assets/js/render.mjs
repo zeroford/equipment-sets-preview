@@ -1,7 +1,7 @@
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { gradeTier } from './catalog.mjs';
 import { escapeHtml, statBestMatch } from './utils.mjs';
-import { formatPower, formatStat, formatStatRange, statLabel } from './stats.mjs';
+import { formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { subStatRange, subStatRatio } from './base-stat.mjs';
 import { buildSetSummary } from './summary.mjs';
 
@@ -42,7 +42,7 @@ export function renderCard(item, gridIndex, bestStats) {
     return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span>${flag}</li>`;
   });
 
-  return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="meta"><span class="level">Lv.${escapeHtml(item.level)}</span><span class="meta-power">${escapeHtml(formatPower(item.power))}</span></div><div class="stat-primary-block"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
+  return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
 }
 
 /**

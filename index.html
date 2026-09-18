@@ -433,12 +433,6 @@
       height: auto;
     }
     .edit-card .level,
-    .edit-card .meta-power {
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-      min-width: 0;
-    }
     .edit-card .stats li {
       grid-template-columns: minmax(0, 1fr) 5.5rem;
       min-height: 2.4rem;
@@ -458,9 +452,6 @@
     }
     .edit-card .level .edit-inline {
       width: 3.6rem;
-    }
-    .edit-card .meta-power .edit-inline {
-      width: 5.5rem;
     }
     .edit-card .stats select {
       width: 100%;
@@ -667,34 +658,6 @@
 
     .card-body { padding: 8px; }
 
-    .meta {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      column-gap: 0.75rem;
-      margin-inline: -8px;
-      padding: 4px 16px;
-      margin-bottom: 0.55rem;
-    }
-
-    .level {
-      justify-self: start;
-      align-self: center;
-      font-size: 1.02rem;
-      font-weight: 600;
-      line-height: 1;
-      color: #dee2e6;
-    }
-
-    .card.legendary .level {
-      color: #fb923c;
-    }
-
-    .card.eternal .level {
-      /* NOTE: โทนเดียวกับ name-bar และ highlight — ผูกกับ --glow ทั้งหมด */
-      color: var(--glow);
-    }
-
     /*
      * eternal เป็นเกรดสูงสุด — ให้เด่นกว่าเกรดอื่นด้วยไล่สีที่ name-bar
      */
@@ -709,17 +672,6 @@
       );
     }
 
-
-    .meta-power {
-      justify-self: end;
-      align-self: center;
-      font-size: 1.02rem;
-      font-weight: 700;
-      line-height: 1;
-      color: #fff;
-      letter-spacing: -0.02em;
-      white-space: nowrap;
-    }
 
     .name-bar {
       display: flex;
@@ -742,6 +694,8 @@
     }
 
     .name-bar-icon-wrap {
+      position: relative;
+      overflow: hidden;
       flex-shrink: 0;
       width: 45px;
       height: 45px;
@@ -750,6 +704,22 @@
       justify-content: center;
       background: rgba(255, 255, 255, 0.5);
       border-radius: 12px;
+    }
+
+    /* เลเวลเป็นแถบจางพาดล่างไอคอน — overflow: hidden ของ wrap ตัดให้โค้งตามมุม */
+    .level-badge {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0.08rem 0;
+      background: rgba(0, 0, 0, 0.42);
+      font-size: 0.6rem;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center;
+      color: #fff;
+      letter-spacing: 0.02em;
     }
 
     .name-bar-icon {
@@ -1113,7 +1083,7 @@
     <div class="set-tabs-list glass-chip" id="setTabList" role="tablist"></div>
   </nav>
   <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-  <script type="application/json" id="equipment-sets-data">[{"setKey":"boss","title":"Set A","items":[{"level":97,"grade":10,"power":287.59,"subs":[["skillAmp",0.0853],["critDmg",0.1462]]},{"level":98,"grade":10,"power":218.42,"subs":[["skillAmp",0.0871],["accuracy",160.91]]},{"level":101,"grade":10,"power":185.72,"subs":[["skillAmp",0.0885],["critDmg",0.1239]]},{"level":99,"grade":10,"power":103.56,"subs":[["dmgReduction",0.0433],["critRes",0.1462]]},{"level":99,"grade":9,"power":209.31,"subs":[["dmgReduction",0.0343],["critRes",0.1329]]},{"level":97,"grade":10,"power":250.07,"subs":[["dmgReduction",0.0621],["critRes",0.206]]},{"level":99,"grade":9,"power":179.87,"subs":[["skillAmp",0.0731],["focus",167.72]]},{"level":94,"grade":10,"power":213.84,"subs":[["critRate",0.2125],["skillAmp",0.092]]},{"level":97,"grade":10,"power":209.82,"subs":[["accuracy",151.5],["skillAmp",0.0862]]},{"level":101,"grade":10,"power":179.85,"subs":[["dmgReduction",0.0609],["critRes",0.2182]]},{"level":100,"grade":10,"power":152.61,"subs":[["focus",214.46],["skillHaste",4.6]]},{"level":96,"grade":10,"power":155.27,"subs":[["dmgReduction",0.063],["resistance",140.08]]}]},{"setKey":"pve","title":"Set B","items":[{"level":94,"grade":9,"power":184.58,"subs":[["skillAmp",0.0729],["accuracy",110.54]]},{"level":89,"grade":9,"power":125.07,"subs":[["skillAmp",0.0717],["accuracy",135.48]]},{"level":91,"grade":10,"power":119.28,"subs":[["critDmg",0.1265],["accuracy",157.18]]},{"level":93,"grade":10,"power":73.94,"subs":[["dmgReduction",0.0476],["critRes",0.1252]]},{"level":94,"grade":10,"power":143.46,"subs":[["evasion",54.63],["dmgReduction",0.0436]]},null,{"level":96,"grade":10,"power":135.2,"subs":[["focus",191.38],["skillHaste",4.6]]},{"level":95,"grade":9,"power":113.99,"subs":[["skillAmp",0.0708],["accuracy",143.99]]},{"level":93,"grade":9,"power":148.09,"subs":[["resistance",77.94],["skillAmp",0.0731]]},null,{"level":85,"grade":9,"power":110.69,"subs":[["focus",176.64],["critRes",0.1639]]},{"level":90,"grade":9,"power":110.74,"subs":[["focus",187.04],["critRes",0.149]]}]},{"setKey":"set3","title":"Set C","items":[null,null,null,null,null,null,null,null,null,null,null,null]}]</script>
+  <script type="application/json" id="equipment-sets-data">[{"setKey":"boss","title":"Set A","items":[{"level":97,"grade":10,"subs":[["skillAmp",0.0853],["critDmg",0.1462]]},{"level":98,"grade":10,"subs":[["skillAmp",0.0871],["accuracy",160.91]]},{"level":101,"grade":10,"subs":[["skillAmp",0.0885],["critDmg",0.1239]]},{"level":99,"grade":10,"subs":[["dmgReduction",0.0433],["critRes",0.1462]]},{"level":99,"grade":9,"subs":[["dmgReduction",0.0343],["critRes",0.1329]]},{"level":97,"grade":10,"subs":[["dmgReduction",0.0621],["critRes",0.206]]},{"level":99,"grade":9,"subs":[["skillAmp",0.0731],["focus",167.72]]},{"level":94,"grade":10,"subs":[["critRate",0.2125],["skillAmp",0.092]]},{"level":97,"grade":10,"subs":[["accuracy",151.5],["skillAmp",0.0862]]},{"level":101,"grade":10,"subs":[["dmgReduction",0.0609],["critRes",0.2182]]},{"level":100,"grade":10,"subs":[["focus",214.46],["skillHaste",4.6]]},{"level":96,"grade":10,"subs":[["dmgReduction",0.063],["resistance",140.08]]}]},{"setKey":"pve","title":"Set B","items":[{"level":94,"grade":9,"subs":[["skillAmp",0.0729],["accuracy",110.54]]},{"level":89,"grade":9,"subs":[["skillAmp",0.0717],["accuracy",135.48]]},{"level":91,"grade":10,"subs":[["critDmg",0.1265],["accuracy",157.18]]},{"level":93,"grade":10,"subs":[["dmgReduction",0.0476],["critRes",0.1252]]},{"level":94,"grade":10,"subs":[["evasion",54.63],["dmgReduction",0.0436]]},null,{"level":96,"grade":10,"subs":[["focus",191.38],["skillHaste",4.6]]},{"level":95,"grade":9,"subs":[["skillAmp",0.0708],["accuracy",143.99]]},{"level":93,"grade":9,"subs":[["resistance",77.94],["skillAmp",0.0731]]},null,{"level":85,"grade":9,"subs":[["focus",176.64],["critRes",0.1639]]},{"level":90,"grade":9,"subs":[["focus",187.04],["critRes",0.149]]}]},{"setKey":"set3","title":"Set C","items":[null,null,null,null,null,null,null,null,null,null,null,null]}]</script>
   <script type="application/json" id="equipment-sheets-config">{"webAppUrl":"https://script.google.com/macros/s/AKfycbw7PadlOwS_HfJKhU9g8Tacz-fPNewAbdV4JvLMsu_iHrfDAAzXEUWpceiuad1EDfVo/exec"}</script>
   <script type="module" src="assets/js/main.mjs"></script>
 </body>

@@ -1,4 +1,4 @@
-import { formatPower, formatStat, statLabel } from './stats.mjs';
+import { formatStat, statLabel } from './stats.mjs';
 
 /**
  * Aggregates equipped item stats for the summary popover.
@@ -21,9 +21,5 @@ export function buildSetSummary(set) {
     display: formatStat(statId, total),
   })).sort((a, b) => (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));
 
-  const totalPower = formatPower(
-    equipped.reduce((sum, item) => sum + item.power, 0),
-  );
-
-  return { setKey: set.setKey, aggregatedStats, totalPower };
+  return { setKey: set.setKey, aggregatedStats };
 }
