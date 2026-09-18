@@ -114,7 +114,7 @@ function formCardHtml(slot) {
 
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
       <div class="name-bar">
-        <span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="40" height="40" decoding="async" /><span class="level-badge" data-level-badge>—</span></span>
+        <span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /><span class="level-badge" data-level-badge>—</span></span>
         <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span></span>
       </div>
       <div class="card-body">
