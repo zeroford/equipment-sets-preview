@@ -313,28 +313,8 @@
     .edit-fab[hidden] {
       display: none !important;
     }
-    .edit-fab[aria-pressed="true"] {
-      background: rgba(255, 255, 255, 0.38);
-      border-color: rgba(255, 255, 255, 0.42);
-      color: #fff;
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.45),
-        0 1px 3px rgba(0, 0, 0, 0.22);
-    }
-    /* การ์ดกดได้เฉพาะตอนเปิดโหมดแก้ไข */
-    body.is-editing .card,
-    body.is-editing .grid-empty {
-      cursor: pointer;
-      outline: 1px dashed rgba(255, 255, 255, 0.28);
-      outline-offset: 2px;
-    }
-    body.is-editing .card:hover,
-    body.is-editing .grid-empty:hover {
-      outline-color: rgba(255, 255, 255, 0.6);
-    }
-
     .edit-dialog {
-      width: min(26rem, calc(100vw - 2rem));
+      width: min(44rem, calc(100vw - 2rem));
       padding: 0;
       border: none;
       border-radius: 1rem;
@@ -352,15 +332,52 @@
       gap: 0.85rem;
       padding: 1.15rem;
     }
-    .edit-title {
-      margin: 0;
-      font-size: 1rem;
-      font-weight: 600;
+    .edit-cols {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
     }
-    .edit-sub {
-      margin: -0.55rem 0 0;
-      font-size: 0.78rem;
+
+    .edit-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      padding: 0.75rem;
+      border: 1px solid var(--divider);
+      border-radius: 0.75rem;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .edit-col-title {
+      margin: 0;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #e4e4e7;
+    }
+
+    .edit-col-name {
+      margin: -0.35rem 0 0;
+      font-size: 0.75rem;
       color: var(--muted);
+    }
+
+    .edit-remove {
+      margin-top: 0.15rem;
+      padding: 0.4rem;
+      border: 1px solid var(--divider);
+      border-radius: 0.5rem;
+      background: transparent;
+      color: #ff8787;
+      font: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 40rem) {
+      .edit-cols {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
     .edit-row {
       display: grid;
@@ -479,26 +496,20 @@
       margin-bottom: 0.5rem;
       padding: 0.3rem;
       border-radius: 999px;
-      /* NOTE: ให้ .best-label ที่ยื่นออกไปชนขอบซ้าย ถูกตัดตามส่วนโค้งของแถบ */
-      overflow: hidden;
       background: rgba(255, 255, 255, 0.06);
       /* NOTE: กันความสูงไว้ให้แถวที่ไม่มี tag ด้วย ไม่งั้นกริดแต่ละแถวเหลื่อมกัน */
       min-height: 2.25rem;
     }
 
-    /* ป้ายหัวแถบ: ชนขอบซ้าย ให้แถบตัดเป็นครึ่ง pill มนเฉพาะฝั่งขวา */
+    /* ป้ายหัวแถบ: เป็นข้อความในกรอบเฉยๆ ไม่มีพื้นของตัวเอง (ชุดเดียวกับ .mode-group-label) */
     .best-label {
       display: inline-flex;
       align-items: center;
-      align-self: stretch;
-      margin: -0.3rem 0.15rem -0.3rem -0.3rem;
-      padding: 0 0.85rem;
-      border-radius: 0;
-      background: rgba(255, 255, 255, 0.2);
+      padding: 0 0.35rem 0 0.3rem;
       font-size: 0.8rem;
       font-weight: 600;
       line-height: 1;
-      color: #dddddd;
+      color: #e4e4e7;
       white-space: nowrap;
     }
 
@@ -764,15 +775,14 @@
       margin-bottom: 0.45rem;
       padding: 0;
       min-height: 0;
-      overflow: visible;
       background: none;
     }
 
     .compare-group .best-label {
       align-self: flex-start;
-      margin: 0;
       padding: 0.45rem 1rem;
       border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
       font-size: 0.875rem;
     }
 
@@ -932,12 +942,11 @@
     type="button"
     class="dock-fab glass-chip edit-fab"
     id="editModeToggle"
-    aria-pressed="false"
-    aria-label="Edit mode"
-    title="Edit mode — tap a card to edit"
+    aria-label="Add or edit an item"
+    title="Add or edit an item"
     hidden
   >
-    <i data-lucide="pencil" aria-hidden="true"></i>
+    <i data-lucide="plus" aria-hidden="true"></i>
   </button>
   <dialog class="edit-dialog" id="editDialog"></dialog>
   <div class="page" id="equipmentPage">
