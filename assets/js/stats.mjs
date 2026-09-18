@@ -94,7 +94,3 @@ export function formatStat(statId, value) {
 export function formatPower(value) {
   return `${toStatNumber(value).toFixed(2)}M`;
 }
-
-export function isPercentStat(statId) {
-  return Boolean(STATS[statId]) && STATS[statId].format === 'percent';
-}

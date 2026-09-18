@@ -21,7 +21,7 @@ export const SLOT_TYPES = [
  * NOTE: ค่าเป็นแบบ "หลังสลับ" ที่ .erb ทำไว้ — `boss` จึงเป็นชุดสาย Accuracy
  * ปุ่ม swap ใน UI สลับระหว่าง 2 profile นี้
  */
-export const BEST_SUBSTAT_PROFILES = {
+const BEST_SUBSTAT_PROFILES = {
   boss: {
     rows: [
       ['skillAmp', 'accuracy'],
@@ -52,7 +52,7 @@ export const BEST_SUBSTAT_PROFILES = {
   },
 };
 
-export const EMPTY_BEST_SUBSTAT = { rows: [], labels: [] };
+const EMPTY_BEST_SUBSTAT = { rows: [], labels: [] };
 
 export function bestSubstatFor(setKey) {
   return BEST_SUBSTAT_PROFILES[setKey] || EMPTY_BEST_SUBSTAT;

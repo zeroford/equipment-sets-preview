@@ -36,7 +36,7 @@ export function buildMetaFromSets(sets) {
   return hash;
 }
 
-export function normalizeSetsPayload(raw) {
+function normalizeSetsPayload(raw) {
   const list = raw.sets || raw;
   if (!Array.isArray(list)) {
     return [];
@@ -48,7 +48,7 @@ export function normalizeSetsPayload(raw) {
   }));
 }
 
-export function resolveWebAppUrl(sheetsConfig) {
+function resolveWebAppUrl(sheetsConfig) {
   const params = new URLSearchParams(window.location.search);
   return (
     params.get('webApp') ||
