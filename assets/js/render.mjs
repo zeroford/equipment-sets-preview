@@ -35,9 +35,11 @@ function renderCard(item, gridIndex, bestStats) {
  * ไม่ได้ใช้ข้อความ label แยกอีกแล้ว ป้ายกับ highlight เลยตรงกันเสมอ
  */
 export function bestTagsHtml(statIds) {
-  return (statIds || [])
+  const tags = (statIds || [])
     .map((statId) => `<span class="best-tag">${escapeHtml(statLabel(statId))}</span>`)
     .join('');
+  // แถวที่ไม่มี stat ก็ไม่ต้องมีป้ายหัวแถบ (เช่น set ที่ยังไม่ได้ตั้งโหมด)
+  return tags ? `<span class="best-label">Best Stat</span>${tags}` : '';
 }
 
 function renderSection(set, setIndex, summary, mode) {

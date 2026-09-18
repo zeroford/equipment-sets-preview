@@ -533,9 +533,27 @@
       margin-bottom: 0.5rem;
       padding: 0.4rem;
       border-radius: 999px;
+      /* NOTE: ให้ .best-label ที่ยื่นออกไปชนขอบซ้าย ถูกตัดตามส่วนโค้งของแถบ */
+      overflow: hidden;
       background: rgba(255, 255, 255, 0.06);
       /* NOTE: กันความสูงไว้ให้แถวที่ไม่มี tag ด้วย ไม่งั้นกริดแต่ละแถวเหลื่อมกัน */
       min-height: 2.25rem;
+    }
+
+    /* ป้ายหัวแถบ: ชนขอบซ้าย ให้แถบตัดเป็นครึ่ง pill มนเฉพาะฝั่งขวา */
+    .best-label {
+      display: inline-flex;
+      align-items: center;
+      align-self: stretch;
+      margin: -0.4rem 0.15rem -0.4rem -0.4rem;
+      padding: 0 0.85rem;
+      border-radius: 0 999px 999px 0;
+      background: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1;
+      color: #18181b;
+      white-space: nowrap;
     }
 
     /* ทรง chip ของ HeroUI: พื้นทึบ ไม่มีขอบ มนเต็ม */
