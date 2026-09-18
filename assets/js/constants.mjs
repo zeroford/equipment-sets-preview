@@ -1,5 +1,5 @@
 export const GRADES = {
-  eternal: { frame: '#8b5cf6', glow: '#c4b5fd' },
+  eternal: { frame: '#a855f7', glow: '#f0abfc' },
   legendary: { frame: '#ca8a04', glow: '#fde047' },
 };
 
