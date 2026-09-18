@@ -847,8 +847,8 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 0.4rem;
-      /* NOTE: padding ต้องเท่า .stats li ไม่งั้นชื่อ base stat กับชื่อ substat ไม่ตรงแนวกัน */
-      padding: 0 0.3rem;
+      /* NOTE: padding ขวาต้องเท่า .stats li ไม่งั้น Power หลุดแนวตัวเลข substat */
+      padding: 0 1rem 0 0.3rem;
       margin-top: 0.05rem;
       margin-bottom: 0.6rem;
     }
@@ -893,8 +893,9 @@
       grid-template-columns: 1fr auto;
       align-items: center;
       column-gap: 0.5rem;
+      position: relative;
       min-height: 2.25rem;
-      padding: 0.1rem 0.45rem;
+      padding: 0.1rem 1rem 0.1rem 0.45rem;
       font-size: 0.79rem;
     }
 
@@ -912,12 +913,17 @@
      *
      * NOTE: ใช้ drop-shadow ไม่ใช่ box-shadow — box-shadow เรืองเป็นกรอบสี่เหลี่ยม
      * รอบไอคอน ไม่ใช่รอบตัวรูป
+     *
+     * NOTE: ลอยอยู่ในช่อง padding ขวาของแถว ไม่กินพื้นที่ — ตัวเลข substat เลยชิดขวา
+     * ตรงแนวเดียวกันทุกแถว ไม่ว่าแถวนั้นจะมีเครื่องหมายหรือไม่
      */
     .roll-mark {
-      width: 0.78em;
-      height: 0.78em;
-      margin-left: 0.15em;
-      vertical-align: -0.09em;
+      position: absolute;
+      right: 0.15rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0.88em;
+      height: 0.88em;
     }
     .roll-mark.is-top25 {
       color: #4dabf7;
@@ -928,6 +934,8 @@
       filter: drop-shadow(0 0 3px rgba(45, 212, 191, 0.85));
     }
     .roll-mark.is-top5 {
+      width: 0.68em;
+      height: 0.68em;
       color: #fcc419;
       filter: drop-shadow(0 0 4px rgba(252, 196, 25, 0.9));
     }
@@ -1179,7 +1187,7 @@
 </head>
 <body>
   <svg width="0" height="0" aria-hidden="true" style="position: absolute">
-    <symbol id="roll-star" viewBox="0 0 616 560">
+    <symbol id="roll-star" viewBox="10 -30 596 574">
       <path fill="currentColor" d="M308.2-28c-22.4 0-44.3 11.4-56.1 32.1-13.5 23.6-36.6 67.5-55.1 121.1-.2 .7-.9 1.2-1.7 1.2-56.7 1.1-105.6 9.5-132.2 15-23.3 4.9-40.9 22.1-47.8 43.4s-2.8 45.6 13.2 63.3c18.3 20.1 52.9 55.7 98.1 89.9 .6 .4 .8 1.3 .6 2-16.5 54.2-23.6 103.3-26.6 130.4-2.6 23.7 8.4 45.7 26.5 58.9s42.5 16.8 64.2 7c24.8-11.2 69.3-33.1 115.8-65.6 .6-.4 1.5-.4 2.1 0 46.5 32.4 91 54.4 115.8 65.6 21.7 9.8 46.1 6.2 64.2-7s29.1-35.2 26.5-58.9c-3-27-10.1-76.2-26.6-130.4-.2-.7 .1-1.5 .6-2 45.2-34.2 79.9-69.7 98.1-89.9 16-17.6 20.1-41.9 13.2-63.3s-24.5-38.6-47.8-43.4c-26.6-5.5-75.5-13.9-132.2-15-.7 0-1.4-.5-1.7-1.2-18.5-53.5-41.6-97.5-55.1-121.1-11.8-20.7-33.6-32.1-56.1-32.1z" />
     </symbol>
   </svg>

@@ -36,7 +36,7 @@ function rollMarkHtml(ratio) {
     return '';
   }
   if (tier.icon === 'star') {
-    return `<svg class="roll-mark ${tier.cls}" viewBox="0 0 616 560" aria-hidden="true"><use href="#roll-star" /></svg>`;
+    return `<svg class="roll-mark ${tier.cls}" viewBox="10 -30 596 574" aria-hidden="true"><use href="#roll-star" /></svg>`;
   }
   return `<svg class="roll-mark ${tier.cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CHEVRON_PATHS[tier.icon]}</svg>`;
 }
@@ -67,7 +67,7 @@ export function renderCard(item, gridIndex, bestStats) {
 
     // เครื่องหมายบอกว่าโรลได้ดีแค่ไหน — เทียบกับช่วงที่เป็นไปได้ของ stat ตัวนั้น
     const mark = rollMarkHtml(subStatRatio(gridIndex + 1, item.grade, statId, value));
-    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${mark}${rangeHtml}</span></li>`;
+    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span>${mark}</li>`;
   });
 
   return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">Lv.${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="primary-cell"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></span><span class="primary-cell is-power"><span class="label">Power</span><span class="value">${escapeHtml(formatPower(item.power))}</span></span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
