@@ -2,7 +2,8 @@ import { postToWebApp } from './data.mjs';
 import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES } from './constants.mjs';
 import { emptyCellHtml, equipIconPath, renderCard } from './render.mjs';
-import { STATS, statLabel } from './stats.mjs';
+import { computeBaseStat } from './base-stat.mjs';
+import { STATS, formatStat, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
 
 const KEY_STORAGE = 'equipment-sets-edit-key';
@@ -123,9 +124,7 @@ function formCardHtml(slot) {
         </div>
         <div class="stat-primary-block">
           <span class="label">${escapeHtml(statLabel(baseStat))}</span>
-          <span class="value"><input name="base" type="number" step="any" class="edit-inline" aria-label="${escapeHtml(
-            statLabel(baseStat),
-          )}" /></span>
+          <span class="value" data-base-display>—</span>
         </div>
         <ul class="stats">${subRows}</ul>
       </div>
@@ -192,6 +191,13 @@ export function createEditUi({ onSaved }) {
     webAppUrl = payload.webAppUrl || '';
   }
 
+  /** base stat คำนวณจาก slot + rarity + level ไม่ได้ให้กรอก */
+  function baseValue(form, targetSlot) {
+    const grade = Number(form.elements.grade.value);
+    const level = Number(form.elements.level.value);
+    return computeBaseStat(targetSlot, grade, level);
+  }
+
   function collect(form, targetSlot) {
     const baseStat = baseStatForSlot(targetSlot);
     const subs = [];
@@ -206,7 +212,7 @@ export function createEditUi({ onSaved }) {
       level: Number(form.elements.level.value) || 0,
       grade: Number(form.elements.grade.value),
       power: Number(form.elements.power.value) || 0,
-      base: fromInput(baseStat, form.elements.base.value || 0),
+      base: baseValue(form, targetSlot) || 0,
       baseFormat: statFormat(baseStat),
       subs,
     };
@@ -260,6 +266,15 @@ export function createEditUi({ onSaved }) {
       slot = Number(event.target.value) || 1;
       renderDialog();
     });
+
+    const refreshBase = () => {
+      const cell = form.querySelector('[data-base-display]');
+      const value = baseValue(form, slot);
+      cell.textContent = value === null ? '—' : formatStat(baseStatForSlot(slot), value);
+    };
+    refreshBase();
+    form.elements.level.addEventListener('input', refreshBase);
+    form.elements.grade.addEventListener('change', refreshBase);
 
     form.addEventListener('change', (event) => {
       const select = event.target.closest('select[name="grade"]');

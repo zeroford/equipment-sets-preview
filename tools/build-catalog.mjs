@@ -116,6 +116,58 @@ export function itemNameFor(slot, grade) {
 `;
 
 writeFileSync(join(ROOT, 'assets', 'js', 'catalog.mjs'), out);
+
+// ── ตารางค่า base stat ต่อ level + ตัวคูณตาม rarity ────────────────────
+const rateBySlot = Array.from({ length: SLOT_COUNT }, () => ({}));
+const curves = {};
+// stat ที่ไฟล์เกมบอกว่าเป็น percent — ค่าในตารางเป็นหน่วยเปอร์เซ็นต์ ต้องหาร 100
+const gamePercent = [];
+
+data.equipments.forEach((item) => {
+  const slot = slotByType.get(item.type);
+  const grade = gradeByRarity.get(item.rarity);
+  const option = item.mainOptions[0];
+  rateBySlot[slot - 1][grade] = option.rate;
+
+  const statId = resolveStatId(data.stats[option.statId].names.en);
+  if (!curves[statId]) {
+    const table = data.mainOptionValues[option.statId];
+    if (!table) {
+      throw new Error(`ไม่มี mainOptionValues ของ ${statId}`);
+    }
+    // ตารางเรียงตาม level 1..N อยู่แล้ว เก็บเฉพาะค่าเป็น array ธรรมดา
+    curves[statId] = table.slice().sort((a, b) => a.level - b.level).map((row) => row.value);
+    if (data.stats[option.statId].format === 'percent') {
+      gamePercent.push(statId);
+    }
+  }
+});
+
+const dataOut = `/**
+ * ตารางค่า base stat จาก game data
+ *
+ * base = CURVES[statId][level - 1] × RATE_BY_SLOT[slot - 1][grade] / 100 × ตัวคูณโบนัส
+ * (ตัวคูณโบนัสไม่ได้อยู่ในไฟล์เกม — ตั้งไว้ใน base-stat.mjs)
+ *
+ * ‼️ ไฟล์นี้ generate จาก data/oven-tool-v1.json — อย่าแก้มือ
+ *    แก้แล้วรัน: node tools/build-catalog.mjs
+ */
+
+/** slot (1–${SLOT_COUNT}) → { grade code: rate } — rate 550 = ×5.5 */
+export const RATE_BY_SLOT = ${JSON.stringify(rateBySlot)};
+
+/** stat id → ค่าตาม level (index 0 = Lv.1) */
+export const CURVES = ${JSON.stringify(curves)};
+
+/**
+ * stat ที่ไฟล์เกมบอกว่าเป็น percent — ค่าในตารางเป็นหน่วยเปอร์เซ็นต์ ต้องหาร 100
+ *
+ * NOTE: ไม่ตรงกับ format ของเราเสมอไป เช่น Accuracy เกมบอก percent แต่เราโชว์เป็นเลขธรรมดา
+ */
+export const GAME_PERCENT_STATS = ${JSON.stringify(gamePercent)};
+`;
+writeFileSync(join(ROOT, 'assets', 'js', 'base-stat-data.mjs'), dataOut);
+console.log(`base-stat-data.mjs ← ${Object.keys(curves).length} stat × ${Object.values(curves)[0].length} level`);
 console.log(
   `catalog.mjs ← ${data.equipments.length} ชิ้น (${gradeKeys.length} grade × ${SLOT_COUNT} slot)`,
 );

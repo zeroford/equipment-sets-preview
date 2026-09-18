@@ -1,0 +1,41 @@
+import { CURVES, GAME_PERCENT_STATS, RATE_BY_SLOT } from './base-stat-data.mjs';
+import { baseStatForSlot } from './catalog.mjs';
+
+/**
+ * โบนัสที่บวกทับค่าจากตารางเกม
+ *
+ * ค่าในไฟล์เกมเป็นค่าดิบ ของจริงในเกมโดนบวกอีกชั้น ซึ่งไม่ได้อยู่ในไฟล์
+ * ตัวเลขชุดนี้มาจากการเทียบกับของจริง — slot ไหนไม่ตรง แก้ตรงนี้ที่เดียว
+ *
+ * base = ค่าตาราง × rate × (1 + baseBonus)
+ */
+const DEFAULT_BONUS = 1.05;
+
+const BONUS_BY_SLOT = {
+  4: 0.57, // helmet
+  5: 0.69, // armor
+  11: 1.23, // book — วัดจากของจริงได้ +123% ไม่ใช่ +105%
+};
+
+function baseBonusForSlot(slot) {
+  return slot in BONUS_BY_SLOT ? BONUS_BY_SLOT[slot] : DEFAULT_BONUS;
+}
+
+/**
+ * ค่า base stat ที่ควรได้ จาก slot + grade + level
+ *
+ * คืนค่าในหน่วยที่เก็บจริง (stat แบบ % เป็นเศษส่วน) — ไม่รู้ก็คืน null
+ */
+export function computeBaseStat(slot, grade, level) {
+  const rate = (RATE_BY_SLOT[slot - 1] || {})[grade];
+  const statId = baseStatForSlot(slot);
+  const curve = CURVES[statId];
+  if (!rate || !curve || !(level >= 1 && level <= curve.length)) {
+    return null;
+  }
+
+  const value = curve[level - 1] * (rate / 100) * (1 + baseBonusForSlot(slot));
+  // NOTE: หาร 100 ตาม format ของ "ไฟล์เกม" ไม่ใช่ format ที่เราใช้โชว์
+  // เช่น Accuracy เกมบอก percent (11600) แต่เราเก็บ/โชว์เป็นเลขธรรมดา (475.60)
+  return GAME_PERCENT_STATS.includes(statId) ? value / 100 : value;
+}
