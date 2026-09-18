@@ -71,14 +71,15 @@ export function createSetModeUi() {
     }
   }
 
+  function highlightStats(root, bestStats) {
+    root.querySelectorAll('.stats [data-stat-id]').forEach((el) => {
+      el.classList.toggle('stat-row-best', statBestMatch(el.dataset.statId, bestStats));
+    });
+  }
+
   function applyHighlights() {
     panels.forEach((section) => {
       const setKey = section.dataset.setKey;
-      // NOTE: panel ที่ไม่มีโหมด (Compare, set ที่ยังไม่ตั้งโหมด) วาดมาครบแล้วตั้งแต่ render
-      if (!modeFor(setKey)) {
-        return;
-      }
-      const best = bestSubstatFor(modeFor(setKey));
       const meta = setMeta[setKey];
 
       const titleEl = section.querySelector('.section-title');
@@ -86,6 +87,12 @@ export function createSetModeUi() {
         titleEl.textContent = meta.title;
       }
 
+      // panel ที่ไม่มีโหมด (เช่น Compare) ไม่มี row group ให้วาดตรงนี้
+      if (!modeFor(setKey)) {
+        return;
+      }
+
+      const best = bestSubstatFor(modeFor(setKey));
       section.querySelectorAll('.grid-row-group').forEach((group) => {
         const rowIndex = Number(group.dataset.rowIndex);
         const bestStats = best.rows[rowIndex] || [];
@@ -93,10 +100,14 @@ export function createSetModeUi() {
         if (caption) {
           caption.innerHTML = bestTagsHtml(bestStats);
         }
-        group.querySelectorAll('.stats [data-stat-id]').forEach((el) => {
-          el.classList.toggle('stat-row-best', statBestMatch(el.dataset.statId, bestStats));
-        });
+        highlightStats(group, bestStats);
       });
+    });
+
+    // แท็บ Compare: แต่ละใบใช้โหมดของ set ที่มันมา ไม่ใช่โหมดของ panel
+    document.querySelectorAll('.compare-cell[data-set-key]').forEach((cell) => {
+      const best = bestSubstatFor(modeFor(cell.dataset.setKey));
+      highlightStats(cell, best.rows[Number(cell.dataset.rowIndex)] || []);
     });
   }
 

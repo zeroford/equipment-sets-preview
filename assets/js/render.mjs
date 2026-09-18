@@ -102,7 +102,10 @@ function renderCompareSection(sets, modeFor) {
         const item = (set.items || [])[gridIndex];
         const bestStats = bestOf[i].rows[Math.floor(gridIndex / 3)] || [];
         const card = item ? renderCard(item, gridIndex, bestStats) : emptyCellHtml(gridIndex);
-        return `<div class="compare-cell"><span class="compare-set">${escapeHtml(set.title)}</span>${card}</div>`;
+        // NOTE: ติด setKey/rowIndex ไว้ให้ set-mode.mjs วาด highlight ใหม่ได้ตอนสลับโหมด
+        return `<div class="compare-cell" data-set-key="${escapeHtml(set.setKey)}" data-row-index="${Math.floor(
+          gridIndex / 3,
+        )}"><span class="compare-set">${escapeHtml(set.title)}</span>${card}</div>`;
       })
       .join('');
 
