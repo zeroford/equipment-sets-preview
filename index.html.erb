@@ -907,8 +907,9 @@
       grid-template-columns: 1fr auto;
       align-items: center;
       column-gap: 0.5rem;
+      position: relative;
       min-height: 2.6rem;
-      padding: 0.25rem 0.55rem;
+      padding: 0.25rem 0.8rem 0.25rem 0.55rem;
       font-size: 0.79rem;
       border-bottom: 1px solid var(--divider);
     }
@@ -922,6 +923,24 @@
     .stats li:last-child { border-bottom: none; }
 
     /* NOTE: substat ที่ไม่ตรง best ให้จางลง เกรดถึงจะเด่นออกมา (.stat-row-best ทับอีกที) */
+    /* จุดมุมขวาบนของแถว substat: ฟ้า = โรลติดขอบบน 10%, แดง = ติดขอบล่าง 10% */
+    .stat-flag {
+      position: absolute;
+      top: 0.3rem;
+      right: 0.3rem;
+      width: 0.34rem;
+      height: 0.34rem;
+      border-radius: 50%;
+    }
+    .stat-flag.is-high {
+      background: #4dabf7;
+      box-shadow: 0 0 4px rgba(77, 171, 247, 0.8);
+    }
+    .stat-flag.is-low {
+      background: #ff6b6b;
+      box-shadow: 0 0 4px rgba(255, 107, 107, 0.7);
+    }
+
     /* ช่วงค่าที่เป็นไปได้ของ substat — เล็กและจาง อยู่ใต้ตัวเลขฝั่งขวา */
     .stat-range {
       display: block;

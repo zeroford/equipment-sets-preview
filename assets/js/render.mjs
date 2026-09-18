@@ -2,8 +2,12 @@ import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { gradeTier } from './catalog.mjs';
 import { escapeHtml, statBestMatch } from './utils.mjs';
 import { formatPower, formatStat, formatStatRange, statLabel } from './stats.mjs';
-import { subStatRange } from './base-stat.mjs';
+import { subStatRange, subStatRatio } from './base-stat.mjs';
 import { buildSetSummary } from './summary.mjs';
+
+// โรลติดขอบบน/ล่าง 10% ของช่วง
+const HIGH_ROLL = 0.9;
+const LOW_ROLL = 0.1;
 
 export function equipIconPath(item, gridIndex) {
   const type = SLOT_TYPES[gridIndex] || 'sword';
@@ -28,7 +32,14 @@ export function renderCard(item, gridIndex, bestStats) {
     const rangeHtml = range
       ? `<small class="stat-range">${escapeHtml(formatStatRange(statId, range[0], range[1]))}</small>`
       : '';
-    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span></li>`;
+
+    // จุดบอกว่าโรลได้ดี/แย่ — เทียบกับช่วงที่เป็นไปได้ของ stat ตัวนั้น
+    const ratio = subStatRatio(gridIndex + 1, item.grade, statId, value);
+    const flag =
+      ratio === null || (ratio < HIGH_ROLL && ratio > LOW_ROLL)
+        ? ''
+        : `<span class="stat-flag ${ratio >= HIGH_ROLL ? 'is-high' : 'is-low'}" aria-hidden="true"></span>`;
+    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span>${flag}</li>`;
   });
 
   return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="meta"><span class="level">Lv.${escapeHtml(item.level)}</span><span class="meta-power">${escapeHtml(formatPower(item.power))}</span></div><div class="stat-primary-block"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;

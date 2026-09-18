@@ -64,3 +64,15 @@ export function subStatRange(slot, grade, statId) {
   const bonus = 1 + (slot in SUB_BONUS_BY_SLOT ? SUB_BONUS_BY_SLOT[slot] : DEFAULT_SUB_BONUS);
   return [range[0] * bonus, range[1] * bonus];
 }
+
+/**
+ * ค่าที่ได้อยู่ตรงไหนของช่วง — 0 = ต่ำสุด, 1 = สูงสุด, ไม่รู้ช่วงคืน null
+ */
+export function subStatRatio(slot, grade, statId, value) {
+  const range = subStatRange(slot, grade, statId);
+  if (!range) {
+    return null;
+  }
+  const [low, high] = range;
+  return (value - low) / (high - low);
+}
