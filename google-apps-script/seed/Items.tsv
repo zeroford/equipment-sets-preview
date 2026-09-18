@@ -1,23 +1,23 @@
-setKey	slot	level	grade	sub1Type	sub1Value	sub2Type	sub2Value
-boss	1	97	10	skillAmp	0.0853	critDmg	0.1462
-boss	2	98	10	skillAmp	0.0871	accuracy	160.91
-boss	3	101	10	skillAmp	0.0885	critDmg	0.1239
-boss	4	99	10	dmgReduction	0.0433	critRes	0.1462
-boss	5	99	9	dmgReduction	0.0343	critRes	0.1329
-boss	6	97	10	dmgReduction	0.0621	critRes	0.206
-boss	7	99	9	skillAmp	0.0731	focus	167.72
-boss	8	94	10	critRate	0.2125	skillAmp	0.092
-boss	9	97	10	accuracy	151.5	skillAmp	0.0862
-boss	10	101	10	dmgReduction	0.0609	critRes	0.2182
-boss	11	100	10	focus	214.46	skillHaste	4.6
-boss	12	96	10	dmgReduction	0.063	resistance	140.08
-pve	1	94	9	skillAmp	0.0729	accuracy	110.54
-pve	2	89	9	skillAmp	0.0717	accuracy	135.48
-pve	3	91	10	critDmg	0.1265	accuracy	157.18
-pve	4	93	10	dmgReduction	0.0476	critRes	0.1252
-pve	5	94	10	evasion	54.63	dmgReduction	0.0436
-pve	7	96	10	focus	191.38	skillHaste	4.6
-pve	8	95	9	skillAmp	0.0708	accuracy	143.99
-pve	9	93	9	resistance	77.94	skillAmp	0.0731
-pve	11	85	9	focus	176.64	critRes	0.1639
-pve	12	90	9	focus	187.04	critRes	0.149
+setKey	slot	level	grade	power	sub1Type	sub1Value	sub2Type	sub2Value
+boss	1	97	10	287.59	skillAmp	0.0853	critDmg	0.1462
+boss	2	98	10	218.42	skillAmp	0.0871	accuracy	160.91
+boss	3	101	10	185.72	skillAmp	0.0885	critDmg	0.1239
+boss	4	99	10	103.56	dmgReduction	0.0433	critRes	0.1462
+boss	5	99	9	209.31	dmgReduction	0.0343	critRes	0.1329
+boss	6	97	10	250.07	dmgReduction	0.0621	critRes	0.206
+boss	7	99	9	179.87	skillAmp	0.0731	focus	167.72
+boss	8	94	10	213.84	critRate	0.2125	skillAmp	0.092
+boss	9	97	10	209.82	accuracy	151.5	skillAmp	0.0862
+boss	10	101	10	179.85	dmgReduction	0.0609	critRes	0.2182
+boss	11	100	10	152.61	focus	214.46	skillHaste	4.6
+boss	12	96	10	155.27	dmgReduction	0.063	resistance	140.08
+pve	1	94	9	184.58	skillAmp	0.0729	accuracy	110.54
+pve	2	89	9	125.07	skillAmp	0.0717	accuracy	135.48
+pve	3	91	10	119.28	critDmg	0.1265	accuracy	157.18
+pve	4	93	10	73.94	dmgReduction	0.0476	critRes	0.1252
+pve	5	94	10	143.46	evasion	54.63	dmgReduction	0.0436
+pve	7	96	10	135.2	focus	191.38	skillHaste	4.6
+pve	8	95	9	113.99	skillAmp	0.0708	accuracy	143.99
+pve	9	93	9	148.09	resistance	77.94	skillAmp	0.0731
+pve	11	85	9	110.69	focus	176.64	critRes	0.1639
+pve	12	90	9	110.74	focus	187.04	critRes	0.149

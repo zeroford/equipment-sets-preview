@@ -3,7 +3,7 @@ import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES } from './constants.mjs';
 import { emptyCellHtml, equipIconPath, renderCard } from './render.mjs';
 import { computeBaseStat } from './base-stat.mjs';
-import { STATS, formatStat, statLabel } from './stats.mjs';
+import { STATS, formatPower, formatStat, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
 
 const KEY_STORAGE = 'equipment-sets-edit-key';
@@ -115,7 +115,7 @@ function formCardHtml(slot) {
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
       <div class="name-bar">
         <span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /><span class="level-badge" data-level-badge>—</span></span>
-        <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span></span>
+        <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span><span class="power-badge" data-power-badge>—</span></span>
       </div>
       <div class="card-body">
         <div class="stat-primary-block">
@@ -129,6 +129,10 @@ function formCardHtml(slot) {
     <div class="edit-row">
       <label for="editLevel">Lv.</label>
       <input id="editLevel" name="level" type="number" min="1" step="1" />
+    </div>
+    <div class="edit-row">
+      <label for="editPower">Power (M)</label>
+      <input id="editPower" name="power" type="number" step="any" />
     </div>
     <div class="edit-row">
       <label for="editGrade">Rarity</label>
@@ -209,6 +213,7 @@ export function createEditUi({ onSaved }) {
     }
     return {
       level: Number(form.elements.level.value) || 0,
+      power: Number(form.elements.power.value) || 0,
       grade: Number(form.elements.grade.value),
       subs,
     };
@@ -269,9 +274,12 @@ export function createEditUi({ onSaved }) {
       cell.textContent = value === null ? '—' : formatStat(baseStatForSlot(slot), value);
       const level = Number(form.elements.level.value);
       form.querySelector('[data-level-badge]').textContent = level > 0 ? level : '—';
+      const power = Number(form.elements.power.value);
+      form.querySelector('[data-power-badge]').textContent = power > 0 ? formatPower(power) : '—';
     };
     refreshBase();
     form.elements.level.addEventListener('input', refreshBase);
+    form.elements.power.addEventListener('input', refreshBase);
     form.elements.grade.addEventListener('change', refreshBase);
 
     form.addEventListener('change', (event) => {
