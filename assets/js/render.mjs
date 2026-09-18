@@ -1,0 +1,99 @@
+import { GRADES, GRADE_TIER, SLOT_TYPES } from './constants.mjs';
+import { escapeHtml, statBestMatch, statDisplayValue } from './utils.mjs';
+import { buildSetSummary } from './summary.mjs';
+
+function equipIconPath(item, gridIndex) {
+  const type = SLOT_TYPES[gridIndex] || 'sword';
+  const tier = GRADE_TIER[item.grade] || '09';
+  const folder = type.charAt(0).toUpperCase() + type.slice(1);
+  return `assets/equipment/${folder}/icon_equip_${type}_${tier}.png`;
+}
+
+function platePath(gridIndex) {
+  const type = SLOT_TYPES[gridIndex] || 'sword';
+  return `assets/plates/icon_plate_${type}.png`;
+}
+
+function renderCard(item, gridIndex, bestStats) {
+  const g = GRADES[item.grade] || GRADES.legendary;
+  const stats = item.stats || [];
+  const primary = stats[0] || ['', ''];
+  const subRows = stats.slice(1).map(([label, value]) => {
+    const best = statBestMatch(label, bestStats);
+    return `<li${best ? ' class="stat-row-best"' : ''} data-stat-label="${escapeHtml(label)}"><span class="label">${escapeHtml(label)}</span><span class="value">${escapeHtml(statDisplayValue(value))}</span></li>`;
+  });
+
+  return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="30" height="30" decoding="async" /></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="meta"><span class="level">Lv.${escapeHtml(item.level)}</span><span class="meta-power">${escapeHtml(item.power)}</span></div><div class="stat-primary-block"><span class="label">${escapeHtml(primary[0])}</span><span class="value">${escapeHtml(statDisplayValue(primary[1]))}</span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
+}
+
+function renderSection(set, setIndex, summary) {
+  let rowsHtml = '';
+  const items = set.items || [];
+
+  for (let rowIndex = 0; rowIndex < 4; rowIndex += 1) {
+    const rowItems = items.slice(rowIndex * 3, rowIndex * 3 + 3);
+    while (rowItems.length < 3) {
+      rowItems.push(null);
+    }
+    const rowLabel = (set.bestSubstatLabels || [])[rowIndex] || '';
+    const bestStats = (set.bestStatsByRow || [])[rowIndex] || [];
+    const cells = rowItems.map((item, colIndex) => {
+      const gridIndex = rowIndex * 3 + colIndex;
+      if (!item) {
+        return `<div class="grid-empty" aria-hidden="true"><img class="grid-empty-plate" src="${escapeHtml(platePath(gridIndex))}" alt="" width="72" height="72" decoding="async" /></div>`;
+      }
+      return renderCard(item, gridIndex, bestStats);
+    });
+    rowsHtml += `<div class="grid-row-group" data-row-index="${rowIndex}"><p class="row-best-caption">${escapeHtml(rowLabel)}</p><div class="grid">${cells.join('')}</div></div>`;
+  }
+
+  const summaryRows = (summary.aggregatedStats || [])
+    .map(
+      (row) =>
+        `<tr><td class="stat-label">${escapeHtml(row.label)}</td><td class="stat-total">${escapeHtml(row.display)}</td></tr>`,
+    )
+    .join('');
+
+  const badgeHtml =
+    set.setKey === 'set3'
+      ? ''
+      : `<span class="section-mode-badge">${escapeHtml(set.setKey === 'pve' ? 'Boss' : 'PvE')}</span>`;
+
+  return `<section class="section" data-set-key="${escapeHtml(set.setKey)}" role="tabpanel" id="panel-${escapeHtml(set.setKey)}" aria-labelledby="tab-${escapeHtml(set.setKey)}"${setIndex === 0 ? '' : ' hidden'}><div class="summary-hover summary-float"><button type="button" class="dock-fab glass-chip" aria-label="สรุป stat รวม"><i data-lucide="info" aria-hidden="true"></i></button><div class="summary-popover" role="tooltip"><div class="summary-table-wrap"><table class="summary-table"><tbody>${summaryRows}</tbody></table></div></div></div><div class="section-header"><div class="section-title-row"><h2 class="section-title">${escapeHtml(set.title)}</h2>${badgeHtml}</div></div>${rowsHtml}</section>`;
+}
+
+function renderTabs(sets) {
+  return sets
+    .map(
+      (set, index) =>
+        `<button type="button" class="set-tab" role="tab" id="tab-${escapeHtml(set.setKey)}" data-set-key="${escapeHtml(set.setKey)}" aria-selected="${index === 0 ? 'true' : 'false'}" aria-controls="panel-${escapeHtml(set.setKey)}"><span class="set-tab-indicator" aria-hidden="true"></span><span class="set-tab-label">${escapeHtml(set.title)}</span></button>`,
+    )
+    .join('');
+}
+
+/**
+ * Renders set panels and tab bar into the page shell.
+ */
+export function renderAppShell(sets, loadError) {
+  const page = document.getElementById('equipmentPage');
+  const tabList = document.getElementById('setTabList');
+  if (!page || !tabList) {
+    return null;
+  }
+
+  const errorHtml = loadError
+    ? `<p class="page-load-error" role="status">${escapeHtml(loadError)}</p>`
+    : '';
+
+  page.innerHTML =
+    errorHtml +
+    sets.map((set, index) => renderSection(set, index, buildSetSummary(set))).join('');
+
+  tabList.innerHTML = renderTabs(sets);
+
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
+
+  return { page, tabList };
+}

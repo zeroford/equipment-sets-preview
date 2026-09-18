@@ -1,0 +1,628 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Equipment Sets</title>
+  <style>
+    :root {
+      --bg: #0f1114;
+      --card: #2a2e33;
+      --text: #f1f3f5;
+      --muted: #868e96;
+      --divider: rgba(255, 255, 255, 0.08);
+      --dock-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+      --dock-scroll-pad: calc(4.35rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .glass-chip {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(22, 24, 28, 0.72);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1.5rem var(--dock-scroll-pad);
+    }
+
+    .page { max-width: 1200px; margin: 0 auto; }
+
+    .section[hidden] {
+      display: none !important;
+    }
+
+    .set-tabs {
+      position: fixed;
+      left: 50%;
+      bottom: var(--dock-bottom);
+      z-index: 1001;
+      width: min(calc((100vw - 2rem) * 0.7), 364px);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .set-tabs-list {
+      display: flex;
+      width: 100%;
+      height: 3.25rem;
+      box-sizing: border-box;
+      align-items: stretch;
+      gap: 0.25rem;
+      padding: 0.25rem;
+      border-radius: 999px;
+      pointer-events: auto;
+    }
+
+    .set-tabs-list.glass-chip {
+      border-radius: 999px;
+    }
+
+    .set-tab {
+      position: relative;
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 0;
+      margin: 0;
+      padding: 0 0.65rem;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: #868e96;
+      font: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      line-height: 1.25;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s ease;
+      z-index: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .set-tab-label {
+      position: relative;
+      z-index: 1;
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .set-tab-indicator {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #3d4450;
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 0;
+    }
+
+    .set-tab[aria-selected="true"] {
+      color: #f1f3f5;
+    }
+
+    .set-tab[aria-selected="true"] .set-tab-indicator {
+      opacity: 1;
+    }
+
+    .set-tab:hover:not([aria-selected="true"]) {
+      color: #ced4da;
+    }
+
+    .set-tab:focus-visible {
+      outline: 2px solid #a78bfa;
+      outline-offset: 2px;
+    }
+
+    .dock-fab {
+      width: 3.25rem;
+      height: 3.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 0;
+      border: none;
+      color: #f1f3f5;
+      border-radius: 50%;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .dock-fab.glass-chip {
+      border-radius: 50%;
+    }
+
+    .dock-fab:hover {
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    .dock-fab svg,
+    .dock-fab .lucide {
+      display: block;
+      width: 1.35rem;
+      height: 1.35rem;
+    }
+
+    .best-swap-fab {
+      position: fixed;
+      right: 1rem;
+      left: auto;
+      bottom: var(--dock-bottom);
+      z-index: 1002;
+    }
+
+    .best-swap-fab[aria-pressed="true"] {
+      background: rgba(255, 255, 255, 0.38);
+      backdrop-filter: blur(16px) saturate(1.25);
+      -webkit-backdrop-filter: blur(16px) saturate(1.25);
+      border-color: rgba(255, 255, 255, 0.42);
+      color: #fff;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        0 1px 3px rgba(0, 0, 0, 0.22);
+    }
+
+    .best-swap-fab[aria-pressed="true"]:hover {
+      background: rgba(255, 255, 255, 0.44);
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    .best-swap-fab[hidden] {
+      display: none !important;
+    }
+
+    .section { margin-bottom: 1.5rem; }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title-row {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+      max-width: 100%;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .section-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: 0.03em;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      flex-shrink: 0;
+    }
+
+    .section-mode-badge[hidden] {
+      display: none !important;
+    }
+
+    .grid-row-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .grid-row-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .row-best-caption {
+      margin-bottom: 0.5rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 3px solid #6c757d;
+      font-size: 0.75rem;
+      color: #ced4da;
+      line-height: 1.35;
+      min-height: calc(0.7rem + 1.35 * 0.75rem);
+    }
+
+    .row-best-caption strong {
+      color: #e9ecef;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      align-items: stretch;
+      --equipment-card-min-height: 212px;
+    }
+
+    .card {
+      --frame: #6b7280;
+      --glow: rgba(255, 255, 255, 0.15);
+      position: relative;
+      background: var(--card);
+      border-radius: 14px;
+      border: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .card-body { padding: 8px; }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      column-gap: 0.75rem;
+      margin-inline: -8px;
+      padding: 4px 16px;
+      margin-bottom: 0.55rem;
+    }
+
+    .level {
+      justify-self: start;
+      align-self: center;
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1;
+      color: #dee2e6;
+    }
+
+    .card.legendary .level {
+      color: #fb923c;
+    }
+
+    .card.eternal .level {
+      color: #a78bfa;
+    }
+
+    .meta-power {
+      justify-self: end;
+      align-self: center;
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .name-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--glow) 55%, var(--frame)) 0%,
+        var(--frame) 100%
+      );
+      border-radius: 0;
+      padding: 8px;
+      box-sizing: border-box;
+      text-align: left;
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.15;
+      color: #0f1114;
+      text-shadow: 0 1px 0 color-mix(in srgb, var(--glow) 40%, transparent);
+    }
+
+    .name-bar-icon-wrap {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.38);
+      border-radius: 10px;
+    }
+
+    .name-bar-icon {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      object-fit: contain;
+      image-rendering: -webkit-optimize-contrast;
+    }
+
+    .name-bar-text-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      min-height: calc(1.15em * 2);
+    }
+
+    .name-bar-text {
+      width: 100%;
+      line-height: 1.15;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .card.eternal .name-bar {
+      color: #1e1b4b;
+    }
+
+    .card.legendary .name-bar {
+      color: #422006;
+    }
+
+    .stat-primary-block {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      border-radius: 8px;
+      min-height: 2.5rem;
+      padding: 0 0.55rem;
+      margin-bottom: 0.5rem;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-primary-block .label {
+      color: #ced4da;
+      font-weight: 700;
+      font-size: 0.78rem;
+      line-height: 1.15;
+      align-self: center;
+    }
+
+    .stat-primary-block .value {
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.88rem;
+      line-height: 1.15;
+      text-align: right;
+      align-self: center;
+    }
+
+    .stats {
+      list-style: none;
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .stats li {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      column-gap: 0.5rem;
+      min-height: 2rem;
+      padding: 0 0.55rem;
+      font-size: 0.72rem;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .stats li .label,
+    .stats li .value {
+      line-height: 1.15;
+      align-self: center;
+    }
+
+    .stats li:last-child { border-bottom: none; }
+
+    .stats .label {
+      color: #ced4da;
+      font-weight: 500;
+      justify-self: start;
+    }
+
+    .stats .value {
+      color: #fff;
+      font-weight: 600;
+      text-align: right;
+      justify-self: end;
+    }
+
+    .card.eternal .stat-row-best .label,
+    .card.eternal .stat-row-best .value {
+      color: #a78bfa;
+      font-weight: 600;
+    }
+
+    .card.legendary .stat-row-best .label,
+    .card.legendary .stat-row-best .value {
+      color: #fdba74;
+      font-weight: 600;
+    }
+
+    .grid-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+      min-height: 0;
+      height: 100%;
+      border-radius: 14px;
+      border: 1px dashed rgba(255, 255, 255, 0.06);
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .grid:not(:has(.card)) .grid-empty {
+      min-height: var(--equipment-card-min-height);
+    }
+
+    .grid-empty-plate {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      opacity: 0.22;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .summary-hover {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .summary-float {
+      position: fixed;
+      left: 1rem;
+      right: auto;
+      bottom: var(--dock-bottom);
+      z-index: 1002;
+    }
+
+    .summary-popover {
+      position: absolute;
+      left: 0;
+      right: auto;
+      bottom: calc(100% + 0.55rem);
+      top: auto;
+      z-index: 100;
+      width: max-content;
+      min-width: 11rem;
+      max-width: min(16rem, calc(100vw - 2rem));
+      padding: 0;
+      background: rgba(22, 24, 28, 0.72);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(6px);
+      transition:
+        opacity 0.16s ease,
+        transform 0.16s ease,
+        visibility 0.16s;
+      pointer-events: none;
+    }
+
+    .summary-hover:hover .summary-popover,
+    .summary-hover:focus-within .summary-popover {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .summary-table-wrap {
+      max-height: min(50vh, 20rem);
+      overflow-x: auto;
+      overflow-y: auto;
+      padding: 0.35rem 0.25rem;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .summary-table td {
+      padding: 0.35rem 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      vertical-align: middle;
+    }
+
+    .summary-table td.stat-label {
+      font-weight: 500;
+      color: #adb5bd;
+      white-space: nowrap;
+      padding-right: 0.75rem;
+    }
+
+    .summary-table td.stat-total {
+      font-weight: 600;
+      color: #f1f3f5;
+      white-space: nowrap;
+      text-align: right;
+      padding-left: 0.5rem;
+      padding-right: 0.35rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .page-loading {
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .page-load-error {
+      margin: 0 0 1rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      background: rgba(127, 29, 29, 0.25);
+      color: #fecaca;
+      font-size: 0.8125rem;
+    }
+  </style>
+</head>
+<body>
+  <button
+    type="button"
+    class="dock-fab glass-chip best-swap-fab"
+    id="bestSubstatSwap"
+    aria-pressed="false"
+    aria-label="สลับ best substat PvE กับ BOSS"
+    title="สลับ best substat PvE ↔ BOSS"
+  >
+    <i data-lucide="arrow-down-up" aria-hidden="true"></i>
+  </button>
+  <div class="page" id="equipmentPage"></div>
+  <nav class="set-tabs" aria-label="เลือก equipment set">
+    <div class="set-tabs-list glass-chip" id="setTabList" role="tablist"></div>
+  </nav>
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+  <script type="application/json" id="equipment-sets-data">[{"setKey":"boss","title":"Set A","items":[{"level":97,"grade":"eternal","name":"Axe-Spear of Blind Destruction","stats":[["ATK","+6,043"],["Skill AMP","8.53%"],["CRIT DMG","14.62%"]],"power":"287.59M"},{"level":98,"grade":"eternal","name":"Resplendent Wind Guardian","stats":[["Accuracy","+475.60"],["Skill AMP","8.71%"],["Accuracy","+160.91"]],"power":"218.42M"},{"level":101,"grade":"eternal","name":"Dreaming Moon","stats":[["CRIT%","36.49%"],["Skill AMP","8.85%"],["CRIT DMG","12.39%"]],"power":"185.72M"},{"level":99,"grade":"eternal","name":"Helmet of Silence","stats":[["DEF","+4,809"],["DMG Reduction","4.33%"],["CRIT RES","14.62%"]],"power":"103.56M"},{"level":99,"grade":"legendary","name":"Proud Dragon Eye Armor","stats":[["HP","+62,614"],["DMG Reduction","3.43%"],["CRIT RES","13.29%"]],"power":"209.31M"},{"level":97,"grade":"eternal","name":"Hollyberry Shield","stats":[["Evasion","+471.50"],["DMG Reduction","6.21%"],["CRIT RES","20.60%"]],"power":"250.07M"},{"level":99,"grade":"legendary","name":"Subtle Fragrant Remedy","stats":[["CRIT RES","33.04%"],["Skill AMP","7.31%"],["Focus","+167.72"]],"power":"179.87M"},{"level":94,"grade":"eternal","name":"Eternally Sweet Paradise","stats":[["Focus","+455.10"],["CRIT%","21.25%"],["Skill AMP","9.20%"]],"power":"213.84M"},{"level":97,"grade":"eternal","name":"Light of Deceit","stats":[["Resistance","+471.50"],["Accuracy","+151.50"],["Skill AMP","8.62%"]],"power":"209.82M"},{"level":101,"grade":"eternal","name":"Free Explorer's Lily","stats":[["CRIT DMG","27.47%"],["DMG Reduction","6.09%"],["CRIT RES","21.82%"]],"power":"179.85M"},{"level":100,"grade":"eternal","name":"Ultimate Recipe Book","stats":[["Skill AMP","13.38%"],["Focus","+214.46"],["Skill Haste","+4.60"]],"power":"152.61M"},{"level":96,"grade":"eternal","name":"Rainbow Ginseng","stats":[["DMG Reduction","11.48%"],["DMG Reduction","6.30%"],["Resistance","+140.08"]],"power":"155.27M"}],"bestStatsByRow":[["Skill AMP","Accuracy"],["DMG Reduction","CRIT RES"],["Skill AMP","CRIT DMG","Accuracy","Focus","Skill Haste"],["Focus","Skill Haste"]],"bestSubstatLabels":["Skill AMP / Accuracy","DMG Reduction / CRIT RES","Skill AMP · Crit DMG · Accuracy · Focus / Skill Haste","Focus / Skill Haste"]},{"setKey":"pve","title":"Set B","items":[{"level":94,"grade":"legendary","name":"Ruthless Red Dragon's Greatsword","stats":[["ATK","+5,196"],["Skill AMP","7.29%"],["Accuracy","+110.54"]],"power":"184.58M"},{"level":89,"grade":"legendary","name":"Sovereign's Radiant Spear","stats":[["Accuracy","+403.59"],["Skill AMP","7.17%"],["Accuracy","+135.48"]],"power":"125.07M"},{"level":91,"grade":"eternal","name":"Dreaming Moon","stats":[["CRIT%","30.75%"],["CRIT DMG","12.65%"],["Accuracy","+157.18"]],"power":"119.28M"},{"level":93,"grade":"eternal","name":"Helmet of Silence","stats":[["DEF","+3,963"],["DMG Reduction","4.76%"],["CRIT RES","12.52%"]],"power":"73.94M"},{"level":94,"grade":"eternal","name":"Awakened Dragon Lord's Armor","stats":[["HP","+62,109"],["Evasion","+54.63"],["DMG Reduction","4.36%"]],"power":"143.46M"},null,{"level":96,"grade":"eternal","name":"Endless Void Necklace","stats":[["CRIT RES","33.62%"],["Focus","+191.38"],["Skill Haste","+4.60"]],"power":"135.20M"},{"level":95,"grade":"legendary","name":"Sacred Millennial Glory","stats":[["Focus","+430.50"],["Skill AMP","7.08%"],["Accuracy","+143.99"]],"power":"113.99M"},{"level":93,"grade":"legendary","name":"Brooch of Primordial Light","stats":[["Resistance","+422.81"],["Resistance","+77.94"],["Skill AMP","7.31%"]],"power":"148.09M"},null,{"level":85,"grade":"legendary","name":"Pilgrim's Martial Arts Manual","stats":[["Skill AMP","9.61%"],["Focus","+176.64"],["CRIT RES","16.39%"]],"power":"110.69M"},{"level":90,"grade":"legendary","name":"Cherry Bomb Cake","stats":[["DMG Reduction","9.59%"],["Focus","+187.04"],["CRIT RES","14.90%"]],"power":"110.74M"}],"bestStatsByRow":[["Skill AMP","CRIT DMG"],["DMG Reduction","CRIT RES"],["Skill AMP","CRIT DMG","Skill Haste"],["DMG Reduction","Skill Haste"]],"bestSubstatLabels":["Skill AMP / Crit DMG","DMG Reduction / CRIT RES","Skill AMP · Crit DMG / Skill Haste","DMG Reduction / Skill Haste"]},{"setKey":"set3","title":"Set C","items":[null,null,null,null,null,null,null,null,null,null,null,null],"bestStatsByRow":[[],[],[],[]],"bestSubstatLabels":["","","",""]}]</script>
+  <script type="application/json" id="equipment-sheets-config">{"webAppUrl":""}</script>
+  <script type="module" src="assets/js/main.mjs"></script>
+</body>
+</html>

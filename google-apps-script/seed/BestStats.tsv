@@ -1,0 +1,13 @@
+setKey	row	bestStats	label
+boss	1	Skill AMP, Accuracy	Skill AMP / Accuracy
+boss	2	DMG Reduction, CRIT RES	DMG Reduction / CRIT RES
+boss	3	Skill AMP, CRIT DMG, Accuracy, Focus, Skill Haste	Skill AMP · Crit DMG · Accuracy · Focus / Skill Haste
+boss	4	Focus, Skill Haste	Focus / Skill Haste
+pve	1	Skill AMP, CRIT DMG	Skill AMP / Crit DMG
+pve	2	DMG Reduction, CRIT RES	DMG Reduction / CRIT RES
+pve	3	Skill AMP, CRIT DMG, Skill Haste	Skill AMP · Crit DMG / Skill Haste
+pve	4	DMG Reduction, Skill Haste	DMG Reduction / Skill Haste
+set3	1		
+set3	2		
+set3	3		
+set3	4		
