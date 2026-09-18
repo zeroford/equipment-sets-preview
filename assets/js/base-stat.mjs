@@ -53,11 +53,12 @@ export function computeBaseStat(slot, grade, level) {
  * ช่วงค่าที่ substat ตัวนั้นออกได้ [min, max] — ไม่รู้ก็คืน null
  *
  * NOTE: ตารางเก็บค่าดิบ ของจริงโดนบวกอีกชั้นเหมือน base stat (คนละตัวเลขกัน)
+ * stat ที่ min = max (ตอนนี้มีแค่ Skill Haste) ถือว่าไม่มีช่วง คืน null ไปเลย
  */
 export function subStatRange(slot, grade, statId) {
   const code = Number(grade) || GRADE_KEYS.indexOf(String(grade)) + 1;
   const range = ((SUB_RANGES[slot - 1] || {})[code] || {})[statId];
-  if (!range) {
+  if (!range || range[0] === range[1]) {
     return null;
   }
   const bonus = 1 + (slot in SUB_BONUS_BY_SLOT ? SUB_BONUS_BY_SLOT[slot] : DEFAULT_SUB_BONUS);

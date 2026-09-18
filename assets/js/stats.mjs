@@ -94,3 +94,11 @@ export function formatStat(statId, value) {
 export function formatPower(value) {
   return `${toStatNumber(value).toFixed(2)}M`;
 }
+
+/** ช่วงค่า a~b — stat แบบ % ใส่เครื่องหมายตัวเดียวท้ายสุด (7.36~9.20% ไม่ใช่ 7.36%~9.20%) */
+export function formatStatRange(statId, low, high) {
+  const from = formatStat(statId, low);
+  const to = formatStat(statId, high);
+  const shared = from.endsWith('%') && to.endsWith('%');
+  return `${shared ? from.slice(0, -1) : from}~${to}`;
+}

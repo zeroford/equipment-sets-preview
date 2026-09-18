@@ -1,7 +1,7 @@
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { gradeTier } from './catalog.mjs';
 import { escapeHtml, statBestMatch } from './utils.mjs';
-import { formatPower, formatStat, statLabel } from './stats.mjs';
+import { formatPower, formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { subStatRange } from './base-stat.mjs';
 import { buildSetSummary } from './summary.mjs';
 
@@ -26,9 +26,7 @@ export function renderCard(item, gridIndex, bestStats) {
     // ช่วงค่าที่ substat ตัวนี้ออกได้ ไว้เทียบว่าที่ได้มาถือว่าดีแค่ไหน
     const range = subStatRange(gridIndex + 1, item.grade, statId);
     const rangeHtml = range
-      ? `<small class="stat-range">${escapeHtml(formatStat(statId, range[0]))}~${escapeHtml(
-          formatStat(statId, range[1]),
-        )}</small>`
+      ? `<small class="stat-range">${escapeHtml(formatStatRange(statId, range[0], range[1]))}</small>`
       : '';
     return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${escapeHtml(formatStat(statId, value))}${rangeHtml}</span></li>`;
   });
