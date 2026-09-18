@@ -613,11 +613,13 @@
      * (สว่างอมชมพูตรงกลาง เข้มที่ขอบล่าง) + แสงเรืองรอบการ์ด
      */
     .card.eternal .name-bar {
+      /* แถบสว่างกลาง เข้มหัวท้าย — ทรงเดียวกับป้าย Eternal ในเกม */
       background: linear-gradient(
-        160deg,
-        color-mix(in srgb, var(--glow) 62%, var(--frame)) 0%,
-        var(--frame) 48%,
-        color-mix(in srgb, var(--frame) 72%, #6b21a8) 100%
+        180deg,
+        color-mix(in srgb, var(--frame) 82%, #6b21a8) 0%,
+        color-mix(in srgb, var(--glow) 68%, var(--frame)) 42%,
+        color-mix(in srgb, var(--glow) 52%, var(--frame)) 60%,
+        color-mix(in srgb, var(--frame) 86%, #6b21a8) 100%
       );
     }
 
@@ -666,7 +668,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.38);
+      background: rgba(255, 255, 255, 0.5);
       border-radius: 12px;
     }
 
@@ -775,7 +777,8 @@
 
     .card.eternal .stat-row-best .label,
     .card.eternal .stat-row-best .value {
-      color: #a78bfa;
+      /* NOTE: ผูกกับ --glow ของการ์ด — แก้สีเกรดใน constants.mjs แล้วตรงนี้ตามเอง */
+      color: var(--glow);
       font-weight: 600;
     }
 
