@@ -484,8 +484,15 @@
       display: grid;
       /* ซ้ายพอดีการ์ด ที่เหลือให้ฟอร์ม — ฟอร์มมีช่องกรอก ต้องการที่มากกว่า */
       grid-template-columns: var(--card-max) minmax(0, 1fr);
-      align-items: start;
-      gap: 0.85rem;
+      align-items: stretch;
+      gap: 1.1rem;
+    }
+
+    /* NOTE: grid ไม่มี column-rule — ต้องแปะเส้นที่คอลัมน์ขวาเอง (align-items: stretch
+       ข้างบนคือสิ่งที่ทำให้เส้นยาวเต็มความสูง ไม่ใช่แค่เท่าเนื้อหาในคอลัมน์) */
+    .edit-cols > .edit-col + .edit-col {
+      padding-left: 1.1rem;
+      border-left: 1px solid var(--divider);
     }
 
     .edit-col {
@@ -556,10 +563,22 @@
     .edit-name-bar {
       align-items: flex-start;
     }
+    /* 45 → 68px (×1.5) ไอคอนในนี้เป็นปุ่มเลือก slot ด้วย ใหญ่แล้วกดง่ายขึ้น */
+    .edit-card .name-bar-icon-wrap {
+      width: 68px;
+      height: 68px;
+    }
+    .edit-card .name-bar-icon {
+      width: 54px;
+      height: 54px;
+    }
+    .edit-card .name-bar-text {
+      font-size: 1rem;
+    }
     .edit-name-lines {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
+      gap: 0.45rem;
       flex: 1;
       min-width: 0;
     }
@@ -573,25 +592,25 @@
     .edit-lv {
       display: inline-flex;
       align-items: center;
-      gap: 0.1rem;
-      height: 1.45rem;
-      padding: 0 0.4rem;
+      gap: 0.12rem;
+      height: 1.7rem;
+      padding: 0 0.5rem;
       border-radius: 999px;
       background: rgba(0, 0, 0, 0.42);
-      font-size: 0.62rem;
+      font-size: 0.72rem;
       font-weight: 700;
       line-height: 1;
       color: #fff;
     }
     .edit-name-controls .rarity-group {
       gap: 0.15rem;
-      padding: 0.12rem;
+      padding: 0.14rem;
       background: rgba(0, 0, 0, 0.28);
     }
     .edit-name-controls .rarity-option {
-      height: 1.2rem;
-      padding: 0 0.45rem;
-      font-size: 0.62rem;
+      height: 1.42rem;
+      padding: 0 0.55rem;
+      font-size: 0.72rem;
       color: rgba(0, 0, 0, 0.55);
     }
     .edit-name-controls .rarity-option:hover {
@@ -604,7 +623,7 @@
     }
 
     .edit-dialog .level-input {
-      width: 1.7rem;
+      width: 1.95rem;
       height: auto;
       padding: 0;
       border: none;
