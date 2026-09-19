@@ -237,7 +237,6 @@ export function createEditUi({ onSaved, modeFor }) {
   let menu = null;
   let trigger = null;
   let slot = NO_SLOT;
-  let openPicker = () => {};
 
   const pair = () => sets.slice(0, 2);
 
@@ -337,7 +336,6 @@ export function createEditUi({ onSaved, modeFor }) {
       pickBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     };
     pickBtn.addEventListener('click', () => setPickerOpen(picker.hidden));
-    openPicker = () => setPickerOpen(true);
     // กดที่อื่นในฟอร์มแล้วปิด เหมือน dropdown ทั่วไป
     form.addEventListener('click', (event) => {
       if (!picker.hidden && !picker.contains(event.target) && !pickBtn.contains(event.target)) {
@@ -471,8 +469,6 @@ export function createEditUi({ onSaved, modeFor }) {
       slot = NO_SLOT;
       renderDialog();
       dialog.showModal();
-      // NOTE: ต้องหลัง showModal — ตำแหน่งตารางวัดจาก rect ของจริง ซึ่งยังไม่มีตอน dialog ปิดอยู่
-      openPicker();
     });
   }
 
