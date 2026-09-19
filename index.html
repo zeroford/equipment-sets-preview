@@ -674,23 +674,25 @@
       padding: 0.15rem 0.5rem;
       text-align: right;
     }
-    /*
-     * Power กรอกตรงช่องที่ค่ามันจะไปโผล่ — แต่งให้เหมือนตัวเลขในการ์ด ไม่ใช่กล่องฟอร์ม
-     * เส้นประใต้ตัวเลขคือสิ่งเดียวที่บอกว่าพิมพ์ได้
-     */
+    /* Power กรอกตรงช่องที่ค่ามันจะไปโผล่ — ทรงและขนาดชุดเดียวกับชิป Lv. */
     .edit-dialog .power-input {
-      width: 5.2rem;
-      height: auto;
-      padding: 0 0 0.1rem;
+      width: 4.8rem;
+      height: 1.85rem;
+      padding: 0 0.55rem;
       border: none;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.28);
-      border-radius: 0;
-      background: transparent;
+      border-radius: 999px;
+      background-color: rgba(255, 255, 255, 0.07);
       color: #fff;
       font: inherit;
-      font-size: 0.86rem;
+      font-size: 0.72rem;
       font-weight: 700;
       text-align: right;
+    }
+
+    /* ค่า base stat คือผลลัพธ์ที่คำนวณให้ — ตัวหลักของการ์ดนี้ ต้องอ่านได้ในแวบเดียว */
+    .edit-card .stat-primary-block .value {
+      font-size: 1.5rem;
+      line-height: 1.1;
     }
 
     .edit-card .stats select {
