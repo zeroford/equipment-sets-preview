@@ -38,22 +38,15 @@ const fromInput = (statId, value) => round6(isPercent(statId) ? Number(value) / 
 
 const titleCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
-/**
- * ตารางไอคอน 6×2 — ใช้ทั้งเมนูปุ่ม + และตัวเลือก slot ในการ์ดฟอร์ม
- *
- * NOTE: ส่ง grade มาด้วยจะได้รูปของจริงของเกรดนั้น (ในฟอร์มรู้ rarity อยู่แล้ว)
- * ถ้าไม่ส่ง (เมนูปุ่ม +) ใช้แผ่นเปล่าไปก่อน เพราะยังไม่รู้ว่าจะเป็นเกรดไหน
- */
+/** ตารางไอคอน 6×2 สำหรับเลือก slot — รูปเป็นไอเทมจริงของเกรดที่เลือกอยู่ */
 function slotButtonsHtml(selected, grade) {
   let html = '';
   for (let n = 1; n <= SLOT_COUNT; n += 1) {
-    const type = SLOT_TYPES[n - 1] || '';
-    const name = titleCase(type);
-    const src = grade ? equipIconPath({ grade }, n - 1) : `assets/plates/icon_plate_${type}.png`;
-    html += `<button type="button" class="add-slot" role="menuitem" data-slot="${n}" aria-pressed="${n === selected}" title="${escapeHtml(
+    const name = titleCase(SLOT_TYPES[n - 1] || '');
+    html += `<button type="button" class="add-slot" data-slot="${n}" aria-pressed="${n === selected}" title="${escapeHtml(
       name,
     )}" aria-label="${escapeHtml(name)}"><img src="${escapeHtml(
-      src,
+      equipIconPath({ grade }, n - 1),
     )}" alt="" width="30" height="30" decoding="async" /></button>`;
   }
   return html;
@@ -443,17 +436,11 @@ export function createEditUi({ onSaved, modeFor }) {
     });
   }
 
-  function closeMenu() {
-    menu.classList.remove('is-open');
-    trigger.setAttribute('aria-expanded', 'false');
-  }
-
   function bind() {
     dialog = document.getElementById('editDialog');
     menu = document.getElementById('addMenu');
     trigger = document.getElementById('editModeToggle');
-    const grid = document.getElementById('addSlotGrid');
-    if (!dialog || !menu || !trigger || !grid) {
+    if (!dialog || !menu || !trigger) {
       return;
     }
 
@@ -462,29 +449,13 @@ export function createEditUi({ onSaved, modeFor }) {
       return;
     }
 
-    grid.innerHTML = slotButtonsHtml();
-
-    // จอสัมผัสไม่มี hover เลยให้กดปุ่มเปิด/ปิดเมนูได้ด้วย
+    /*
+     * NOTE: กด + แล้วเข้าฟอร์มเลย ไม่มีเมนูเลือก slot คั่นก่อน — ในฟอร์มมีตัวเลือก slot
+     * อยู่แล้ว (ไอคอนในการ์ด) และ `slot` จำค่าล่าสุดไว้ เปิดซ้ำก็ได้ช่องเดิม
+     */
     trigger.addEventListener('click', () => {
-      const open = menu.classList.toggle('is-open');
-      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-
-    grid.addEventListener('click', (event) => {
-      const btn = event.target.closest('.add-slot');
-      if (!btn) {
-        return;
-      }
-      slot = Number(btn.dataset.slot) || 1;
-      closeMenu();
       renderDialog();
       dialog.showModal();
-    });
-
-    document.addEventListener('click', (event) => {
-      if (!menu.contains(event.target)) {
-        closeMenu();
-      }
     });
   }
 

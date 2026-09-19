@@ -328,29 +328,6 @@
       display: none !important;
     }
 
-    /* เมนูเลือก slot — โผล่ตอน hover ปุ่ม + หรือกดปุ่ม (จอสัมผัสไม่มี hover) */
-    .add-menu-grid {
-      position: absolute;
-      right: 0;
-      bottom: calc(100% + 0.5rem);
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 0.25rem;
-      padding: 0.35rem;
-      border-radius: 1rem;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(0.25rem);
-      transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
-    }
-    .add-menu:hover .add-menu-grid,
-    .add-menu:focus-within .add-menu-grid,
-    .add-menu.is-open .add-menu-grid {
-      opacity: 1;
-      visibility: visible;
-      transform: none;
-    }
-
     .add-slot {
       display: flex;
       align-items: center;
@@ -371,21 +348,6 @@
       width: 1.9rem;
       height: 1.9rem;
       object-fit: contain;
-      /* NOTE: แค่ดึงให้สว่างขึ้น ไม่ใช้ brightness(0) invert(1) — อันนั้นได้เงาทึบ รายละเอียดหายหมด */
-      filter: brightness(2.3);
-      opacity: 0.9;
-    }
-    .add-slot:hover img {
-      opacity: 1;
-    }
-
-    /*
-     * ในการ์ดฟอร์มเป็นรูปไอเทมจริง มีสีของมันเองอยู่แล้ว — ที่ดึงสว่างข้างบนมีไว้
-     * ให้แผ่นเปล่าสีเทาในเมนูปุ่ม + เท่านั้น ใส่ทับรูปจริงแล้วสีซีดหมด
-     */
-    .slot-picker .add-slot img {
-      filter: none;
-      opacity: 1;
     }
     .edit-dialog {
       /* NOTE: * { margin: 0 } ข้างบนลบ margin: auto ที่เบราว์เซอร์ใช้จัดกลาง dialog — ต้องใส่คืน */
@@ -1433,13 +1395,11 @@
   </svg>
   <div class="mode-toggle" id="setModeToggle" role="group" aria-label="Set mode" hidden></div>
   <div class="add-menu" id="addMenu" hidden>
-    <div class="add-menu-grid glass-chip" id="addSlotGrid" role="menu" aria-label="Pick a slot"></div>
     <button
       type="button"
       class="dock-fab glass-chip edit-fab"
       id="editModeToggle"
       aria-label="Add or edit an item"
-      aria-expanded="false"
       title="Add or edit an item"
     >
       <i data-lucide="plus" aria-hidden="true"></i>
