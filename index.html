@@ -16,7 +16,8 @@
       --tab-active: rgba(255, 255, 255, 0.86);
       --tab-active-text: #18181b;
       --pill-active: #3f3f46;
-      --card-max: 175px;
+      --card-min: 168px;
+      --card-max: 200px;
       --card-gap: 1rem;
       --dock-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
       --dock-scroll-pad: calc(4.35rem + env(safe-area-inset-bottom, 0px));
@@ -49,7 +50,7 @@
     .page { max-width: 1200px; margin: 0 auto; }
 
     /* จอกว้าง: วาง row-group เป็น 2 คอลัมน์ ได้การ์ด 3 3 / 3 3 แทนที่จะเรียงลงยาว 4 แถว */
-    @media (min-width: 1080px) {
+    @media (min-width: 1120px) {
       .page {
         max-width: none;
       }
@@ -57,7 +58,7 @@
         display: grid;
         /*
          * กว้างสุดเท่าการ์ด 3 ใบ ไม่ใช้ 1fr — ไม่งั้นแถบ tag ด้านบนจะยืดเกินแนวการ์ด
-         * NOTE: ต้องเป็น minmax(0, …) ไม่ใช่ค่าตายตัว — ช่วงจอ 1080–1245px
+         * NOTE: ต้องเป็น minmax(0, …) ไม่ใช่ค่าตายตัว — ช่วงจอ 1120–1290px
          * สองคอลัมน์รวมกันกว้างกว่าจอ ถ้าหดไม่ได้จะล้นออกนอกจอทั้งซ้ายและขวา
          */
         grid-template-columns: repeat(2, minmax(0, calc(var(--card-max) * 3 + var(--card-gap) * 2)));
@@ -380,7 +381,7 @@
     .edit-dialog {
       /* NOTE: * { margin: 0 } ข้างบนลบ margin: auto ที่เบราว์เซอร์ใช้จัดกลาง dialog — ต้องใส่คืน */
       margin: auto;
-      width: min(36rem, calc(100vw - 2rem));
+      width: min(40rem, calc(100vw - 2rem));
       max-height: calc(100vh - 2rem);
       overflow: auto;
       padding: 0;
@@ -521,6 +522,9 @@
     }
 
     @media (max-width: 40rem) {
+      :root {
+        --card-min: 0px;
+      }
       .edit-cols {
         grid-template-columns: minmax(0, 1fr);
       }
@@ -681,7 +685,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, var(--card-max)));
+      grid-template-columns: repeat(3, minmax(var(--card-min), var(--card-max)));
       gap: var(--card-gap);
       align-items: stretch;
       justify-content: center;
@@ -813,9 +817,7 @@
       align-items: flex-start;
       gap: 0.4rem;
       /* NOTE: padding ขวาต้องเท่า .stats li ไม่งั้น Power หลุดแนวตัวเลข substat */
-      padding: 0 0.45rem 0 0.3rem;
-      margin-top: 0.05rem;
-      margin-bottom: 0.6rem;
+      padding: 0.15rem 0.4rem 0.6rem;
     }
 
     .primary-cell {
@@ -1013,7 +1015,7 @@
      * ที่ความสูงเดียวกันเสมอ
      */
     .compare-grid {
-      grid-template-columns: repeat(2, minmax(0, var(--card-max)));
+      grid-template-columns: repeat(2, minmax(var(--card-min), var(--card-max)));
       grid-template-rows: auto auto;
       row-gap: 0.35rem;
       column-gap: var(--card-gap);
