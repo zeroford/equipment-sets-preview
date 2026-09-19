@@ -455,7 +455,7 @@
     .edit-dialog {
       /* NOTE: * { margin: 0 } ข้างบนลบ margin: auto ที่เบราว์เซอร์ใช้จัดกลาง dialog — ต้องใส่คืน */
       margin: auto;
-      width: min(44rem, calc(100vw - 2rem));
+      width: min(36rem, calc(100vw - 2rem));
       max-height: calc(100vh - 2rem);
       overflow: auto;
       padding: 0;
@@ -477,7 +477,8 @@
     }
     .edit-cols {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      /* ซ้ายพอดีการ์ด ที่เหลือให้ฟอร์ม — ฟอร์มมีช่องกรอก ต้องการที่มากกว่า */
+      grid-template-columns: var(--card-max) minmax(0, 1fr);
       align-items: start;
       gap: 0.85rem;
     }
@@ -499,7 +500,7 @@
 
     .edit-preview .card,
     .edit-preview .grid-empty {
-      width: 100%;
+      width: var(--card-max);
       height: auto;
       min-height: 11rem;
     }
@@ -1045,23 +1046,48 @@
       font-size: 0.875rem;
     }
 
+    /*
+     * NOTE: แถวคำกำกับกับแถวการ์ดเป็นแถวของ .compare-grid ไม่ใช่ของแต่ละช่อง
+     * (subgrid) — ป้าย best stat ของสอง set ยาวไม่เท่ากันได้ แต่การ์ดยังเริ่ม
+     * ที่ความสูงเดียวกันเสมอ
+     */
     .compare-grid {
       grid-template-columns: repeat(2, minmax(0, var(--card-max)));
+      grid-template-rows: auto auto;
+      row-gap: 0.35rem;
+      column-gap: var(--card-gap);
     }
 
     .compare-cell {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
+      display: grid;
+      grid-row: span 2;
+      grid-template-rows: subgrid;
       min-width: 0;
     }
 
     .compare-set {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      align-content: end;
+      gap: 0.25rem;
       padding-left: 0.2rem;
+    }
+
+    /* กินเต็มบรรทัดในกล่อง flex ที่ wrap ได้ — tag เลยถูกดันลงบรรทัดถัดไปทั้งหมด */
+    .compare-set-name {
+      width: 100%;
+      margin-bottom: 0.15rem;
       font-size: 0.7rem;
       font-weight: 600;
       letter-spacing: 0.02em;
       color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* การ์ดกว้างแค่ 175px — tag ต้องเล็กกว่าบนหัวแถบปกติ ไม่งั้นตกบรรทัดยาวเป็นพรืด */
+    .compare-set .best-tag {
+      padding: 0.15rem 0.4rem;
+      font-size: 0.62rem;
     }
 
     .grid-empty {

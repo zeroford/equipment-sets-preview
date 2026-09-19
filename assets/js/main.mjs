@@ -12,7 +12,10 @@ function paint(sets, loadError) {
   setModeUi.bind();
 }
 
-const editUi = createEditUi({ onSaved: (sets) => paint(sets, '') });
+const editUi = createEditUi({
+  onSaved: (sets) => paint(sets, ''),
+  modeFor: setModeUi.modeFor,
+});
 
 async function bootstrap() {
   const payload = await loadSetsPayload();

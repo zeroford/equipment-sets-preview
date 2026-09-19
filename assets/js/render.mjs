@@ -73,6 +73,12 @@ export function renderCard(item, gridIndex, bestStats) {
   return `<article class="card ${escapeHtml(item.grade)}" style="--frame:${g.frame};--glow:${g.glow}"><div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">Lv.${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="primary-cell"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></span><span class="primary-cell is-power"><span class="label">Power</span><span class="value">${escapeHtml(formatPower(item.power))}</span></span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
 }
 
+function statTagsHtml(statIds) {
+  return (statIds || [])
+    .map((statId) => `<span class="best-tag">${escapeHtml(statLabel(statId))}</span>`)
+    .join('');
+}
+
 /**
  * แถบ best substat เหนือแต่ละแถว — 1 stat = 1 tag
  *
@@ -80,11 +86,18 @@ export function renderCard(item, gridIndex, bestStats) {
  * ไม่ได้ใช้ข้อความ label แยกอีกแล้ว ป้ายกับ highlight เลยตรงกันเสมอ
  */
 export function bestTagsHtml(statIds) {
-  const tags = (statIds || [])
-    .map((statId) => `<span class="best-tag">${escapeHtml(statLabel(statId))}</span>`)
-    .join('');
+  const tags = statTagsHtml(statIds);
   // แถวที่ไม่มี stat ก็ไม่ต้องมีป้ายหัวแถบ (เช่น set ที่ยังไม่ได้ตั้งโหมด)
   return tags ? `<span class="best-label">Best Stat</span>${tags}` : '';
+}
+
+/**
+ * คำกำกับเหนือการ์ดในแท็บ Compare — ชื่อ set + best stat ของ set นั้น
+ *
+ * NOTE: set-mode.mjs เรียกซ้ำตอน toggle โหมด ป้ายเลยเปลี่ยนตามทันที
+ */
+export function compareCaptionHtml(title, statIds) {
+  return `<span class="compare-set-name">${escapeHtml(title)}</span>${statTagsHtml(statIds)}`;
 }
 
 function renderSection(set, setIndex, summary, mode) {
@@ -150,7 +163,7 @@ function renderCompareSection(sets, modeFor) {
         // NOTE: ติด setKey/rowIndex ไว้ให้ set-mode.mjs วาด highlight ใหม่ได้ตอนสลับโหมด
         return `<div class="compare-cell" data-set-key="${escapeHtml(set.setKey)}" data-row-index="${Math.floor(
           gridIndex / 3,
-        )}"><span class="compare-set">${escapeHtml(set.title)}</span>${card}</div>`;
+        )}"><p class="compare-set">${compareCaptionHtml(set.title, bestStats)}</p>${card}</div>`;
       })
       .join('');
 

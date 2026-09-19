@@ -1,7 +1,7 @@
 import { MODES, MODE_ICONS, MODE_LABELS, bestSubstatFor, defaultModeFor } from './constants.mjs';
 import { buildMetaFromSets } from './data.mjs';
 import { statBestMatch } from './utils.mjs';
-import { COMPARE_KEY, bestTagsHtml } from './render.mjs';
+import { COMPARE_KEY, bestTagsHtml, compareCaptionHtml } from './render.mjs';
 
 const MODE_STORAGE = 'equipment-sets-mode';
 
@@ -131,8 +131,16 @@ export function createSetModeUi() {
 
     // แท็บ Compare: แต่ละใบใช้โหมดของ set ที่มันมา ไม่ใช่โหมดของ panel
     document.querySelectorAll('.compare-cell[data-set-key]').forEach((cell) => {
-      const best = bestSubstatFor(modeFor(cell.dataset.setKey));
-      highlightStats(cell, best.rows[Number(cell.dataset.rowIndex)] || []);
+      const setKey = cell.dataset.setKey;
+      const best = bestSubstatFor(modeFor(setKey));
+      const bestStats = best.rows[Number(cell.dataset.rowIndex)] || [];
+
+      const caption = cell.querySelector('.compare-set');
+      const meta = setMeta[setKey];
+      if (caption && meta) {
+        caption.innerHTML = compareCaptionHtml(meta.title, bestStats);
+      }
+      highlightStats(cell, bestStats);
     });
   }
 

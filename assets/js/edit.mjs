@@ -1,6 +1,6 @@
 import { postToWebApp } from './data.mjs';
 import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
-import { GRADES, SLOT_TYPES } from './constants.mjs';
+import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { emptyCellHtml, equipIconPath, renderCard } from './render.mjs';
 import { computeBaseStat } from './base-stat.mjs';
 import { STATS, formatPower, formatStat, statLabel } from './stats.mjs';
@@ -82,12 +82,18 @@ function cardChrome(slot, grade) {
   };
 }
 
-/** การ์ดของ set นั้นตามจริง ไว้ดูเทียบก่อนกรอก — อ่านอย่างเดียว */
-function previewHtml(set, slot) {
+/**
+ * การ์ดของ set นั้นตามจริง ไว้ดูเทียบก่อนกรอก — อ่านอย่างเดียว
+ *
+ * NOTE: ต้องส่ง best stat ของโหมดที่ set นั้นเลือกอยู่เข้าไปด้วย ไม่งั้นการ์ดในนี้
+ * ไม่ highlight อะไรเลย ดูไม่เหมือนใบเดียวกันกับที่อยู่บนหน้าเว็บ
+ */
+function previewHtml(set, slot, mode) {
   const item = (set.items || [])[slot - 1] || null;
+  const bestStats = bestSubstatFor(mode).rows[Math.floor((slot - 1) / 3)] || [];
   return `<div class="edit-preview">
     <p class="edit-col-title">${escapeHtml(set.title)}${item ? '' : ' · empty'}</p>
-    ${item ? renderCard(item, slot - 1, []) : emptyCellHtml(slot - 1)}
+    ${item ? renderCard(item, slot - 1, bestStats) : emptyCellHtml(slot - 1)}
   </div>`;
 }
 
@@ -153,10 +159,10 @@ function formCardHtml(slot) {
  * NOTE: แยกเป็นคอลัมน์ของใครของมัน ไม่ใช่กริดแถวเดียวกัน — ไม่งั้นแถวบนจะสูงตาม
  * การ์ด Set A ทั้งที่ฝั่งขวามีแค่ช่องเลือก slot บรรทัดเดียว
  */
-function dialogHtml(pair, slot) {
+function dialogHtml(pair, slot, modeFor) {
   return `<form method="dialog">
     <div class="edit-cols">
-      <div class="edit-col">${pair.map((set) => previewHtml(set, slot)).join('')}</div>
+      <div class="edit-col">${pair.map((set) => previewHtml(set, slot, modeFor(set.setKey))).join('')}</div>
       <div class="edit-col">
         <div class="edit-row">
           <label for="editSlot">Slot</label>
@@ -185,7 +191,7 @@ function dialogHtml(pair, slot) {
  * NOTE: ปุ่มจะโผล่เฉพาะตอนต่อ Web App ได้จริง ถ้าใช้ข้อมูลสำรองในเว็บอยู่
  * ก็ไม่มีอะไรให้เขียนกลับ
  */
-export function createEditUi({ onSaved }) {
+export function createEditUi({ onSaved, modeFor }) {
   let webAppUrl = '';
   let sets = [];
   let dialog = null;
@@ -272,7 +278,7 @@ export function createEditUi({ onSaved }) {
   }
 
   function renderDialog() {
-    dialog.innerHTML = dialogHtml(pair(), slot);
+    dialog.innerHTML = dialogHtml(pair(), slot, modeFor);
     const form = dialog.querySelector('form');
 
     form.elements.slot.addEventListener('change', (event) => {
