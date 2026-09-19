@@ -187,28 +187,32 @@ function formCardHtml(slot, grade) {
  */
 function dialogHtml(pair, slot, modeFor) {
   const grade = GRADE_KEYS[GRADE_KEYS.length - 1];
+  /*
+   * NOTE: หัวเรื่องกับปุ่มอยู่ในคอลัมน์ขวา ไม่ใช่คร่อมทั้ง modal — ทุกอย่างที่เกี่ยวกับ
+   * "สร้างของใหม่" เลยอยู่ฝั่งเดียวกันหมด และเส้นคั่นพาดได้เต็มความสูงโดยไม่มีอะไรมาขวาง
+   */
   return `<form method="dialog">
-    <header class="edit-header">
-      <h2 class="edit-title">New item</h2>
-      <button type="submit" value="cancel" class="edit-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></button>
-    </header>
-
     <div class="edit-cols">
       <div class="edit-col">${pair.map((set) => previewHtml(set, slot, modeFor(set.setKey))).join('')}</div>
       <div class="edit-col">
-        ${formCardHtml(slot, grade)}
-      </div>
-    </div>
+        <header class="edit-header">
+          <h2 class="edit-title">New item</h2>
+          <button type="submit" value="cancel" class="edit-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></button>
+        </header>
 
-    <p class="edit-status" id="editStatus"></p>
-    <div class="edit-actions">
-      <button type="submit" value="cancel">Cancel</button>
-      ${pair
-        .map(
-          (set, i) =>
-            `<button type="submit" value="replace${i}" class="edit-replace">Replace ${escapeHtml(set.title)}</button>`,
-        )
-        .join('')}
+        ${formCardHtml(slot, grade)}
+
+        <p class="edit-status" id="editStatus"></p>
+        <div class="edit-actions">
+          <button type="submit" value="cancel">Cancel</button>
+          ${pair
+            .map(
+              (set, i) =>
+                `<button type="submit" value="replace${i}" class="edit-replace">Replace ${escapeHtml(set.title)}</button>`,
+            )
+            .join('')}
+        </div>
+      </div>
     </div>
   </form>`;
 }

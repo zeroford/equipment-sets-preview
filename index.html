@@ -464,6 +464,10 @@
       gap: 0.85rem;
       min-width: 0;
     }
+    /* ความสูงแถวมาจากคอลัมน์ซ้าย (การ์ด 2 ใบ) — ขวายืดตาม ปุ่มเลยลงไปติดล่างได้ */
+    .edit-cols > .edit-col {
+      height: 100%;
+    }
 
     .edit-preview,
     .edit-form-card {
@@ -790,7 +794,7 @@
       cursor: progress;
     }
     .edit-status {
-      margin: 0;
+      margin: 0 0 -0.35rem;
       min-height: 1.1rem;
       font-size: 0.78rem;
       color: var(--muted);
