@@ -96,7 +96,7 @@ var NUMBER_FORMATS = {
 
 /** { header ที่ normalize แล้ว → index คอลัมน์ (0-based) } */
 function itemsSheetLayout() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_ITEMS);
+  var sheet = getSheet(SHEET_ITEMS);
   if (!sheet) {
     throw new Error('Sheet tab not found: ' + SHEET_ITEMS);
   }
@@ -220,7 +220,7 @@ function setCell(layout, row, name, value, format) {
  * ไม่มีแท็บนี้เลย = หน้าเว็บใช้ค่าตั้งต้นของมันเอง
  */
 function buildBestStats() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_BEST);
+  var sheet = getSheet(SHEET_BEST);
   if (!sheet) {
     return null;
   }
@@ -338,7 +338,7 @@ function readSubStats(row) {
 
 /** อ่านทั้งแท็บเป็น array ของ object โดยใช้ header row เป็น key */
 function readTable(name) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+  var sheet = getSheet(name);
   if (!sheet) {
     throw new Error('Sheet tab not found: ' + name);
   }
@@ -380,6 +380,28 @@ function groupBySetKey(rows, sheetName) {
     grouped[key].push(rows[i]);
   }
   return grouped;
+}
+
+/**
+ * หาแท็บโดยไม่สนช่องว่าง/ตัวพิมพ์ — `Best Stats` = `BestStats` = `best_stats`
+ *
+ * NOTE: ชื่อคอลัมน์ยืดหยุ่นอยู่แล้ว ชื่อแท็บก็ควรเหมือนกัน ไม่งั้นพิมพ์เว้นวรรคเข้าไป
+ * แล้วสคริปต์หาไม่เจอโดยไม่มีอะไรบอก
+ */
+function getSheet(name) {
+  var book = SpreadsheetApp.getActiveSpreadsheet();
+  var exact = book.getSheetByName(name);
+  if (exact) {
+    return exact;
+  }
+  var target = normalizeKey(name);
+  var sheets = book.getSheets();
+  for (var i = 0; i < sheets.length; i += 1) {
+    if (normalizeKey(sheets[i].getName()) === target) {
+      return sheets[i];
+    }
+  }
+  return null;
 }
 
 function normalizeKey(header) {
