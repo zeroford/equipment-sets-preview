@@ -14,7 +14,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
 SEED = Path(__file__).resolve().parent.parent / 'google-apps-script' / 'seed'
-TABS = ['Sets', 'Items', 'Stats']
+TABS = ['Sets', 'Items', 'Stats', 'BestStats']
 OUT = SEED / 'equipment-sets.xlsx'
 
 HEADER_FILL = PatternFill('solid', fgColor='1F2937')

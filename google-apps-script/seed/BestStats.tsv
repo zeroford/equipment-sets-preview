@@ -1,0 +1,9 @@
+mode	row	stats
+pve	1	skillAmp, accuracy
+pve	2	dmgReduction, critRes
+pve	3	skillAmp, critDmg, accuracy, focus, skillHaste
+pve	4	focus, skillHaste
+boss	1	skillAmp, critDmg
+boss	2	dmgReduction, critRes
+boss	3	skillAmp, critDmg, skillHaste
+boss	4	dmgReduction, skillHaste

@@ -5,7 +5,7 @@ critDmg	CRIT DMG	percent
 critRate	CRIT%	percent
 critRes	CRIT RES	percent
 def	DEF	int
-dmgReduction	DMG Reduction	percent
+dmgReduction	DMG RDN	percent
 evasion	Evasion	decimal
 focus	Focus	decimal
 hp	HP	int

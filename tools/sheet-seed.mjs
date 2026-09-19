@@ -3,7 +3,7 @@
  * สำหรับ paste ลง Google Sheet ครั้งแรก — ไม่ต้องพิมพ์ item ทีละตัว
  *
  *   node tools/sheet-seed.mjs
- *   → google-apps-script/seed/{Sets,Items,Stats}.tsv + percent-cells.json
+ *   → google-apps-script/seed/{Sets,Items,Stats,BestStats}.tsv + percent-cells.json
  *
  * แต่ละไฟล์ = 1 แท็บ: copy ทั้งไฟล์ แล้ว paste ลง A1 ของแท็บชื่อเดียวกัน
  */
@@ -11,6 +11,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { STATS, resolveStatId } from '../assets/js/stats.mjs';
+import { MODES, bestSubstatFor } from '../assets/js/constants.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'google-apps-script', 'seed');
@@ -44,7 +45,7 @@ function buildSets(sets) {
 }
 
 function buildItems(sets) {
-  const header = ['setKey', 'slot', 'level', 'grade', 'power'];
+  const header = ['setKey', 'slot', 'level', 'grade', 'power', 'isNew', 'archived'];
   for (let i = 1; i <= MAX_SUBS; i += 1) {
     header.push(`sub${i}Type`, `sub${i}Value`);
   }
@@ -59,7 +60,8 @@ function buildItems(sets) {
         return; // slot ว่าง = ไม่มีแถวในชีต
       }
       const slot = index + 1;
-      const row = [set.setKey, slot, item.level, item.grade, item.power];
+      // ของที่มีอยู่แล้วไม่ใช่ของใหม่ และยังไม่ถูกแทนที่
+      const row = [set.setKey, slot, item.level, item.grade, item.power, 'FALSE', 'FALSE'];
       for (let i = 0; i < MAX_SUBS; i += 1) {
         const [type, value] = (item.subs || [])[i] || ['', ''];
         const statId = type === '' ? '' : resolveStatId(type);
@@ -79,6 +81,25 @@ function isPercent(statId) {
   return Boolean(STATS[statId]) && STATS[statId].format === 'percent';
 }
 
+/**
+ * best substat ที่ฝังอยู่ในโค้ดตอนนี้ — paste ลงแท็บ BestStats แล้วแก้ในชีตได้เลย
+ *
+ * NOTE: อ่านผ่าน bestSubstatFor ไม่ใช่ก๊อปค่ามาเขียนซ้ำ — แก้ค่าตั้งต้นในโค้ดเมื่อไหร่
+ * ไฟล์นี้ก็ตามเอง ไม่มีทางหลุดกัน
+ *
+ * NOTE: เขียนเป็น stat id ไม่ใช่ label — Code.gs รับได้ทั้งสองแบบ แต่ id ไม่กำกวม
+ * และไม่พังถ้าวันหลังเปลี่ยนชื่อที่แสดง (เช่น DMG Reduction → DMG RDN)
+ */
+function buildBestStats() {
+  const rows = [];
+  MODES.forEach((mode) => {
+    bestSubstatFor(mode).rows.forEach((ids, index) => {
+      rows.push([mode, index + 1, ids.join(', ')]);
+    });
+  });
+  return tsv([['mode', 'row', 'stats'], ...rows]);
+}
+
 /** แท็บอ้างอิงเฉยๆ — Code.gs ไม่ได้อ่าน แต่ช่วยให้รู้ว่ามี stat id อะไรให้ใช้บ้าง */
 function buildStatsLegend() {
   const rows = Object.keys(STATS)
@@ -94,6 +115,7 @@ const files = {
   'Sets.tsv': buildSets(sets),
   'Items.tsv': items.tsv,
   'Stats.tsv': buildStatsLegend(),
+  'BestStats.tsv': buildBestStats(),
 };
 Object.entries(files).forEach(([name, content]) => {
   writeFileSync(join(OUT_DIR, name), content);
