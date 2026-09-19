@@ -65,6 +65,9 @@ export function subStatRange(slot, grade, statId) {
   return [range[0] * bonus, range[1] * bonus];
 }
 
+/** เลเวลสูงสุดที่ตารางของเกมมีข้อมูล — เกินนี้คำนวณ base stat ไม่ได้ */
+export const MAX_LEVEL = CURVES.atk.length;
+
 /**
  * substat ที่ slot + เกรดนี้โรลออกได้จริง — ตารางของเกมบอกไว้ไม่เท่ากันทุกช่อง
  * เช่น ATK/CRIT DMG ไม่มีทางออกใน helmet/armor/shield

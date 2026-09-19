@@ -865,6 +865,12 @@
       font-weight: 700;
     }
 
+    /* ยังไม่ได้เลือก = ไม่ใช่ค่าจริง ให้จางกว่าตัวเลือกอื่น */
+    .ui-select-option.is-none,
+    .ui-select-text.is-none {
+      color: var(--muted);
+    }
+
     /* หัวแถวกินเต็มความกว้าง — กำกับทั้งช่องเลือกและช่องกรอกในแถวเดียวกัน */
     .edit-sub-label {
       grid-column: 1 / -1;
@@ -1394,6 +1400,7 @@
       justify-self: end;
     }
 
+    .card.eternal .stat-row-best .ui-select-text,
     .card.eternal .stat-row-best .label,
     .card.eternal .stat-row-best .value {
       /* NOTE: ผูกกับ --glow ของการ์ด — แก้สีเกรดใน constants.mjs แล้วตรงนี้ตามเอง */
@@ -1401,6 +1408,7 @@
       font-weight: 600;
     }
 
+    .card.legendary .stat-row-best .ui-select-text,
     .card.legendary .stat-row-best .label,
     .card.legendary .stat-row-best .value {
       color: #fdba74;

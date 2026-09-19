@@ -3,6 +3,7 @@ import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { emptyCellHtml, equipIconPath, renderCard, rollMarkHtml, statTagsHtml } from './render.mjs';
 import {
+  MAX_LEVEL,
   computeBaseStat,
   subStatFixed,
   subStatIds,
@@ -16,6 +17,7 @@ const KEY_STORAGE = 'equipment-sets-edit-key';
 const SLOT_COUNT = 12;
 /** ยังไม่เลือก slot — เปิดฟอร์มมาใหม่ทุกครั้งจะอยู่สถานะนี้ */
 const NO_SLOT = 0;
+const NONE_LABEL = 'None';
 const SUB_COUNT = 2;
 
 function readStoredKey() {
@@ -91,21 +93,35 @@ function rarityToggleHtml(selected) {
   return `<div class="rarity-group glass-chip" role="group" aria-label="Rarity">${buttons}</div><input type="hidden" name="grade" value="${code}" />`;
 }
 
+/** stat ที่มีโอกาสเป็น best ของแถวนี้ — รวมของทุก set เพราะยังไม่รู้ว่าจะลงเซตไหน */
+function bestIdsFor(sets, slot, modeFor) {
+  const row = Math.floor((slot - 1) / 3);
+  const ids = new Set();
+  sets.forEach((set) => {
+    (bestSubstatFor(modeFor(set.setKey)).rows[row] || []).forEach((id) => ids.add(id));
+  });
+  return ids;
+}
+
 /**
- * ตัวเลือก substat ของ slot + เกรดนั้นเท่านั้น
+ * ตัวเลือก substat ของ slot + เกรดนั้นเท่านั้น เรียงตัวที่มีโอกาสเป็น best ขึ้นก่อน
  *
  * NOTE: เดิมโชว์ทุก stat ในระบบ เลือกตัวที่ช่องนั้นออกไม่ได้ก็เลยไม่มีช่วงค่าให้ดู
  * และบันทึกไปก็เป็นของที่ไม่มีอยู่จริงในเกม
  *
  * NOTE: กรองด้วย STATS อีกชั้น — ตารางของเกมมี SPD ที่แอปนี้ยังไม่รู้จัก format
  */
-function statOptionsHtml(slot, grade, selected) {
-  const ids = subStatIds(slot, grade)
-    .filter((id) => STATS[id])
-    .sort((a, b) => statLabel(a).localeCompare(statLabel(b)));
-  return [`<option value="">— none —</option>`]
+function statOptionsHtml(slot, grade, selected, best) {
+  const byLabel = (a, b) => statLabel(a).localeCompare(statLabel(b));
+  const ids = subStatIds(slot, grade).filter((id) => STATS[id]);
+  const ordered = ids
+    .filter((id) => best.has(id))
+    .sort(byLabel)
+    .concat(ids.filter((id) => !best.has(id)).sort(byLabel));
+
+  return [`<option value="">${NONE_LABEL}</option>`]
     .concat(
-      ids.map(
+      ordered.map(
         (id) =>
           `<option value="${id}"${id === selected ? ' selected' : ''}>${escapeHtml(statLabel(id))}</option>`,
       ),
@@ -158,7 +174,7 @@ function previewHtml(set, slot, mode) {
  *
  * NOTE: ใช้คลาสเดียวกับการ์ดบนหน้าเว็บ (.card/.name-bar/.stats) ไม่ต้องดูแล layout สองชุด
  */
-function formCardHtml(slot, grade) {
+function formCardHtml(slot, grade, best) {
   const chrome = cardChrome(slot, grade);
   const baseStat = baseStatForSlot(slot);
   const iconHtml = slotIconHtml(slot, chrome.icon);
@@ -169,8 +185,8 @@ function formCardHtml(slot, grade) {
     subRows += `<li>
       <span class="edit-sub-label">Substat ${i}</span>
       <span class="ui-select">
-        <select name="sub${i}Type" aria-label="Substat ${i} type" hidden>${statOptionsHtml(slot, grade, '')}</select>
-        <button type="button" class="ui-select-trigger" data-select="${i}" aria-haspopup="listbox" aria-expanded="false"><span class="ui-select-text" data-select-text="${i}">— none —</span><svg class="ui-select-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></button>
+        <select name="sub${i}Type" aria-label="Substat ${i} type" hidden>${statOptionsHtml(slot, grade, '', best)}</select>
+        <button type="button" class="ui-select-trigger" data-select="${i}" aria-haspopup="listbox" aria-expanded="false"><span class="ui-select-text is-none" data-select-text="${i}">${NONE_LABEL}</span><svg class="ui-select-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></button>
       </span>
       <span class="edit-sub-value">
         <span class="edit-field">
@@ -196,7 +212,7 @@ function formCardHtml(slot, grade) {
         <div class="edit-name-lines">
           <span class="name-bar-text">${escapeHtml(slot ? chrome.name : '')}</span>
           <div class="edit-name-controls">
-            <span class="edit-lv">Lv.<input name="level" type="number" min="1" step="1" class="level-input" aria-label="Level" autofocus /></span>
+            <span class="edit-lv">Lv.<input name="level" type="number" min="1" max="${MAX_LEVEL}" step="1" class="level-input" aria-label="Level" autofocus /></span>
             ${rarityToggleHtml(grade)}
           </div>
         </div>
@@ -245,7 +261,7 @@ function dialogHtml(pair, slot, modeFor) {
           <button type="submit" value="cancel" class="edit-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></button>
         </header>
 
-        ${formCardHtml(slot, grade)}
+        ${formCardHtml(slot, grade, bestIdsFor(pair, slot, modeFor))}
 
         <p class="edit-status" id="editStatus"></p>
         <div class="edit-actions">
@@ -419,14 +435,7 @@ export function createEditUi({ onSaved, modeFor }) {
      * NOTE: ฟอร์มยังไม่รู้ว่าจะกด Replace ไปลงเซตไหน เลยนับว่า "มีโอกาส" ถ้าเป็น
      * best ของเซตใดเซตหนึ่ง
      */
-    const bestCandidates = () => {
-      const row = Math.floor((slot - 1) / 3);
-      const ids = new Set();
-      pair().forEach((set) => {
-        (bestSubstatFor(modeFor(set.setKey)).rows[row] || []).forEach((id) => ids.add(id));
-      });
-      return ids;
-    };
+    const bestCandidates = () => bestIdsFor(pair(), slot, modeFor);
 
     const refreshMarks = () => {
       const grade = Number(form.elements.grade.value);
@@ -464,9 +473,13 @@ export function createEditUi({ onSaved, modeFor }) {
           ? formatStatRange(statId, range[0], range[1])
           : '';
         form.querySelector(`[data-sub-unit="${i}"]`).hidden = !isPercent(statId);
-        form
-          .querySelector(`[data-select-text="${i}"]`)
-          .classList.toggle('is-best', best.has(statId));
+        const label = form.querySelector(`[data-select-text="${i}"]`);
+        label.classList.toggle('is-best', best.has(statId));
+        label.classList.toggle('is-none', !statId);
+        // คลาสเดียวกับการ์ดจริง — ได้ทั้งสีชื่อ stat และเครื่องหมายโรลแบบไม่จาง
+        form.elements[`sub${i}Type`]
+          .closest('li')
+          .classList.toggle('stat-row-best', best.has(statId));
       }
       refreshMarks();
     };
@@ -486,7 +499,7 @@ export function createEditUi({ onSaved, modeFor }) {
       list.innerHTML = Array.from(select.options)
         .map(
           (opt) =>
-            `<button type="button" class="ui-select-option${best.has(opt.value) ? ' is-best' : ''}" role="option" aria-selected="${opt.value === select.value}" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.textContent)}</button>`,
+            `<button type="button" class="ui-select-option${best.has(opt.value) ? ' is-best' : ''}${opt.value ? '' : ' is-none'}" role="option" aria-selected="${opt.value === select.value}" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.textContent)}</button>`,
         )
         .join('');
       list.dataset.for = String(index);
@@ -534,7 +547,8 @@ export function createEditUi({ onSaved, modeFor }) {
      * หายหมดทุกครั้งที่สลับ slot
      */
     function applySlot() {
-      const gradeKey = GRADE_KEYS[Number(form.elements.grade.value) - 1];
+      const gradeCode = Number(form.elements.grade.value);
+      const gradeKey = GRADE_KEYS[gradeCode - 1];
       const chrome = cardChrome(slot, gradeKey);
       const card = form.querySelector('.edit-card[data-card]');
 
@@ -549,15 +563,14 @@ export function createEditUi({ onSaved, modeFor }) {
         ? statLabel(baseStatForSlot(slot))
         : '—';
 
+      const best = bestCandidates();
       for (let i = 1; i <= SUB_COUNT; i += 1) {
         const select = form.elements[`sub${i}Type`];
-        const keep = subStatIds(slot, Number(form.elements.grade.value)).includes(select.value)
-          ? select.value
-          : '';
-        select.innerHTML = statOptionsHtml(slot, Number(form.elements.grade.value), keep);
+        const keep = subStatIds(slot, gradeCode).includes(select.value) ? select.value : '';
+        select.innerHTML = statOptionsHtml(slot, gradeCode, keep, best);
         select.value = keep;
         if (!keep) {
-          form.querySelector(`[data-select-text="${i}"]`).textContent = '— none —';
+          form.querySelector(`[data-select-text="${i}"]`).textContent = NONE_LABEL;
           form.elements[`sub${i}Value`].value = '';
         }
       }
@@ -576,9 +589,40 @@ export function createEditUi({ onSaved, modeFor }) {
     refreshSubs();
     form.elements.level.addEventListener('input', refreshBase);
     form.elements.grade.addEventListener('change', applySlot);
+    /*
+     * ดึงค่าที่เกินขอบเข้ามาให้ — ทำตอน change (เสียโฟกัส/กด Enter) ไม่ใช่ตอน input
+     * ไม่งั้นพิมพ์ "150" ยังไม่ทันครบก็โดนแก้ตั้งแต่ตัวแรกแล้ว
+     */
+    form.elements.level.addEventListener('change', () => {
+      const input = form.elements.level;
+      const value = Number(input.value);
+      if (!input.value || !Number.isFinite(value)) {
+        return;
+      }
+      const clamped = Math.min(MAX_LEVEL, Math.max(1, Math.round(value)));
+      if (clamped !== value) {
+        input.value = clamped;
+        refreshBase();
+      }
+    });
+
     for (let i = 1; i <= SUB_COUNT; i += 1) {
       form.elements[`sub${i}Type`].addEventListener('change', refreshSubs);
       form.elements[`sub${i}Value`].addEventListener('input', refreshMarks);
+      form.elements[`sub${i}Value`].addEventListener('change', () => {
+        const statId = form.elements[`sub${i}Type`].value;
+        const input = form.elements[`sub${i}Value`];
+        const range = statId ? subStatRange(slot, Number(form.elements.grade.value), statId) : null;
+        if (!range || !input.value) {
+          return;
+        }
+        const value = fromInput(statId, input.value);
+        const clamped = Math.min(range[1], Math.max(range[0], value));
+        if (clamped !== value) {
+          input.value = toInput(statId, clamped);
+          refreshMarks();
+        }
+      });
     }
 
     // ปุ่ม rarity เขียนค่าลง input ที่ซ่อนไว้ แล้วยิง change ให้ตัวที่ฟังอยู่ทำงานต่อ
