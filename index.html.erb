@@ -457,6 +457,15 @@
     .add-slot:hover img {
       opacity: 1;
     }
+
+    /*
+     * ในการ์ดฟอร์มเป็นรูปไอเทมจริง มีสีของมันเองอยู่แล้ว — ที่ดึงสว่างข้างบนมีไว้
+     * ให้แผ่นเปล่าสีเทาในเมนูปุ่ม + เท่านั้น ใส่ทับรูปจริงแล้วสีซีดหมด
+     */
+    .slot-picker .add-slot img {
+      filter: none;
+      opacity: 1;
+    }
     .edit-dialog {
       /* NOTE: * { margin: 0 } ข้างบนลบ margin: auto ที่เบราว์เซอร์ใช้จัดกลาง dialog — ต้องใส่คืน */
       margin: auto;
@@ -624,7 +633,7 @@
     .edit-name-lines {
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
+      gap: 0.3rem;
       flex: 1;
       min-width: 0;
     }
@@ -709,11 +718,34 @@
       width: 100%;
       height: auto;
     }
+    /*
+     * การ์ดจริงใช้ <ul> เป็นกล่องเทามีเส้นในตัว เพราะข้างในเป็นข้อความล้วน
+     * แต่ในฟอร์ม แต่ละแถวเป็นช่องกรอกที่มีกรอบของตัวเองอยู่แล้ว ซ้อนกล่องอีกชั้นเลยรก
+     * — ถอดกล่องออก เหลือแค่แถวเรียงลงมาโดยมีระยะห่างเท่ากันทุกด้าน
+     */
+    .edit-card .card-body {
+      padding: 0.7rem;
+    }
+    .edit-card .stats {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      border-radius: 0;
+      overflow: visible;
+      background: none;
+    }
     .edit-card .stats li {
       grid-template-columns: minmax(0, 1fr) 5.5rem;
       align-items: start;
-      min-height: 2.4rem;
-      column-gap: 0.4rem;
+      min-height: 0;
+      padding: 0;
+      column-gap: 0.5rem;
+    }
+
+    /* แถว base/power ใช้ระยะขอบเดียวกับแถวช่องกรอกข้างล่าง */
+    .edit-card .stat-primary-block {
+      padding: 0;
+      margin-bottom: 0.7rem;
     }
 
     /* ลูกศรขึ้น/ลงของ input[type=number] เกะกะในช่องแคบๆ — ไม่ได้ใช้กดอยู่แล้ว */
