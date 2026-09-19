@@ -19,7 +19,12 @@ export const SLOT_TYPES = [
  * key = โหมด (ตรงกับที่โชว์บนปุ่ม toggle) ไม่ใช่ setKey
  * rows = stat id (ดู stats.mjs) — ใช้ทั้ง highlight และ tag เหนือแถว
  */
-const BEST_SUBSTAT_PROFILES = {
+/**
+ * ค่าตั้งต้นของ best substat — ใช้เมื่อชีตไม่ได้กำหนดมา
+ *
+ * rows[i] = แถวที่ i ของกริด (0 = slot 1-3, 1 = slot 4-6, 2 = 7-9, 3 = 10-12)
+ */
+const BUILT_IN_BEST_SUBSTATS = {
   pve: {
     rows: [
       ['skillAmp', 'accuracy'],
@@ -54,10 +59,35 @@ const DEFAULT_MODE_BY_SET = { boss: 'pve', pve: 'boss' };
 
 const EMPTY_BEST_SUBSTAT = { rows: [] };
 
+/**
+ * ชุดที่ใช้อยู่จริง — ชีตเขียนทับได้ ไม่งั้นใช้ค่าตั้งต้นในไฟล์นี้
+ *
+ * NOTE: เก็บเป็นตัวแปรเดียวแทนที่จะส่ง profile ไปตามทาง เพราะมีคนเรียก
+ * bestSubstatFor หลายที่ (การ์ด, Compare, ฟอร์ม) และทุกที่ต้องเห็นชุดเดียวกัน
+ */
+let bestSubstats = BUILT_IN_BEST_SUBSTATS;
+
+/**
+ * รับชุดจากชีต — โหมดไหนไม่มีข้อมูลก็ใช้ค่าตั้งต้นของโหมดนั้นต่อ
+ * ส่ง falsy หรือของว่างมา = กลับไปใช้ค่าตั้งต้นทั้งหมด
+ */
+export function configureBestSubstats(profiles) {
+  if (!profiles || !Object.keys(profiles).length) {
+    bestSubstats = BUILT_IN_BEST_SUBSTATS;
+    return;
+  }
+  const merged = {};
+  MODES.forEach((mode) => {
+    const rows = profiles[mode] && profiles[mode].rows;
+    merged[mode] = rows && rows.length ? { rows } : BUILT_IN_BEST_SUBSTATS[mode];
+  });
+  bestSubstats = merged;
+}
+
 export function defaultModeFor(setKey) {
   return DEFAULT_MODE_BY_SET[setKey] || '';
 }
 
 export function bestSubstatFor(mode) {
-  return BEST_SUBSTAT_PROFILES[mode] || EMPTY_BEST_SUBSTAT;
+  return bestSubstats[mode] || EMPTY_BEST_SUBSTAT;
 }

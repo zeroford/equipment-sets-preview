@@ -1,4 +1,5 @@
 import { loadSetsPayload } from './data.mjs';
+import { configureBestSubstats } from './constants.mjs';
 import { renderAppShell } from './render.mjs';
 import { createSetModeUi } from './set-mode.mjs';
 import { createEditUi } from './edit.mjs';
@@ -22,6 +23,8 @@ async function bootstrap() {
   if (!payload.sets.length) {
     throw new Error('No equipment sets found');
   }
+  // NOTE: ต้องตั้งก่อน paint — การ์ดอ่าน best stat ตอน render รอบแรกเลย
+  configureBestSubstats(payload.bestStats);
   paint(payload.sets, payload.loadError);
   editUi.configure(payload);
   editUi.bind();

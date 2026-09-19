@@ -859,10 +859,16 @@
       background: rgba(255, 255, 255, 0.12);
     }
 
-    /* stat ที่มีโอกาสเป็น best ของช่องนี้ — เห็นตั้งแต่ตอนเลือก ไม่ต้องจำเอง */
+    /* stat ที่มีโอกาสเป็น best ของช่องนี้ — สีและน้ำหนักชุดเดียวกับที่การ์ดใช้ */
     .ui-select-option.is-best,
     .ui-select-text.is-best {
       font-weight: 700;
+    }
+    .edit-form-card[data-grade='eternal'] .ui-select-option.is-best {
+      color: var(--glow);
+    }
+    .edit-form-card[data-grade='legendary'] .ui-select-option.is-best {
+      color: #fdba74;
     }
 
     /* ยังไม่ได้เลือก = ไม่ใช่ค่าจริง ให้จางกว่าตัวเลือกอื่น */

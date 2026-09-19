@@ -203,7 +203,7 @@ function formCardHtml(slot, grade, best) {
    * ทุกช่องกรอกอยู่ในการ์ด และอยู่ตรงที่ค่านั้นจะไปโผล่จริง — ไอคอนคือ slot,
    * badge คือ level, ช่องขวาบนคือ power กรอกแล้วเห็นผลทันทีในที่เดียวกัน
    */
-  return `<div class="edit-form-card">
+  return `<div class="edit-form-card" data-grade="${escapeHtml(grade)}" style="--glow:${chrome.glow}">
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
       <div class="name-bar edit-name-bar">
         <span class="name-bar-icon-wrap">
@@ -555,6 +555,9 @@ export function createEditUi({ onSaved, modeFor }) {
       card.className = `card ${chrome.grade} edit-card`;
       card.style.setProperty('--frame', chrome.frame);
       card.style.setProperty('--glow', chrome.glow);
+      // รายการ dropdown แขวนอยู่ที่ host ไม่ใช่ในการ์ด ต้องรู้เกรดด้วยถึงจะทาสีตามได้
+      host.dataset.grade = chrome.grade;
+      host.style.setProperty('--glow', chrome.glow);
       pickBtn.innerHTML = slotIconHtml(slot, chrome.icon);
 
       card.querySelector('.name-bar-text').textContent = slot ? chrome.name : '';

@@ -51,6 +51,25 @@ function normalizeSetsPayload(raw) {
   }));
 }
 
+/**
+ * ชีตพิมพ์ชื่อ stat มาแบบไหนก็ได้ (id หรือ label) — แปลงเป็น id ให้เหมือนกับ substat
+ * NOTE: คืน null ถ้าไม่มีอะไรใช้ได้ ตัวเรียกจะได้รู้ว่าให้ใช้ค่าตั้งต้นต่อ
+ */
+function normalizeBestStats(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const profiles = {};
+  Object.keys(raw).forEach((mode) => {
+    const rows = raw[mode] && raw[mode].rows;
+    if (!Array.isArray(rows)) {
+      return;
+    }
+    profiles[mode] = { rows: rows.map((row) => (row || []).map(resolveStatId)) };
+  });
+  return Object.keys(profiles).length ? profiles : null;
+}
+
 function resolveWebAppUrl(sheetsConfig) {
   const params = new URLSearchParams(window.location.search);
   return (
@@ -108,7 +127,7 @@ export async function loadSetsPayload() {
   const webAppUrl = resolveWebAppUrl(sheetsConfig);
 
   if (!webAppUrl) {
-    return { sets: embeddedSets, loadError: '', webAppUrl: '' };
+    return { sets: embeddedSets, loadError: '', webAppUrl: '', bestStats: null };
   }
 
   try {
@@ -117,12 +136,13 @@ export async function loadSetsPayload() {
     if (!sets.length) {
       throw new Error('Web App returned empty sets');
     }
-    return { sets, loadError: '', webAppUrl };
+    return { sets, loadError: '', webAppUrl, bestStats: normalizeBestStats(payload.bestStats) };
   } catch (err) {
     const message = err && err.message ? err.message : 'error';
     return {
       sets: embeddedSets,
       loadError: `Could not load the Web App — showing built-in fallback data (${message})`,
+      bestStats: null,
     };
   }
 }

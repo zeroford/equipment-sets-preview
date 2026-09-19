@@ -29,13 +29,14 @@
 
 var SHEET_SETS = 'Sets';
 var SHEET_ITEMS = 'Items';
+var SHEET_BEST = 'BestStats'; // ไม่บังคับ — ไม่มีแท็บนี้ก็ใช้ค่าตั้งต้นในโค้ดหน้าเว็บ
 
 var SLOT_COUNT = 12; // grid 3×4
 var MAX_SUBSTATS = 5;
 
 function doGet() {
   try {
-    return jsonResponse({ sets: buildSets() });
+    return jsonResponse({ sets: buildSets(), bestStats: buildBestStats() });
   } catch (err) {
     return jsonResponse({ error: String((err && err.message) || err) });
   }
@@ -182,6 +183,44 @@ function setCell(layout, row, name, value, format) {
   if (NUMBER_FORMATS[format]) {
     cell.setNumberFormat(NUMBER_FORMATS[format]);
   }
+}
+
+/**
+ * แท็บ BestStats (ไม่บังคับ): mode | row | stats
+ *   mode  = pve | boss
+ *   row   = 1-4 (แถวของกริด: 1 = slot 1-3, 2 = 4-6, 3 = 7-9, 4 = 10-12)
+ *   stats = ชื่อ stat คั่นด้วยจุลภาค เช่น "skillAmp, accuracy" หรือ "Skill AMP, Accuracy"
+ *
+ * แถวไหนไม่ได้เขียนไว้ = ว่าง (ไม่ highlight อะไรในแถวนั้น)
+ * ไม่มีแท็บนี้เลย = หน้าเว็บใช้ค่าตั้งต้นของมันเอง
+ */
+function buildBestStats() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_BEST);
+  if (!sheet) {
+    return null;
+  }
+
+  var profiles = {};
+  readTable(SHEET_BEST).forEach(function (row) {
+    var mode = field(row, 'mode').toLowerCase();
+    var index = Number(field(row, 'row')) - 1;
+    if (!mode || !(index >= 0 && index < 4)) {
+      return;
+    }
+    if (!profiles[mode]) {
+      profiles[mode] = { rows: [[], [], [], []] };
+    }
+    profiles[mode].rows[index] = field(row, 'stats')
+      .split(',')
+      .map(function (part) {
+        return part.trim();
+      })
+      .filter(function (part) {
+        return part !== '';
+      });
+  });
+
+  return Object.keys(profiles).length ? profiles : null;
 }
 
 function buildSets() {
