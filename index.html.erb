@@ -733,15 +733,20 @@
     .edit-card .stats[hidden] {
       display: none;
     }
-    /* ช่องกรอกมีพื้นของตัวเองแล้ว ไม่ต้องมีกล่องครอบอีกชั้น */
+    /*
+     * ช่องกรอกมีพื้นของตัวเองแล้ว ไม่ต้องมีกล่องครอบอีกชั้น
+     * NOTE: gap 0 ได้เพราะบรรทัดช่วงค่าใต้แต่ละแถวทำหน้าที่เว้นวรรคให้อยู่แล้ว
+     * ส่วน margin ติดลบดึงขอบล่างการ์ดเข้ามา ไม่ให้เหลือที่ว่างใต้แถวสุดท้ายเยอะ
+     */
     .edit-card .stats {
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0;
       padding: 0;
       border-radius: 0;
       overflow: visible;
       background: none;
+      margin-bottom: -0.4rem;
     }
     .edit-card .stats li {
       grid-template-columns: minmax(0, 1fr) 5.5rem;
