@@ -1151,6 +1151,20 @@
       height: 0.82rem;
     }
 
+    /*
+     * ช่องเดียวมีของหลายใบ (หลายแถว active ใน slot เดียวกัน) — เรียงลงมาในช่องนั้น
+     * NOTE: ปกติมีใบเดียว กล่องนี้เลยไม่เปลี่ยนหน้าตาอะไรเลยในกรณีทั่วไป
+     */
+    .slot-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+    .slot-stack .card {
+      height: auto;
+    }
+
     /* ของที่เพิ่งเปลี่ยนเข้าไป (isNew ในชีต) — กรอบฟ้าให้หาเจอในกริดได้เร็ว */
     .card.is-new {
       box-shadow:

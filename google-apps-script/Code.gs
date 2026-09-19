@@ -62,7 +62,7 @@ function doPost(e) {
     }
 
     if (body.action === 'clearSlot') {
-      clearSlot(body.setKey, body.slot);
+      clearSlot(body.setKey, body.slot, body.row);
     } else if (body.action === 'updateItem') {
       writeItem(body.setKey, body.slot, body.item || {});
     } else {
@@ -182,10 +182,14 @@ function writeItem(setKey, slot, item) {
   }
 }
 
-/** เอาออกจากกริด — มีคอลัมน์ isActive ก็แค่ปิดแถวไว้ ไม่ลบข้อมูลทิ้ง */
-function clearSlot(setKey, slot) {
+/**
+ * เอาออกจากกริด — มีคอลัมน์ isActive ก็แค่ปิดแถวไว้ ไม่ลบข้อมูลทิ้ง
+ *
+ * NOTE: รับเลขแถวมาด้วยได้ ตอน slot มีหลายใบจะได้ลบถูกใบ ไม่ใช่ใบแรกที่เจอ
+ */
+function clearSlot(setKey, slot, targetRow) {
   var layout = itemsSheetLayout();
-  var row = findItemRow(layout, setKey, Math.round(toNumber(slot)));
+  var row = Math.round(toNumber(targetRow)) || findItemRow(layout, setKey, Math.round(toNumber(slot)));
   if (!row) {
     return;
   }
@@ -279,12 +283,17 @@ function buildSets() {
     });
 }
 
-/** 12 ช่องเรียงตาม grid, ช่องที่ไม่มีแถวในชีต = null */
+/**
+ * 12 ช่องเรียงตาม grid — แต่ละช่องเป็น "รายการ" ของที่ยังใช้งานอยู่
+ *
+ * NOTE: ปกติมีใบเดียว แต่ถ้าชีตมีหลายแถว active ใน slot เดียวกันจะส่งไปทั้งหมด
+ * ให้หน้าเว็บเรียงให้เห็นครบ — ดีกว่าเลือกมาใบเดียวแล้วอีกใบหายไปเงียบๆ
+ */
 function buildItems(rows, setKey) {
   var slots = [];
   var i;
   for (i = 0; i < SLOT_COUNT; i += 1) {
-    slots.push(null);
+    slots.push([]);
   }
 
   for (i = 0; i < rows.length; i += 1) {
@@ -300,15 +309,8 @@ function buildItems(rows, setKey) {
         SHEET_ITEMS + ' (' + setKey + '): slot must be 1-' + SLOT_COUNT + ' but got "' + raw + '"',
       );
     }
-    /*
-     * slot ซ้ำ = แถวล่างชนะ
-     *
-     * NOTE: เมื่อก่อน throw ทิ้ง แต่พอ writeItem ต่อแถวใหม่ท้ายตาราง แถวซ้ำเกิดง่ายมาก
-     * (เช่นแถวเก่าไม่ได้ถูกปิด หรือมีแถวว่างค้างอยู่) แล้วทั้งเว็บล่มเพราะแถวเดียว
-     * — แถวล่างสุดคือแถวที่เพิ่งเขียน เอาอันนั้นถูกต้องเสมอ
-     */
-
     var item = {
+      row: row.__row,
       level: Math.round(toNumber(field(row, 'level'))),
       grade: field(row, 'grade'),
       power: toNumber(field(row, 'power')),
@@ -319,7 +321,8 @@ function buildItems(rows, setKey) {
     if (name !== '') {
       item.name = name;
     }
-    slots[slot - 1] = item;
+    // แถวล่าสุดขึ้นก่อน — เพิ่งเพิ่มเข้าไปย่อมเป็นตัวที่สนใจที่สุด
+    slots[slot - 1].unshift(item);
   }
 
   return slots;
@@ -355,18 +358,20 @@ function readTable(name) {
   var headers = values[0].map(normalizeKey);
   return values
     .slice(1)
-    .map(function (row) {
+    .map(function (row, index) {
       var obj = {};
       for (var i = 0; i < headers.length; i += 1) {
         if (headers[i]) {
           obj[headers[i]] = String(row[i] == null ? '' : row[i]).trim();
         }
       }
+      // NOTE: ขึ้นต้น __ กันชนกับชื่อคอลัมน์จริง — field() มองไม่เห็นเพราะ normalizeKey ตัด _ ทิ้ง
+      obj.__row = index + 2;
       return obj;
     })
     .filter(function (obj) {
       return Object.keys(obj).some(function (key) {
-        return obj[key] !== '';
+        return key !== '__row' && obj[key] !== '';
       });
     });
 }

@@ -6,7 +6,11 @@ import { formatStat, statLabel } from './stats.mjs';
  * NOTE: รวมตาม stat id แล้วค่อย format ทีเดียวตอนท้าย — ไม่ต้อง parse ข้อความอย่าง "8.53%" อีก
  */
 export function buildSetSummary(set) {
-  const equipped = (set.items || []).filter(Boolean);
+  /*
+   * NOTE: ช่องละหลายใบได้ แต่ยอดรวมนับใบเดียวต่อช่อง (ใบบนสุด = แถวล่าสุดในชีต)
+   * ใส่ของซ้ำช่องไว้เทียบกัน ไม่ได้แปลว่าสวมพร้อมกัน
+   */
+  const equipped = (set.items || []).map((list) => (list || [])[0]).filter(Boolean);
   const totals = new Map();
 
   equipped.forEach((item) => {

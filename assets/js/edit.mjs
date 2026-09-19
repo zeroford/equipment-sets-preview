@@ -160,7 +160,7 @@ function previewHtml(set, slot, mode) {
       <div class="edit-blank">Pick a slot</div>
     </div>`;
   }
-  const item = (set.items || [])[slot - 1] || null;
+  const item = ((set.items || [])[slot - 1] || [])[0] || null;
   const bestStats = bestSubstatFor(mode).rows[Math.floor((slot - 1) / 3)] || [];
   return `<div class="edit-preview">
     <p class="edit-col-title">${escapeHtml(set.title)}${item ? '' : ' · empty'}</p>
@@ -417,7 +417,13 @@ export function createEditUi({ onSaved, modeFor }) {
       card.classList.add('is-busy');
       try {
         await postAll(key, [
-          { action: 'clearSlot', setKey: owner.dataset.setKey, slot: slotNumber },
+          {
+            action: 'clearSlot',
+            setKey: owner.dataset.setKey,
+            slot: slotNumber,
+            // ช่องเดียวมีได้หลายใบ — ต้องบอกแถวไม่งั้นลบใบแรกที่เจอเสมอ
+            row: Number(card.dataset.row) || 0,
+          },
         ]);
       } catch (err) {
         btn.disabled = false;

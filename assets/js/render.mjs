@@ -73,7 +73,7 @@ export function renderCard(item, gridIndex, bestStats) {
   // NOTE: ปุ่มลบอยู่ในทุกการ์ด แต่ CSS โชว์เฉพาะตอน .can-edit (ต่อ Web App ได้จริง)
   const deleteBtn = `<button type="button" class="card-delete" data-delete-slot="${gridIndex + 1}" aria-label="Remove this item" title="Remove this item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></button>`;
 
-  return `<article class="card ${escapeHtml(item.grade)}${item.isNew ? ' is-new' : ''}" data-slot="${gridIndex + 1}" style="--frame:${g.frame};--glow:${g.glow}">${deleteBtn}<div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">Lv.${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="primary-cell"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></span><span class="primary-cell is-power"><span class="label">Power</span><span class="value">${escapeHtml(formatPower(item.power))}</span></span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
+  return `<article class="card ${escapeHtml(item.grade)}${item.isNew ? ' is-new' : ''}" data-slot="${gridIndex + 1}" data-row="${escapeHtml(item.row || '')}" style="--frame:${g.frame};--glow:${g.glow}">${deleteBtn}<div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">Lv.${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="primary-cell"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></span><span class="primary-cell is-power"><span class="label">Power</span><span class="value">${escapeHtml(formatPower(item.power))}</span></span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
 }
 
 export function statTagsHtml(statIds) {
@@ -111,15 +111,17 @@ function renderSection(set, setIndex, summary, mode) {
   for (let rowIndex = 0; rowIndex < 4; rowIndex += 1) {
     const rowItems = items.slice(rowIndex * 3, rowIndex * 3 + 3);
     while (rowItems.length < 3) {
-      rowItems.push(null);
+      rowItems.push([]);
     }
     const bestStats = best.rows[rowIndex] || [];
-    const cells = rowItems.map((item, colIndex) => {
+    const cells = rowItems.map((slotItems, colIndex) => {
       const gridIndex = rowIndex * 3 + colIndex;
-      if (!item) {
-        return `<div class="grid-empty" aria-hidden="true"><img class="grid-empty-plate" src="${escapeHtml(platePath(gridIndex))}" alt="" width="72" height="72" decoding="async" /></div>`;
+      const list = slotItems || [];
+      if (!list.length) {
+        return emptyCellHtml(gridIndex);
       }
-      return renderCard(item, gridIndex, bestStats);
+      // ช่องเดียวมีได้หลายใบ — เรียงลงมาในช่องนั้น ไม่ไปกินช่องข้างๆ
+      return `<div class="slot-stack">${list.map((item) => renderCard(item, gridIndex, bestStats)).join('')}</div>`;
     });
     rowsHtml += `<div class="grid-row-group" data-row-index="${rowIndex}"><p class="row-best-caption">${bestTagsHtml(bestStats)}</p><div class="grid">${cells.join('')}</div></div>`;
   }
@@ -153,16 +155,18 @@ function renderCompareSection(sets, modeFor) {
   let groupsHtml = '';
   for (let slot = 1; slot <= 12; slot += 1) {
     const gridIndex = slot - 1;
-    if (!pair.some((set) => (set.items || [])[gridIndex])) {
+    if (!pair.some((set) => ((set.items || [])[gridIndex] || []).length)) {
       continue; // ไม่มีของทั้งสอง set ก็ไม่ต้องโชว์ช่องนี้
     }
 
     const slotName = SLOT_TYPES[gridIndex] || '';
     const cells = pair
       .map((set, i) => {
-        const item = (set.items || [])[gridIndex];
+        const list = (set.items || [])[gridIndex] || [];
         const bestStats = bestOf[i].rows[Math.floor(gridIndex / 3)] || [];
-        const card = item ? renderCard(item, gridIndex, bestStats) : emptyCellHtml(gridIndex);
+        const card = list.length
+          ? `<div class="slot-stack">${list.map((item) => renderCard(item, gridIndex, bestStats)).join('')}</div>`
+          : emptyCellHtml(gridIndex);
         // NOTE: ติด setKey/rowIndex ไว้ให้ set-mode.mjs วาด highlight ใหม่ได้ตอนสลับโหมด
         return `<div class="compare-cell" data-set-key="${escapeHtml(set.setKey)}" data-row-index="${Math.floor(
           gridIndex / 3,

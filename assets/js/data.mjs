@@ -26,10 +26,23 @@ function normalizeItem(item, index) {
     level,
     grade,
     isNew: Boolean(item.isNew),
+    // เลขแถวในชีต — ใช้ชี้เป้าตอนลบ ไม่มีก็ได้ (สคริปต์รุ่นเก่าไม่ได้ส่งมา)
+    row: Number(item.row) || 0,
     name: item.name || itemNameFor(slot, grade),
     power: toStatNumber(item.power),
     stats: [[baseStatForSlot(slot), computeBaseStat(slot, grade, level) || 0], ...subs],
   };
+}
+
+/**
+ * 1 ช่อง = รายการของที่อยู่ในช่องนั้น (ปกติ 0 หรือ 1 ใบ)
+ *
+ * NOTE: รับได้ทั้งรูปแบบเก่า (object เดี่ยว / null) และใหม่ (array) — ข้อมูลสำรองใน
+ * .erb ยังเป็นแบบเก่า และสคริปต์ที่ยังไม่อัปเดตก็ส่งแบบเก่ามา
+ */
+function normalizeSlot(entry, index) {
+  const list = Array.isArray(entry) ? entry : [entry];
+  return list.map((item) => normalizeItem(item, index)).filter(Boolean);
 }
 
 export function buildMetaFromSets(sets) {
@@ -48,7 +61,7 @@ function normalizeSetsPayload(raw) {
   return list.map((set) => ({
     setKey: set.setKey || set.set_key,
     title: set.title,
-    items: (set.items || []).map(normalizeItem),
+    items: (set.items || []).map(normalizeSlot),
   }));
 }
 
