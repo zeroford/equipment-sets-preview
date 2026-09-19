@@ -147,7 +147,7 @@ function formCardHtml(slot, grade) {
         <button type="button" class="ui-select-trigger" data-select="${i}" aria-haspopup="listbox" aria-expanded="false"><span class="ui-select-text" data-select-text="${i}">— none —</span><svg class="ui-select-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></button>
       </span>
       <span class="edit-sub-value">
-        <span class="edit-sub-input">
+        <span class="edit-field">
           <span class="edit-sub-mark" data-sub-mark="${i}" aria-hidden="true"></span>
           <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Substat ${i} value" />
           <span class="edit-unit" data-sub-unit="${i}" aria-hidden="true">%</span>
@@ -182,8 +182,11 @@ function formCardHtml(slot, grade) {
             <span class="value" data-base-display>—</span>
           </span>
           <span class="primary-cell is-power">
-            <span class="label">Power (M)</span>
-            <input name="power" type="number" step="any" class="power-input" placeholder="—" aria-label="Power in millions" />
+            <span class="label">Power</span>
+            <span class="edit-field edit-power-field">
+              <input name="power" type="number" step="any" class="power-input" placeholder="—" aria-label="Power in millions" />
+              <span class="edit-unit" aria-hidden="true">M</span>
+            </span>
           </span>
         </div>
         <ul class="stats">${subRows}</ul>

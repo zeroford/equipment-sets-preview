@@ -597,10 +597,10 @@
     }
 
     /*
-     * NOTE: กรอบของฟิลด์อยู่ที่ตัวห่อ ไม่ใช่ที่ <input> — % เลยอยู่ในกรอบเดียวกับตัวเลข
-     * ไม่ต้องกันที่ไว้ข้างนอก โผล่/หายก็ไม่กระทบความกว้างของช่อง
+     * NOTE: กรอบของฟิลด์อยู่ที่ตัวห่อ ไม่ใช่ที่ <input> — หน่วย (% / M) กับเครื่องหมาย
+     * คุณภาพโรลเลยอยู่ในกรอบเดียวกับตัวเลข ไม่ต้องกันที่ไว้ข้างนอก
      */
-    .edit-sub-input {
+    .edit-field {
       display: flex;
       align-items: center;
       gap: 0.15rem;
@@ -610,15 +610,18 @@
       border-radius: 0.65rem;
       background-color: rgba(255, 255, 255, 0.07);
     }
-    .edit-sub-input:hover {
+    .edit-field:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
-    .edit-sub-input:focus-within {
+    .edit-field:focus-within {
       outline: 2px solid rgba(255, 255, 255, 0.35);
       outline-offset: 1px;
     }
-    .edit-sub-input:has(.edit-inline[readonly]) {
+    .edit-field:has(.edit-inline[readonly]) {
       background-color: rgba(255, 255, 255, 0.03);
+    }
+    .edit-power-field {
+      width: 5.5rem;
     }
     /*
      * เครื่องหมายคุณภาพโรลนำหน้าตัวเลข — ชุดเดียวกับที่การ์ดใช้
@@ -821,40 +824,34 @@
       cursor: default;
     }
 
-    /* input เปลือย — กรอบเป็นหน้าที่ของ .edit-sub-input ที่ห่ออยู่ */
-    .edit-dialog .edit-sub-input .edit-inline {
+    /* input เปลือย — กรอบเป็นหน้าที่ของ .edit-field ที่ห่ออยู่ */
+    .edit-dialog .edit-field .edit-inline,
+    .edit-dialog .edit-field .power-input {
       width: 100%;
       min-width: 0;
       height: auto;
       padding: 0;
+      border: none;
       border-radius: 0;
       background: transparent;
       text-align: right;
     }
-    .edit-dialog .edit-sub-input .edit-inline:focus {
+    .edit-dialog .edit-field .edit-inline:focus,
+    .edit-dialog .edit-field .power-input:focus {
       outline: none;
     }
-    /* Power ใช้ทรงเดียวกับช่องค่า substat ข้างล่าง — ในการ์ดมีสองแบบก็พอ */
     .edit-dialog .power-input {
-      width: 5.5rem;
-      height: 1.85rem;
-      padding: 0 0.55rem;
-      border: none;
-      border-radius: 0.65rem;
-      background-color: rgba(255, 255, 255, 0.07);
       color: #fff;
       font: inherit;
       font-size: 0.79rem;
       font-weight: 600;
-      text-align: right;
-    }
-    .edit-dialog .power-input:hover {
-      background-color: rgba(255, 255, 255, 0.1);
     }
 
-    /* ระยะ label → ค่า ให้เท่ากับหัวแถว Substat ข้างล่าง และเท่ากันทั้งสองฝั่ง */
     .edit-card .primary-cell {
-      gap: 0.25rem;
+      gap: 0.1rem;
+    }
+    .edit-card .primary-cell.is-power {
+      gap: 0.2rem;
     }
 
     /*
