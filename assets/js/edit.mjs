@@ -40,10 +40,18 @@ const fromInput = (statId, value) => round6(isPercent(statId) ? Number(value) / 
 
 const titleCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
+/**
+ * ลำดับช่องในตาราง 6×2 ให้ตรงกับกริดบนหน้าเว็บตอนจอกว้าง — สองกลุ่ม 3 ช่องวางข้างกัน
+ *   1 2 3 | 7 8 9
+ *   4 5 6 | 10 11 12
+ * ถ้าไล่ 1–12 ตามปกติ helmet (4) จะไปอยู่แถวบน คนละที่กับที่ชินตา
+ */
+const SLOT_GRID_ORDER = [1, 2, 3, 7, 8, 9, 4, 5, 6, 10, 11, 12];
+
 /** ตารางไอคอน 6×2 สำหรับเลือก slot — รูปเป็นไอเทมจริงของเกรดที่เลือกอยู่ */
 function slotButtonsHtml(selected, grade) {
   let html = '';
-  for (let n = 1; n <= SLOT_COUNT; n += 1) {
+  for (const n of SLOT_GRID_ORDER) {
     const name = titleCase(SLOT_TYPES[n - 1] || '');
     html += `<button type="button" class="add-slot" data-slot="${n}" aria-pressed="${n === selected}" title="${escapeHtml(
       name,
