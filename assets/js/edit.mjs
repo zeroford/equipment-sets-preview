@@ -87,6 +87,13 @@ function statOptions(selected) {
     .join('');
 }
 
+/** ยังไม่เลือก slot ก็ยังไม่มีรูปไอเทม — โชว์เครื่องหมาย + ให้รู้ว่ากดได้ */
+function slotIconHtml(slot, icon) {
+  return slot
+    ? `<img class="name-bar-icon" src="${escapeHtml(icon)}" alt="" width="36" height="36" decoding="async" />`
+    : '<svg class="slot-pick-hint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>';
+}
+
 function cardChrome(slot, grade) {
   const g = GRADES[grade] || GRADES.legendary;
   return {
@@ -129,9 +136,7 @@ function previewHtml(set, slot, mode) {
 function formCardHtml(slot, grade) {
   const chrome = cardChrome(slot, grade);
   const baseStat = baseStatForSlot(slot);
-  const iconHtml = slot
-    ? `<img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" />`
-    : '<svg class="slot-pick-hint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>';
+  const iconHtml = slotIconHtml(slot, chrome.icon);
 
   let subRows = '';
   for (let i = 1; i <= SUB_COUNT; i += 1) {
@@ -200,7 +205,7 @@ function dialogHtml(pair, slot, modeFor) {
    */
   return `<form method="dialog">
     <div class="edit-cols">
-      <div class="edit-col">${pair.map((set) => previewHtml(set, slot, modeFor(set.setKey))).join('')}</div>
+      <div class="edit-col" data-previews>${pair.map((set) => previewHtml(set, slot, modeFor(set.setKey))).join('')}</div>
       <div class="edit-col">
         <header class="edit-header">
           <h2 class="edit-title">New item</h2>
@@ -215,7 +220,7 @@ function dialogHtml(pair, slot, modeFor) {
           ${pair
             .map(
               (set, i) =>
-                `<button type="submit" value="replace${i}" class="edit-replace"${slot ? '' : ' disabled'}>Replace ${escapeHtml(set.title)}</button>`,
+                `<button type="submit" value="replace${i}" class="edit-replace" disabled>Replace ${escapeHtml(set.title)}</button>`,
             )
             .join('')}
         </div>
@@ -348,13 +353,26 @@ export function createEditUi({ onSaved, modeFor }) {
         return;
       }
       slot = Number(btn.dataset.slot) || 1;
-      renderDialog();
+      setPickerOpen(false);
+      applySlot();
     });
 
+    /*
+     * ยังไม่เลือก slot หรือยังไม่ใส่ level = ยังไม่ต้องโชว์ช่อง substat
+     * ช่วงค่าของ substat ผูกกับ slot + rarity ส่วน base stat ผูกกับ level
+     * โผล่มาก่อนก็กรอกได้แต่ไม่มีอะไรมาบอกว่ากรอกถูกหรือผิด
+     */
     const refreshBase = () => {
       const cell = form.querySelector('[data-base-display]');
       const value = slot ? baseValue(form, slot) : null;
       cell.textContent = value === null ? '—' : formatStat(baseStatForSlot(slot), value);
+
+      const ready = Boolean(slot) && Number(form.elements.level.value) > 0;
+      // NOTE: ต้องระบุ .edit-card — การ์ดตัวอย่างซ้ายมือก็มี .stats เหมือนกัน
+      form.querySelector('.edit-card .stats').hidden = !ready;
+      form.querySelectorAll('.edit-replace').forEach((btn) => {
+        btn.disabled = !ready;
+      });
     };
     /**
      * ช่วงค่าของ substat ที่เลือก — ขึ้นกับ slot + rarity เลยต้องคิดใหม่ทุกครั้งที่เปลี่ยน
@@ -388,11 +406,44 @@ export function createEditUi({ onSaved, modeFor }) {
       }
     };
 
+    /**
+     * วาดส่วนที่ผูกกับ slot/rarity ใหม่
+     *
+     * NOTE: ไม่ render ทั้ง dialog ใหม่ — ไม่งั้น level/power/substat ที่พิมพ์ไว้แล้ว
+     * หายหมดทุกครั้งที่สลับ slot
+     */
+    function applySlot() {
+      const gradeKey = GRADE_KEYS[Number(form.elements.grade.value) - 1];
+      const chrome = cardChrome(slot, gradeKey);
+      const card = form.querySelector('.edit-card[data-card]');
+
+      card.className = `card ${chrome.grade} edit-card`;
+      card.style.setProperty('--frame', chrome.frame);
+      card.style.setProperty('--glow', chrome.glow);
+      pickBtn.innerHTML = slotIconHtml(slot, chrome.icon);
+
+      const text = card.querySelector('.name-bar-text');
+      text.textContent = slot ? chrome.name : 'Pick a slot';
+      text.classList.toggle('is-blank', !slot);
+
+      card.querySelector('.primary-cell .label').textContent = slot
+        ? statLabel(baseStatForSlot(slot))
+        : '—';
+
+      // การ์ดตัวอย่างสองใบซ้ายมือขึ้นกับ slot ล้วนๆ
+      form.querySelector('[data-previews]').innerHTML = pair()
+        .map((set) => previewHtml(set, slot, modeFor(set.setKey)))
+        .join('');
+      picker.innerHTML = slotButtonsHtml(slot, gradeKey);
+
+      refreshBase();
+      refreshSubs();
+    }
+
     refreshBase();
     refreshSubs();
     form.elements.level.addEventListener('input', refreshBase);
-    form.elements.grade.addEventListener('change', refreshBase);
-    form.elements.grade.addEventListener('change', refreshSubs);
+    form.elements.grade.addEventListener('change', applySlot);
     for (let i = 1; i <= SUB_COUNT; i += 1) {
       form.elements[`sub${i}Type`].addEventListener('change', refreshSubs);
     }
@@ -408,22 +459,6 @@ export function createEditUi({ onSaved, modeFor }) {
       });
       form.elements.grade.value = btn.dataset.grade;
       form.elements.grade.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-
-    form.addEventListener('change', (event) => {
-      const field = event.target.closest('[name="grade"]');
-      if (!field) {
-        return;
-      }
-      const gradeKey = GRADE_KEYS[Number(field.value) - 1];
-      picker.innerHTML = slotButtonsHtml(slot, gradeKey);
-      const chrome = cardChrome(slot, gradeKey);
-      const card = form.querySelector('.edit-card[data-card]');
-      card.className = `card ${chrome.grade} edit-card`;
-      card.style.setProperty('--frame', chrome.frame);
-      card.style.setProperty('--glow', chrome.glow);
-      card.querySelector('.name-bar-text').textContent = chrome.name;
-      card.querySelector('.name-bar-icon').src = chrome.icon;
     });
 
     form.addEventListener('submit', async (event) => {

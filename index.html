@@ -649,6 +649,9 @@
     .edit-card .card-body {
       padding: 0.7rem;
     }
+    .edit-card .stats[hidden] {
+      display: none;
+    }
     .edit-card .stats {
       display: flex;
       flex-direction: column;
@@ -725,19 +728,27 @@
     .edit-dialog .edit-sub-input .edit-inline:focus {
       outline: none;
     }
-    /* Power กรอกตรงช่องที่ค่ามันจะไปโผล่ — ทรงและขนาดชุดเดียวกับชิป Lv. */
+    /* Power ใช้ทรงเดียวกับช่องค่า substat ข้างล่าง — ในการ์ดมีสองแบบก็พอ */
     .edit-dialog .power-input {
-      width: 4.8rem;
+      width: 5.5rem;
       height: 1.85rem;
       padding: 0 0.55rem;
       border: none;
-      border-radius: 999px;
+      border-radius: 0.65rem;
       background-color: rgba(255, 255, 255, 0.07);
       color: #fff;
       font: inherit;
-      font-size: 0.72rem;
-      font-weight: 700;
+      font-size: 0.79rem;
+      font-weight: 600;
       text-align: right;
+    }
+    .edit-dialog .power-input:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ระยะ label → ช่องกรอก ให้เท่ากับหัวแถว Substat ข้างล่าง */
+    .edit-card .primary-cell.is-power {
+      gap: 0.25rem;
     }
 
     /* ค่า base stat คือผลลัพธ์ที่คำนวณให้ — ตัวหลักของการ์ดนี้ ต้องอ่านได้ในแวบเดียว */
