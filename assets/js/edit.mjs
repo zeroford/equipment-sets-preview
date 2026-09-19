@@ -3,7 +3,7 @@ import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { emptyCellHtml, equipIconPath, renderCard, statTagsHtml } from './render.mjs';
 import { computeBaseStat, subStatFixed, subStatRange } from './base-stat.mjs';
-import { STATS, formatPower, formatStat, formatStatRange, statLabel } from './stats.mjs';
+import { STATS, formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
 
 const KEY_STORAGE = 'equipment-sets-edit-key';
@@ -38,11 +38,17 @@ const fromInput = (statId, value) => round6(isPercent(statId) ? Number(value) / 
 
 const titleCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
-function slotOptions(selected) {
+/** ตารางไอคอน 6×2 — ใช้ทั้งเมนูปุ่ม + และตัวเลือก slot ในการ์ดฟอร์ม */
+function slotButtonsHtml(selected) {
   let html = '';
-  for (let slot = 1; slot <= SLOT_COUNT; slot += 1) {
-    const name = titleCase(SLOT_TYPES[slot - 1] || `slot ${slot}`);
-    html += `<option value="${slot}"${slot === selected ? ' selected' : ''}>${slot} · ${escapeHtml(name)}</option>`;
+  for (let n = 1; n <= SLOT_COUNT; n += 1) {
+    const type = SLOT_TYPES[n - 1] || '';
+    const name = titleCase(type);
+    html += `<button type="button" class="add-slot" role="menuitem" data-slot="${n}" aria-pressed="${n === selected}" title="${escapeHtml(
+      name,
+    )}" aria-label="${escapeHtml(name)}"><img src="assets/plates/icon_plate_${escapeHtml(
+      type,
+    )}.png" alt="" width="30" height="30" decoding="async" /></button>`;
   }
   return html;
 }
@@ -127,37 +133,38 @@ function formCardHtml(slot, grade) {
     </li>`;
   }
 
+  /*
+   * ทุกช่องกรอกอยู่ในการ์ด และอยู่ตรงที่ค่านั้นจะไปโผล่จริง — ไอคอนคือ slot,
+   * badge คือ level, ช่องขวาบนคือ power กรอกแล้วเห็นผลทันทีในที่เดียวกัน
+   */
   return `<div class="edit-form-card">
     <p class="edit-col-title">New item</p>
 
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
       <div class="name-bar">
-        <span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /><span class="level-badge" data-level-badge>—</span></span>
+        <span class="name-bar-icon-wrap">
+          <button type="button" class="slot-pick" data-slot-pick aria-expanded="false" aria-label="Pick a slot" title="Pick a slot"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /></button>
+          <span class="level-badge">Lv.<input name="level" type="number" min="1" step="1" class="level-input" placeholder="Lv." aria-label="Level" /></span>
+        </span>
         <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span></span>
       </div>
       <div class="card-body">
+        ${rarityToggleHtml(grade)}
         <div class="stat-primary-block">
           <span class="primary-cell">
             <span class="label">${escapeHtml(statLabel(baseStat))}</span>
             <span class="value" data-base-display>—</span>
           </span>
           <span class="primary-cell is-power">
-            <span class="label">Power</span>
-            <span class="value" data-power-badge>—</span>
+            <span class="label">Power (M)</span>
+            <input name="power" type="number" step="any" class="power-input" placeholder="—" aria-label="Power in millions" />
           </span>
         </div>
         <ul class="stats">${subRows}</ul>
       </div>
     </article>
 
-    <div class="edit-row">
-      <label for="editLevel">Lv.</label>
-      <input id="editLevel" name="level" type="number" min="1" step="1" />
-    </div>
-    <div class="edit-row">
-      <label for="editPower">Power (M)</label>
-      <input id="editPower" name="power" type="number" step="any" />
-    </div>
+    <div class="slot-picker glass-chip" data-slot-picker role="group" aria-label="Slot" hidden>${slotButtonsHtml(slot)}</div>
   </div>`;
 }
 
@@ -173,14 +180,6 @@ function dialogHtml(pair, slot, modeFor) {
     <div class="edit-cols">
       <div class="edit-col">${pair.map((set) => previewHtml(set, slot, modeFor(set.setKey))).join('')}</div>
       <div class="edit-col">
-        <div class="edit-row">
-          <label for="editSlot">Slot</label>
-          <select id="editSlot" name="slot">${slotOptions(slot)}</select>
-        </div>
-        <div class="edit-row">
-          <span class="edit-row-label">Rarity</span>
-          ${rarityToggleHtml(grade)}
-        </div>
         ${formCardHtml(slot, grade)}
         <p class="edit-status" id="editStatus"></p>
         <div class="edit-actions">
@@ -293,8 +292,20 @@ export function createEditUi({ onSaved, modeFor }) {
     dialog.innerHTML = dialogHtml(pair(), slot, modeFor);
     const form = dialog.querySelector('form');
 
-    form.elements.slot.addEventListener('change', (event) => {
-      slot = Number(event.target.value) || 1;
+    // ไอคอนในการ์ด = ปุ่มเปิดตารางเลือก slot
+    const picker = form.querySelector('[data-slot-picker]');
+    const pickBtn = form.querySelector('[data-slot-pick]');
+    pickBtn.addEventListener('click', () => {
+      const open = picker.hidden;
+      picker.hidden = !open;
+      pickBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    picker.addEventListener('click', (event) => {
+      const btn = event.target.closest('.add-slot');
+      if (!btn) {
+        return;
+      }
+      slot = Number(btn.dataset.slot) || 1;
       renderDialog();
     });
 
@@ -302,10 +313,6 @@ export function createEditUi({ onSaved, modeFor }) {
       const cell = form.querySelector('[data-base-display]');
       const value = baseValue(form, slot);
       cell.textContent = value === null ? '—' : formatStat(baseStatForSlot(slot), value);
-      const level = Number(form.elements.level.value);
-      form.querySelector('[data-level-badge]').textContent = level > 0 ? `Lv.${level}` : '—';
-      const power = Number(form.elements.power.value);
-      form.querySelector('[data-power-badge]').textContent = power > 0 ? formatPower(power) : '—';
     };
     /**
      * ช่วงค่าของ substat ที่เลือก — ขึ้นกับ slot + rarity เลยต้องคิดใหม่ทุกครั้งที่เปลี่ยน
@@ -341,7 +348,6 @@ export function createEditUi({ onSaved, modeFor }) {
     refreshBase();
     refreshSubs();
     form.elements.level.addEventListener('input', refreshBase);
-    form.elements.power.addEventListener('input', refreshBase);
     form.elements.grade.addEventListener('change', refreshBase);
     form.elements.grade.addEventListener('change', refreshSubs);
     for (let i = 1; i <= SUB_COUNT; i += 1) {
@@ -395,20 +401,6 @@ export function createEditUi({ onSaved, modeFor }) {
         dialog.close();
       }
     });
-  }
-
-  function slotButtonsHtml() {
-    let html = '';
-    for (let n = 1; n <= SLOT_COUNT; n += 1) {
-      const type = SLOT_TYPES[n - 1] || '';
-      const name = titleCase(type);
-      html += `<button type="button" class="add-slot" role="menuitem" data-slot="${n}" title="${escapeHtml(
-        name,
-      )}" aria-label="${escapeHtml(name)}"><img src="assets/plates/icon_plate_${escapeHtml(
-        type,
-      )}.png" alt="" width="30" height="30" decoding="async" /></button>`;
-    }
-    return html;
   }
 
   function closeMenu() {
