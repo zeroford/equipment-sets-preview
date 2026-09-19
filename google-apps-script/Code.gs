@@ -122,11 +122,11 @@ function findItemRow(layout, setKey, slot) {
   if (setCol < 0 || slotCol < 0) {
     throw new Error(SHEET_ITEMS + ': needs setKey and slot columns');
   }
-  var archivedCol = columnIndex(layout, 'archived');
+  var activeCol = columnIndex(layout, 'isActive');
 
   var values = layout.sheet.getDataRange().getValues();
   for (var r = 1; r < values.length; r += 1) {
-    if (archivedCol >= 0 && isTruthy(values[r][archivedCol])) {
+    if (activeCol >= 0 && isInactive(values[r][activeCol])) {
       continue;
     }
     if (
@@ -152,11 +152,11 @@ function writeItem(setKey, slot, item) {
   var row = findItemRow(layout, setKey, slotNumber);
 
   /*
-   * มีคอลัมน์ archived = เก็บของเก่าไว้ ไม่เขียนทับ — ปิดแถวเดิมแล้วต่อแถวใหม่ท้ายตาราง
+   * มีคอลัมน์ isActive = เก็บของเก่าไว้ ไม่เขียนทับ — ปิดแถวเดิมแล้วต่อแถวใหม่ท้ายตาราง
    * ไม่มีคอลัมน์ = ชีตรุ่นเก่า เขียนทับแบบเดิมไปก่อน (ถ้าต่อแถวใหม่จะกลายเป็น slot ซ้ำ)
    */
-  if (row && columnIndex(layout, 'archived') >= 0) {
-    setCell(layout, row, 'archived', true, '');
+  if (row && columnIndex(layout, 'isActive') >= 0) {
+    setCell(layout, row, 'isActive', false, '');
     setCell(layout, row, 'isNew', false, '');
     row = 0;
   }
@@ -165,7 +165,7 @@ function writeItem(setKey, slot, item) {
     row = layout.sheet.getLastRow() + 1;
     setCell(layout, row, 'setKey', setKey, '');
     setCell(layout, row, 'slot', slotNumber, '');
-    setCell(layout, row, 'archived', false, '');
+    setCell(layout, row, 'isActive', true, '');
   }
 
   setCell(layout, row, 'level', Math.round(toNumber(item.level)), '');
@@ -182,15 +182,15 @@ function writeItem(setKey, slot, item) {
   }
 }
 
-/** เอาออกจากกริด — มีคอลัมน์ archived ก็แค่ปิดแถวไว้ ไม่ลบข้อมูลทิ้ง */
+/** เอาออกจากกริด — มีคอลัมน์ isActive ก็แค่ปิดแถวไว้ ไม่ลบข้อมูลทิ้ง */
 function clearSlot(setKey, slot) {
   var layout = itemsSheetLayout();
   var row = findItemRow(layout, setKey, Math.round(toNumber(slot)));
   if (!row) {
     return;
   }
-  if (columnIndex(layout, 'archived') >= 0) {
-    setCell(layout, row, 'archived', true, '');
+  if (columnIndex(layout, 'isActive') >= 0) {
+    setCell(layout, row, 'isActive', false, '');
     setCell(layout, row, 'isNew', false, '');
   } else {
     layout.sheet.deleteRow(row);
@@ -289,8 +289,8 @@ function buildItems(rows, setKey) {
 
   for (i = 0; i < rows.length; i += 1) {
     var row = rows[i];
-    // ของเก่าที่ถูกแทนที่ไปแล้ว ยังอยู่ในชีตแต่ไม่เอามาแสดง
-    if (isTruthy(field(row, 'archived'))) {
+    // ของเก่าที่ถูกแทนที่/ลบไปแล้ว ยังอยู่ในชีตแต่ไม่เอามาแสดง
+    if (isInactive(field(row, 'isActive'))) {
       continue;
     }
     var raw = field(row, 'slot');
@@ -398,6 +398,17 @@ function field(row, name) {
 function isTruthy(raw) {
   var text = String(raw == null ? '' : raw).trim().toLowerCase();
   return text === 'true' || text === '1' || text === 'yes' || text === 'y';
+}
+
+/**
+ * ปิดอยู่หรือเปล่า — ต้องเขียน FALSE ชัดๆ เท่านั้น
+ *
+ * NOTE: ช่องว่างถือว่ายังใช้งานอยู่ ไม่งั้นแค่เพิ่มคอลัมน์ isActive เข้าไปเฉยๆ
+ * ของทั้งชีตจะหายจากหน้าเว็บทันที
+ */
+function isInactive(raw) {
+  var text = String(raw == null ? '' : raw).trim().toLowerCase();
+  return text === 'false' || text === '0' || text === 'no' || text === 'n';
 }
 
 function toNumber(raw) {

@@ -291,6 +291,7 @@ export function createEditUi({ onSaved, modeFor }) {
   let menu = null;
   let trigger = null;
   let slot = NO_SLOT;
+  let deleteBound = false;
 
   const pair = () => sets.slice(0, 2);
 
@@ -335,6 +336,19 @@ export function createEditUi({ onSaved, modeFor }) {
     return (window.prompt('Edit key (ตั้งไว้ใน Script Properties)') || '').trim();
   }
 
+  /** ยิง request แล้วรับชุดข้อมูลใหม่กลับมา — โยน error ให้ตัวเรียกจัดการเอง */
+  async function postAll(key, requests) {
+    let latest = sets;
+    // NOTE: ยิงทีละ request — Apps Script ล็อกสคริปต์ไว้ ยิงพร้อมกันจะชนกันเอง
+    for (const body of requests) {
+      latest = await postToWebApp(webAppUrl, Object.assign({ key }, body));
+    }
+    storeKey(key);
+    sets = latest;
+    onSaved(latest);
+    return latest;
+  }
+
   async function send(form, requests) {
     const status = form.querySelector('.edit-status');
     const key = resolveKey();
@@ -351,14 +365,7 @@ export function createEditUi({ onSaved, modeFor }) {
     status.textContent = 'Saving…';
 
     try {
-      let latest = sets;
-      // NOTE: ยิงทีละ request — Apps Script ล็อกสคริปต์ไว้ ยิงพร้อมกันจะชนกันเอง
-      for (const body of requests) {
-        latest = await postToWebApp(webAppUrl, Object.assign({ key }, body));
-      }
-      storeKey(key);
-      sets = latest;
-      onSaved(latest);
+      await postAll(key, requests);
       return true;
     } catch (err) {
       status.dataset.tone = 'error';
@@ -368,6 +375,51 @@ export function createEditUi({ onSaved, modeFor }) {
       });
       return false;
     }
+  }
+
+  /**
+   * ปุ่มกากบาทบนการ์ด — เอาของออกจากช่องนั้น
+   *
+   * NOTE: ผูกที่ #equipmentPage ครั้งเดียว ไม่ได้ผูกรายการ์ด เพราะกริดถูกวาดใหม่
+   * ทุกครั้งที่บันทึกสำเร็จ listener รายใบจะหายไปพร้อมการ์ดเก่า
+   */
+  function bindDelete() {
+    const page = document.getElementById('equipmentPage');
+    if (!page || deleteBound) {
+      return;
+    }
+    deleteBound = true;
+
+    page.addEventListener('click', async (event) => {
+      const btn = event.target.closest('.card-delete');
+      if (!btn) {
+        return;
+      }
+      const owner = btn.closest('[data-set-key]');
+      const slotNumber = Number(btn.dataset.deleteSlot);
+      if (!owner || !slotNumber) {
+        return;
+      }
+
+      const name = btn.closest('.card').querySelector('.name-bar-text').textContent;
+      if (!window.confirm(`Remove ${name}?`)) {
+        return;
+      }
+
+      const key = resolveKey();
+      if (!key) {
+        return;
+      }
+      btn.disabled = true;
+      try {
+        await postAll(key, [
+          { action: 'clearSlot', setKey: owner.dataset.setKey, slot: slotNumber },
+        ]);
+      } catch (err) {
+        btn.disabled = false;
+        window.alert((err && err.message) || 'Remove failed');
+      }
+    });
   }
 
   function renderDialog() {
@@ -669,6 +721,12 @@ export function createEditUi({ onSaved, modeFor }) {
     trigger = document.getElementById('editModeToggle');
     if (!dialog || !menu || !trigger) {
       return;
+    }
+
+    // แก้ข้อมูลได้ต่อเมื่อต่อ Web App ได้จริง — CSS ใช้คลาสนี้ตัดสินใจว่าจะโชว์ปุ่มลบมั้ย
+    document.body.classList.toggle('can-edit', Boolean(webAppUrl));
+    if (webAppUrl) {
+      bindDelete();
     }
 
     menu.hidden = !webAppUrl || pair().length < 2;

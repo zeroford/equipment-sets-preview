@@ -1071,6 +1071,50 @@
 
     .card-body { padding: 8px; }
 
+    /*
+     * ปุ่มลบมุมขวาบนของการ์ด — โผล่ตอน hover เท่านั้น
+     * NOTE: .can-edit ติดที่ body ตอนต่อ Web App ได้ ถ้าดูจากข้อมูลสำรองในเว็บก็ไม่มีปุ่ม
+     * เพราะกดไปก็เขียนอะไรไม่ได้
+     */
+    .card-delete {
+      position: absolute;
+      z-index: 2;
+      top: 0.3rem;
+      right: 0.3rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 1.35rem;
+      height: 1.35rem;
+      padding: 0;
+      border: none;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.12s ease, background 0.12s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .can-edit .card-delete {
+      display: flex;
+    }
+    .card:hover .card-delete,
+    .card-delete:focus-visible {
+      opacity: 1;
+    }
+    .card-delete:hover {
+      background: #e03131;
+    }
+    .card-delete[disabled] {
+      opacity: 0.5;
+      cursor: progress;
+    }
+    .card-delete svg {
+      width: 0.7rem;
+      height: 0.7rem;
+    }
+
     /* ของที่เพิ่งเปลี่ยนเข้าไป (isNew ในชีต) — กรอบฟ้าให้หาเจอในกริดได้เร็ว */
     .card.is-new {
       box-shadow:

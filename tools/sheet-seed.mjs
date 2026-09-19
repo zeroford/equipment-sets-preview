@@ -45,7 +45,7 @@ function buildSets(sets) {
 }
 
 function buildItems(sets) {
-  const header = ['setKey', 'slot', 'level', 'grade', 'power', 'isNew', 'archived'];
+  const header = ['setKey', 'slot', 'level', 'grade', 'power', 'isNew', 'isActive'];
   for (let i = 1; i <= MAX_SUBS; i += 1) {
     header.push(`sub${i}Type`, `sub${i}Value`);
   }
@@ -60,8 +60,8 @@ function buildItems(sets) {
         return; // slot ว่าง = ไม่มีแถวในชีต
       }
       const slot = index + 1;
-      // ของที่มีอยู่แล้วไม่ใช่ของใหม่ และยังไม่ถูกแทนที่
-      const row = [set.setKey, slot, item.level, item.grade, item.power, 'FALSE', 'FALSE'];
+      // ของที่มีอยู่แล้วไม่ใช่ของใหม่ และยังใช้งานอยู่
+      const row = [set.setKey, slot, item.level, item.grade, item.power, 'FALSE', 'TRUE'];
       for (let i = 0; i < MAX_SUBS; i += 1) {
         const [type, value] = (item.subs || [])[i] || ['', ''];
         const statId = type === '' ? '' : resolveStatId(type);
