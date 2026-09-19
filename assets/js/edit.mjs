@@ -127,7 +127,10 @@ function formCardHtml(slot, grade) {
     subRows += `<li>
       <select name="sub${i}Type" aria-label="Sub ${i} stat"><option value="">— none —</option>${statOptions('')}</select>
       <span class="edit-sub-value">
-        <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Sub ${i} value" />
+        <span class="edit-sub-input">
+          <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Sub ${i} value" />
+          <span class="edit-unit" data-sub-unit="${i}" aria-hidden="true">%</span>
+        </span>
         <small class="stat-range" data-sub-range="${i}"></small>
       </span>
     </li>`;
@@ -141,15 +144,19 @@ function formCardHtml(slot, grade) {
     <p class="edit-col-title">New item</p>
 
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
-      <div class="name-bar">
+      <div class="name-bar edit-name-bar">
         <span class="name-bar-icon-wrap">
           <button type="button" class="slot-pick" data-slot-pick aria-expanded="false" aria-label="Pick a slot" title="Pick a slot"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /></button>
-          <span class="level-badge">Lv.<input name="level" type="number" min="1" step="1" class="level-input" placeholder="Lv." aria-label="Level" /></span>
         </span>
-        <span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(chrome.name)}</span></span>
+        <div class="edit-name-lines">
+          <span class="name-bar-text">${escapeHtml(chrome.name)}</span>
+          <div class="edit-name-controls">
+            <span class="edit-lv">Lv.<input name="level" type="number" min="1" step="1" class="level-input" aria-label="Level" /></span>
+            ${rarityToggleHtml(grade)}
+          </div>
+        </div>
       </div>
       <div class="card-body">
-        ${rarityToggleHtml(grade)}
         <div class="stat-primary-block">
           <span class="primary-cell">
             <span class="label">${escapeHtml(statLabel(baseStat))}</span>
@@ -342,6 +349,9 @@ export function createEditUi({ onSaved, modeFor }) {
         form.querySelector(`[data-sub-range="${i}"]`).textContent = range
           ? formatStatRange(statId, range[0], range[1])
           : '';
+        form.querySelector(`[data-sub-unit="${i}"]`).style.visibility = isPercent(statId)
+          ? 'visible'
+          : 'hidden';
       }
     };
 
