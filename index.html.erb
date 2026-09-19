@@ -522,6 +522,24 @@
       column-gap: 0.4rem;
     }
 
+    /* ลูกศรขึ้น/ลงของ input[type=number] เกะกะในช่องแคบๆ — ไม่ได้ใช้กดอยู่แล้ว */
+    .edit-dialog input[type='number'] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+    .edit-dialog input[type='number']::-webkit-outer-spin-button,
+    .edit-dialog input[type='number']::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .edit-sub-value {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 0;
+    }
+
     .edit-inline {
       width: 100%;
       min-width: 0;

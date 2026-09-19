@@ -2,8 +2,8 @@ import { postToWebApp } from './data.mjs';
 import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { emptyCellHtml, equipIconPath, renderCard, statTagsHtml } from './render.mjs';
-import { computeBaseStat } from './base-stat.mjs';
-import { STATS, formatPower, formatStat, statLabel } from './stats.mjs';
+import { computeBaseStat, subStatRange } from './base-stat.mjs';
+import { STATS, formatPower, formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
 
 const KEY_STORAGE = 'equipment-sets-edit-key';
@@ -111,9 +111,13 @@ function formCardHtml(slot) {
 
   let subRows = '';
   for (let i = 1; i <= SUB_COUNT; i += 1) {
+    // NOTE: ช่วงค่าใต้ช่องกรอกใช้หน่วยเดียวกับที่พิมพ์ (8.53 ไม่ใช่ 0.0853) จะได้เทียบกันตรงๆ
     subRows += `<li>
       <select name="sub${i}Type" aria-label="Sub ${i} stat"><option value="">— none —</option>${statOptions('')}</select>
-      <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Sub ${i} value" />
+      <span class="edit-sub-value">
+        <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Sub ${i} value" />
+        <small class="stat-range" data-sub-range="${i}"></small>
+      </span>
     </li>`;
   }
 
@@ -297,10 +301,27 @@ export function createEditUi({ onSaved, modeFor }) {
       const power = Number(form.elements.power.value);
       form.querySelector('[data-power-badge]').textContent = power > 0 ? formatPower(power) : '—';
     };
+    /** ช่วงค่าที่ substat ตัวที่เลือกออกได้ — ขึ้นกับ slot + rarity เลยต้องคิดใหม่ทุกครั้งที่เปลี่ยน */
+    const refreshSubRanges = () => {
+      const grade = Number(form.elements.grade.value);
+      for (let i = 1; i <= SUB_COUNT; i += 1) {
+        const statId = form.elements[`sub${i}Type`].value;
+        const range = statId ? subStatRange(slot, grade, statId) : null;
+        form.querySelector(`[data-sub-range="${i}"]`).textContent = range
+          ? formatStatRange(statId, range[0], range[1])
+          : '';
+      }
+    };
+
     refreshBase();
+    refreshSubRanges();
     form.elements.level.addEventListener('input', refreshBase);
     form.elements.power.addEventListener('input', refreshBase);
     form.elements.grade.addEventListener('change', refreshBase);
+    form.elements.grade.addEventListener('change', refreshSubRanges);
+    for (let i = 1; i <= SUB_COUNT; i += 1) {
+      form.elements[`sub${i}Type`].addEventListener('change', refreshSubRanges);
+    }
 
     form.addEventListener('change', (event) => {
       const select = event.target.closest('select[name="grade"]');
