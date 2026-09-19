@@ -778,7 +778,12 @@
     }
     .ui-select-option[aria-selected='true'] {
       background: rgba(255, 255, 255, 0.12);
-      font-weight: 600;
+    }
+
+    /* stat ที่มีโอกาสเป็น best ของช่องนี้ — เห็นตั้งแต่ตอนเลือก ไม่ต้องจำเอง */
+    .ui-select-option.is-best,
+    .ui-select-text.is-best {
+      font-weight: 700;
     }
 
     /* หัวแถวกินเต็มความกว้าง — กำกับทั้งช่องเลือกและช่องกรอกในแถวเดียวกัน */

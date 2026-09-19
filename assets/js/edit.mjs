@@ -2,7 +2,13 @@ import { postToWebApp } from './data.mjs';
 import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { emptyCellHtml, equipIconPath, renderCard, rollMarkHtml, statTagsHtml } from './render.mjs';
-import { computeBaseStat, subStatFixed, subStatRange, subStatRatio } from './base-stat.mjs';
+import {
+  computeBaseStat,
+  subStatFixed,
+  subStatIds,
+  subStatRange,
+  subStatRatio,
+} from './base-stat.mjs';
 import { STATS, formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
 
@@ -85,12 +91,24 @@ function rarityToggleHtml(selected) {
   return `<div class="rarity-group glass-chip" role="group" aria-label="Rarity">${buttons}</div><input type="hidden" name="grade" value="${code}" />`;
 }
 
-function statOptions(selected) {
-  return Object.keys(STATS)
-    .sort()
-    .map(
-      (id) =>
-        `<option value="${id}"${id === selected ? ' selected' : ''}>${escapeHtml(statLabel(id))}</option>`,
+/**
+ * ตัวเลือก substat ของ slot + เกรดนั้นเท่านั้น
+ *
+ * NOTE: เดิมโชว์ทุก stat ในระบบ เลือกตัวที่ช่องนั้นออกไม่ได้ก็เลยไม่มีช่วงค่าให้ดู
+ * และบันทึกไปก็เป็นของที่ไม่มีอยู่จริงในเกม
+ *
+ * NOTE: กรองด้วย STATS อีกชั้น — ตารางของเกมมี SPD ที่แอปนี้ยังไม่รู้จัก format
+ */
+function statOptionsHtml(slot, grade, selected) {
+  const ids = subStatIds(slot, grade)
+    .filter((id) => STATS[id])
+    .sort((a, b) => statLabel(a).localeCompare(statLabel(b)));
+  return [`<option value="">— none —</option>`]
+    .concat(
+      ids.map(
+        (id) =>
+          `<option value="${id}"${id === selected ? ' selected' : ''}>${escapeHtml(statLabel(id))}</option>`,
+      ),
     )
     .join('');
 }
@@ -151,7 +169,7 @@ function formCardHtml(slot, grade) {
     subRows += `<li>
       <span class="edit-sub-label">Substat ${i}</span>
       <span class="ui-select">
-        <select name="sub${i}Type" aria-label="Substat ${i} type" hidden><option value="">— none —</option>${statOptions('')}</select>
+        <select name="sub${i}Type" aria-label="Substat ${i} type" hidden>${statOptionsHtml(slot, grade, '')}</select>
         <button type="button" class="ui-select-trigger" data-select="${i}" aria-haspopup="listbox" aria-expanded="false"><span class="ui-select-text" data-select-text="${i}">— none —</span><svg class="ui-select-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></button>
       </span>
       <span class="edit-sub-value">
@@ -395,6 +413,21 @@ export function createEditUi({ onSaved, modeFor }) {
      * NOTE: stat ที่โรลไม่ได้ (Skill Haste) เติมค่าให้แล้วล็อกช่องไว้ มีทางเลือกเดียว
      * จะให้กรอกเองก็มีแต่จะกรอกผิด
      */
+    /**
+     * stat ที่มีโอกาสเป็น best ของช่องนี้ — รวมของทั้งสอง set
+     *
+     * NOTE: ฟอร์มยังไม่รู้ว่าจะกด Replace ไปลงเซตไหน เลยนับว่า "มีโอกาส" ถ้าเป็น
+     * best ของเซตใดเซตหนึ่ง
+     */
+    const bestCandidates = () => {
+      const row = Math.floor((slot - 1) / 3);
+      const ids = new Set();
+      pair().forEach((set) => {
+        (bestSubstatFor(modeFor(set.setKey)).rows[row] || []).forEach((id) => ids.add(id));
+      });
+      return ids;
+    };
+
     const refreshMarks = () => {
       const grade = Number(form.elements.grade.value);
       for (let i = 1; i <= SUB_COUNT; i += 1) {
@@ -409,6 +442,7 @@ export function createEditUi({ onSaved, modeFor }) {
 
     const refreshSubs = () => {
       const grade = Number(form.elements.grade.value);
+      const best = bestCandidates();
       for (let i = 1; i <= SUB_COUNT; i += 1) {
         const statId = form.elements[`sub${i}Type`].value;
         const input = form.elements[`sub${i}Value`];
@@ -430,6 +464,9 @@ export function createEditUi({ onSaved, modeFor }) {
           ? formatStatRange(statId, range[0], range[1])
           : '';
         form.querySelector(`[data-sub-unit="${i}"]`).hidden = !isPercent(statId);
+        form
+          .querySelector(`[data-select-text="${i}"]`)
+          .classList.toggle('is-best', best.has(statId));
       }
       refreshMarks();
     };
@@ -445,10 +482,11 @@ export function createEditUi({ onSaved, modeFor }) {
     };
     const openList = (index) => {
       const select = form.elements[`sub${index}Type`];
+      const best = bestCandidates();
       list.innerHTML = Array.from(select.options)
         .map(
           (opt) =>
-            `<button type="button" class="ui-select-option" role="option" aria-selected="${opt.value === select.value}" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.textContent)}</button>`,
+            `<button type="button" class="ui-select-option${best.has(opt.value) ? ' is-best' : ''}" role="option" aria-selected="${opt.value === select.value}" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.textContent)}</button>`,
         )
         .join('');
       list.dataset.for = String(index);
@@ -510,6 +548,19 @@ export function createEditUi({ onSaved, modeFor }) {
       card.querySelector('.primary-cell .label').textContent = slot
         ? statLabel(baseStatForSlot(slot))
         : '—';
+
+      for (let i = 1; i <= SUB_COUNT; i += 1) {
+        const select = form.elements[`sub${i}Type`];
+        const keep = subStatIds(slot, Number(form.elements.grade.value)).includes(select.value)
+          ? select.value
+          : '';
+        select.innerHTML = statOptionsHtml(slot, Number(form.elements.grade.value), keep);
+        select.value = keep;
+        if (!keep) {
+          form.querySelector(`[data-select-text="${i}"]`).textContent = '— none —';
+          form.elements[`sub${i}Value`].value = '';
+        }
+      }
 
       // การ์ดตัวอย่างสองใบซ้ายมือขึ้นกับ slot ล้วนๆ
       form.querySelector('[data-previews]').innerHTML = pair()

@@ -66,6 +66,15 @@ export function subStatRange(slot, grade, statId) {
 }
 
 /**
+ * substat ที่ slot + เกรดนี้โรลออกได้จริง — ตารางของเกมบอกไว้ไม่เท่ากันทุกช่อง
+ * เช่น ATK/CRIT DMG ไม่มีทางออกใน helmet/armor/shield
+ */
+export function subStatIds(slot, grade) {
+  const code = Number(grade) || GRADE_KEYS.indexOf(String(grade)) + 1;
+  return Object.keys((SUB_RANGES[slot - 1] || {})[code] || {});
+}
+
+/**
  * substat ที่โรลไม่ได้ (min = max) คืนค่าเดียวที่เป็นไปได้ — ตัวที่โรลได้คืน null
  *
  * NOTE: คู่กับ subStatRange ที่คืน null ให้ stat แบบนี้ — ฟอร์มจะได้เติมค่าให้เลย
