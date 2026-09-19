@@ -26,7 +26,7 @@ Static preview สำหรับ equipment set cards (Set A / B / C)
 
 ### JS modules
 
-- `constants.mjs` — grade / slot / best substat (2 แบบ)
+- `constants.mjs` — grade / slot / best substat (ชีตเขียนทับได้)
 - `stats.mjs` — catalog ของ stat (id, label, format)
 - `catalog.mjs` — ชื่อของตาม (slot, grade) + base stat ตาม slot
 - `utils.mjs` — escape, stat match
@@ -41,7 +41,8 @@ Static preview สำหรับ equipment set cards (Set A / B / C)
 1. **สำรองในเว็บ** — `#equipment-sets-data` จาก Ruby ใน `.erb` (ใช้เมื่อโหลด Web App ไม่สำเร็จ)
 2. **Google Sheet** ผ่าน Apps Script Web App — ตั้ง `webAppUrl` ใน `#equipment-sheets-config` หรือ query `?webApp=URL`
 
-ชีตมี 2 แท็บ: `Sets` (setKey/title/order) และ `Items` (1 แถว = 1 ชิ้น, `slot` 1–12)
+ชีตมี 2 แท็บหลัก: `Sets` (setKey/title/order) และ `Items` (1 แถว = 1 ชิ้น, `slot` 1–12)
+บวกแท็บเสริม `BestStats` (mode/row/stats) ไว้กำหนด best substat เองโดยไม่ต้องแก้โค้ด
 เก็บแค่ level / grade / power / ค่า stat / substat type — ชื่อของกับ base stat type
 derive จาก slot+grade ในโค้ด
 

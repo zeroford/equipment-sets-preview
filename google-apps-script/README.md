@@ -12,11 +12,11 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ใ
 | ชนิด base stat | `assets/js/catalog.mjs` | fix ตาม slot |
 | **ค่า** base stat | `assets/js/base-stat.mjs` | คำนวณจาก slot + grade + level |
 | label / % / คั่นหลักพัน | `assets/js/stats.mjs` | เป็นเรื่องแสดงผล |
-| best substat | `assets/js/constants.mjs` | มีแค่ 2 แบบ |
+| best substat | **ชีต** (แท็บ `BestStats`) | ไม่มีแท็บนี้ = ใช้ค่าตั้งต้นใน `assets/js/constants.mjs` |
 
-## 1. โครงชีต — 2 แท็บ
+## 1. โครงชีต — 2 แท็บหลัก + 1 แท็บเสริม
 
-ชื่อแท็บต้องตรง (`Sets` / `Items`) ส่วนชื่อ**คอลัมน์**บรรทัดแรกไม่สนตัวพิมพ์/ช่องว่าง/ขีด
+ชื่อแท็บต้องตรง (`Sets` / `Items` / `BestStats`) ส่วนชื่อ**คอลัมน์**บรรทัดแรกไม่สนตัวพิมพ์/ช่องว่าง/ขีด
 (`setKey` = `Set Key` = `set_key`) และสลับลำดับคอลัมน์ได้
 
 ### `Sets`
@@ -31,9 +31,9 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ใ
 
 ### `Items` — 1 แถว = equipment 1 ชิ้น
 
-| setKey | slot | level | grade | power | sub1Type | sub1Value | sub2Type | sub2Value |
-|---|---|---|---|---|---|---|---|---|
-| boss | 1 | 97 | 10 | 287.59 | skillAmp | 8.53% | critDmg | 14.62% |
+| setKey | slot | level | grade | power | isNew | archived | sub1Type | sub1Value | sub2Type | sub2Value |
+|---|---|---|---|---|---|---|---|---|---|---|
+| boss | 1 | 97 | 10 | 287.59 | TRUE | FALSE | skillAmp | 8.53% | critDmg | 14.62% |
 
 - **`slot`** — ตำแหน่งใน grid 3×4 นับ 1–12 ซ้าย→ขวา บน→ล่าง
 
@@ -51,6 +51,36 @@ Sheet เป็นแหล่งข้อมูลจริง — แก้ใ
 - **`subNValue`** — stat ที่เป็น **%** ให้พิมพ์แบบ `8.53%` ไปเลย (Sheets เก็บเป็น `0.0853` ซึ่งถูกต้อง)
   ที่เหลือพิมพ์เลขตรงๆ `6043`, `475.6`
 - **`name`** — ไม่ต้องมี; ใส่คอลัมน์นี้เมื่ออยาก override ชื่อเป็นรายชิ้น
+- **`isNew`** — `TRUE` = ของที่เพิ่งเปลี่ยน เว็บวาดกรอบฟ้ารอบการ์ดให้ ลบเองเมื่อไม่อยากให้เด่นแล้ว
+- **`archived`** — `TRUE` = ของเก่าที่ถูกแทนที่ไปแล้ว ยังอยู่ในชีตแต่ไม่ขึ้นบนเว็บ
+
+  ฟอร์ม `Replace` **ไม่เขียนทับแถวเดิม** — ปิดแถวเดิมเป็น `archived` แล้วต่อแถวใหม่ท้ายตาราง
+  ประวัติเลยอยู่ครบ
+
+  ⚠️ ถ้าไม่มีคอลัมน์ `archived` สคริปต์จะกลับไปเขียนทับแบบเดิม (ต่อแถวใหม่โดยไม่ปิดแถวเก่า
+  จะกลายเป็น slot ซ้ำแล้วพัง)
+
+### `BestStats` — แท็บเสริม (ไม่มีก็ได้)
+
+กำหนดเองว่า substat ไหนคือของดีของแต่ละโหมด แทนค่าตั้งต้นที่ฝังในโค้ด
+
+| mode | row | stats |
+|---|---|---|
+| pve | 1 | Skill AMP, Accuracy |
+| pve | 2 | DMG RDN, CRIT RES |
+| pve | 3 | Skill AMP, CRIT DMG, Accuracy, Focus, Skill Haste |
+| pve | 4 | Focus, Skill Haste |
+| boss | 1 | Skill AMP, CRIT DMG |
+| boss | 2 | DMG RDN, CRIT RES |
+| boss | 3 | Skill AMP, CRIT DMG, Skill Haste |
+| boss | 4 | DMG RDN, Skill Haste |
+
+- **`mode`** — `pve` หรือ `boss`
+- **`row`** — แถวของกริด: `1` = slot 1–3, `2` = 4–6, `3` = 7–9, `4` = 10–12
+- **`stats`** — คั่นด้วยจุลภาค พิมพ์ id (`skillAmp`) หรือชื่อที่แสดง (`Skill AMP`) ก็ได้
+
+โหมดไหนไม่เขียนไว้จะใช้ค่าตั้งต้นของโหมดนั้นต่อ ไม่ได้กลายเป็นว่าง
+ค่านี้มีผลกับทุกที่ที่ใช้ best stat — highlight บนการ์ด, แถบ tag, หน้า Compare, ฟอร์มสร้างของ
 
 ### `Stats` — แท็บอ้างอิง (สคริปต์ไม่ได้อ่าน)
 
