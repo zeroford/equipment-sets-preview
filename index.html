@@ -311,7 +311,8 @@
       }
     }
     @media (prefers-reduced-motion: reduce) {
-      .page-loading-spinner {
+      .page-loading-spinner,
+      .card.is-busy::after {
         animation-duration: 2.4s;
       }
     }
@@ -1113,6 +1114,37 @@
     .card-delete[disabled] {
       opacity: 0.5;
       cursor: progress;
+    }
+
+    /*
+     * กำลังลบ — การ์ดจางลงและมีวงหมุนทับ กันกดซ้ำระหว่างรอ Web App (หลายวินาที)
+     * NOTE: วงหมุนอยู่บน ::after ของการ์ด ไม่ได้เพิ่ม element เพราะ renderCard
+     * ใช้ร่วมกับหน้า Compare และ dialog ด้วย
+     */
+    .card.is-busy {
+      pointer-events: none;
+    }
+    .card.is-busy > *:not(.card-delete) {
+      opacity: 0.35;
+    }
+    .card.is-busy::after {
+      content: '';
+      position: absolute;
+      z-index: 3;
+      top: 50%;
+      left: 50%;
+      width: 1.6rem;
+      height: 1.6rem;
+      margin: -0.8rem 0 0 -0.8rem;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: card-busy-spin 0.7s linear infinite;
+    }
+    @keyframes card-busy-spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
     .card-delete svg {
       width: 0.82rem;

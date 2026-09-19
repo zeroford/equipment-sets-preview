@@ -269,7 +269,7 @@ function dialogHtml(pair, slot, modeFor) {
           ${pair
             .map(
               (set, i) =>
-                `<button type="submit" value="replace${i}" class="edit-replace" disabled>Replace ${escapeHtml(set.title)}</button>`,
+                `<button type="submit" value="replace${i}" class="edit-replace" disabled>Add to ${escapeHtml(set.title)}</button>`,
             )
             .join('')}
         </div>
@@ -401,7 +401,8 @@ export function createEditUi({ onSaved, modeFor }) {
         return;
       }
 
-      const name = btn.closest('.card').querySelector('.name-bar-text').textContent;
+      const card = btn.closest('.card');
+      const name = card.querySelector('.name-bar-text').textContent;
       if (!window.confirm(`Remove ${name}?`)) {
         return;
       }
@@ -410,13 +411,17 @@ export function createEditUi({ onSaved, modeFor }) {
       if (!key) {
         return;
       }
+
+      // Web App ตอบหลายวินาที ต้องบอกให้รู้ว่ากำลังทำอยู่ ไม่งั้นจะกดซ้ำ
       btn.disabled = true;
+      card.classList.add('is-busy');
       try {
         await postAll(key, [
           { action: 'clearSlot', setKey: owner.dataset.setKey, slot: slotNumber },
         ]);
       } catch (err) {
         btn.disabled = false;
+        card.classList.remove('is-busy');
         window.alert((err && err.message) || 'Remove failed');
       }
     });

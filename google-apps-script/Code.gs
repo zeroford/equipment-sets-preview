@@ -300,9 +300,13 @@ function buildItems(rows, setKey) {
         SHEET_ITEMS + ' (' + setKey + '): slot must be 1-' + SLOT_COUNT + ' but got "' + raw + '"',
       );
     }
-    if (slots[slot - 1]) {
-      throw new Error(SHEET_ITEMS + ' (' + setKey + '): slot ' + slot + ' is duplicated');
-    }
+    /*
+     * slot ซ้ำ = แถวล่างชนะ
+     *
+     * NOTE: เมื่อก่อน throw ทิ้ง แต่พอ writeItem ต่อแถวใหม่ท้ายตาราง แถวซ้ำเกิดง่ายมาก
+     * (เช่นแถวเก่าไม่ได้ถูกปิด หรือมีแถวว่างค้างอยู่) แล้วทั้งเว็บล่มเพราะแถวเดียว
+     * — แถวล่างสุดคือแถวที่เพิ่งเขียน เอาอันนั้นถูกต้องเสมอ
+     */
 
     var item = {
       level: Math.round(toNumber(field(row, 'level'))),

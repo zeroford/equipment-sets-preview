@@ -104,13 +104,68 @@ export async function postToWebApp(url, body) {
   return normalizeSetsPayload(payload.sets || []);
 }
 
+/** Web App ตอบช้าได้ถึง ~8 วิ — เกินนี้ถือว่าไม่ไหว ใช้ของที่มีอยู่ไปก่อนดีกว่าค้าง */
+const FETCH_TIMEOUT_MS = 15000;
+
 export async function fetchSetsFromWebApp(url) {
   const sep = url.includes('?') ? '&' : '?';
-  const res = await fetch(`${url}${sep}t=${Date.now()}`);
-  if (!res.ok) {
-    throw new Error(`Web App HTTP ${res.status}`);
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${url}${sep}t=${Date.now()}`, { signal: stop.signal });
+    if (!res.ok) {
+      throw new Error(`Web App HTTP ${res.status}`);
+    }
+    return await res.json();
+  } catch (err) {
+    throw stop.signal.aborted ? new Error(`timed out after ${FETCH_TIMEOUT_MS / 1000}s`) : err;
+  } finally {
+    clearTimeout(timer);
   }
-  return res.json();
+}
+
+/*
+ * Apps Script ตอบ 3–8 วินาที ถ้ารอให้เสร็จก่อนค่อยวาด หน้าเว็บจะค้างที่ spinner นานมาก
+ * เลยเก็บชุดล่าสุดที่โหลดสำเร็จไว้ วาดจากของเก่าไปก่อน แล้วค่อยวาดทับตอนของจริงมาถึง
+ *
+ * NOTE: เก็บ payload ดิบ ไม่ใช่ที่ normalize แล้ว — สูตรคำนวณในโค้ดเปลี่ยนเมื่อไหร่
+ * ของใน cache จะได้คิดใหม่ตามด้วย ไม่ค้างค่าเก่า
+ */
+const CACHE_KEY = 'equipment-sets-cache';
+
+function readCachedPayload() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function writeCachedPayload(payload) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    /* โควตาเต็ม/private mode — ไม่มี cache ก็แค่ช้าเหมือนเดิม */
+  }
+}
+
+/**
+ * ชุดล่าสุดที่เคยโหลดสำเร็จ — เอาไว้วาดทันทีระหว่างรอของจริง ไม่มีก็คืน null
+ */
+export function loadCachedPayload() {
+  const configEl = document.getElementById('equipment-sheets-config');
+  const sheetsConfig = configEl ? JSON.parse(configEl.textContent) : {};
+  if (!resolveWebAppUrl(sheetsConfig)) {
+    return null; // ไม่ได้ต่อ Web App ก็ใช้ข้อมูลในเว็บอยู่แล้ว ไม่ต้องมี cache
+  }
+
+  const payload = readCachedPayload();
+  if (!payload) {
+    return null;
+  }
+  const sets = normalizeSetsPayload(payload);
+  return sets.length ? { sets, bestStats: normalizeBestStats(payload.bestStats) } : null;
 }
 
 /**
@@ -137,6 +192,7 @@ export async function loadSetsPayload() {
     if (!sets.length) {
       throw new Error('Web App returned empty sets');
     }
+    writeCachedPayload(payload);
     return { sets, loadError: '', webAppUrl, bestStats: normalizeBestStats(payload.bestStats) };
   } catch (err) {
     const message = err && err.message ? err.message : 'error';

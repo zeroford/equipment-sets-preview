@@ -1,4 +1,4 @@
-import { loadSetsPayload } from './data.mjs';
+import { loadCachedPayload, loadSetsPayload } from './data.mjs';
 import { configureBestSubstats } from './constants.mjs';
 import { renderAppShell } from './render.mjs';
 import { createSetModeUi } from './set-mode.mjs';
@@ -19,6 +19,13 @@ const editUi = createEditUi({
 });
 
 async function bootstrap() {
+  // วาดของที่เคยโหลดไว้ก่อน ระหว่างรอ Web App ที่ใช้เวลา 3-8 วิ
+  const cached = loadCachedPayload();
+  if (cached) {
+    configureBestSubstats(cached.bestStats);
+    paint(cached.sets, '');
+  }
+
   const payload = await loadSetsPayload();
   if (!payload.sets.length) {
     throw new Error('No equipment sets found');
