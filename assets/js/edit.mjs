@@ -147,25 +147,24 @@ function formCardHtml(slot) {
   </div>`;
 }
 
-function dialogHtml(pair, slot, needsKey) {
+/**
+ * ซ้าย = ของเดิมทั้งสอง set วางซ้อนกันไว้เทียบ / ขวา = ตัวเลือก slot กับฟอร์ม
+ *
+ * NOTE: แยกเป็นคอลัมน์ของใครของมัน ไม่ใช่กริดแถวเดียวกัน — ไม่งั้นแถวบนจะสูงตาม
+ * การ์ด Set A ทั้งที่ฝั่งขวามีแค่ช่องเลือก slot บรรทัดเดียว
+ */
+function dialogHtml(pair, slot) {
   return `<form method="dialog">
-    <div class="edit-row">
-      <label for="editSlot">Slot</label>
-      <select id="editSlot" name="slot">${slotOptions(slot)}</select>
+    <div class="edit-cols">
+      <div class="edit-col">${pair.map((set) => previewHtml(set, slot)).join('')}</div>
+      <div class="edit-col">
+        <div class="edit-row">
+          <label for="editSlot">Slot</label>
+          <select id="editSlot" name="slot">${slotOptions(slot)}</select>
+        </div>
+        ${formCardHtml(slot)}
+      </div>
     </div>
-
-    <div class="edit-previews">${pair.map((set) => previewHtml(set, slot)).join('')}</div>
-
-    ${formCardHtml(slot)}
-
-    ${
-      needsKey
-        ? `<div class="edit-row">
-      <label for="editKey">Edit key</label>
-      <input id="editKey" name="editKey" type="password" autocomplete="off" placeholder="set in Script Properties" />
-    </div>`
-        : ''
-    }
 
     <p class="edit-status" id="editStatus"></p>
     <div class="edit-actions">
@@ -225,14 +224,21 @@ export function createEditUi({ onSaved }) {
     };
   }
 
-  function resolveKey(form) {
-    const field = form.elements.editKey;
-    return field ? field.value.trim() : readStoredKey();
+  /**
+   * NOTE: ไม่มีช่องกรอกในฟอร์มแล้ว — เก็บไว้ในเครื่องตั้งแต่ครั้งแรก
+   * ยังต้องส่งอยู่เพราะ Web App เปิด public ใครเจอ URL ก็ยิงเขียนทับได้
+   */
+  function resolveKey() {
+    const stored = readStoredKey();
+    if (stored) {
+      return stored;
+    }
+    return (window.prompt('Edit key (ตั้งไว้ใน Script Properties)') || '').trim();
   }
 
   async function send(form, requests) {
     const status = form.querySelector('.edit-status');
-    const key = resolveKey(form);
+    const key = resolveKey();
     if (!key) {
       status.dataset.tone = 'error';
       status.textContent = 'Edit key required';
@@ -266,7 +272,7 @@ export function createEditUi({ onSaved }) {
   }
 
   function renderDialog() {
-    dialog.innerHTML = dialogHtml(pair(), slot, !readStoredKey());
+    dialog.innerHTML = dialogHtml(pair(), slot);
     const form = dialog.querySelector('form');
 
     form.elements.slot.addEventListener('change', (event) => {
