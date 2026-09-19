@@ -137,10 +137,11 @@ function formCardHtml(slot, grade) {
   for (let i = 1; i <= SUB_COUNT; i += 1) {
     // NOTE: ช่วงค่าใต้ช่องกรอกใช้หน่วยเดียวกับที่พิมพ์ (8.53 ไม่ใช่ 0.0853) จะได้เทียบกันตรงๆ
     subRows += `<li>
-      <select name="sub${i}Type" aria-label="Sub ${i} stat"><option value="">— none —</option>${statOptions('')}</select>
+      <span class="edit-sub-label">Substat ${i}</span>
+      <select name="sub${i}Type" aria-label="Substat ${i} type"><option value="">— none —</option>${statOptions('')}</select>
       <span class="edit-sub-value">
         <span class="edit-sub-input">
-          <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Sub ${i} value" />
+          <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Substat ${i} value" />
           <span class="edit-unit" data-sub-unit="${i}" aria-hidden="true">%</span>
         </span>
         <small class="stat-range" data-sub-range="${i}"></small>
