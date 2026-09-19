@@ -1099,6 +1099,10 @@
     .can-edit .card-delete {
       display: flex;
     }
+    /* การ์ดตัวอย่างใน dialog อ่านอย่างเดียว — ลบจากตรงนั้นไม่ได้ */
+    .can-edit .edit-preview .card-delete {
+      display: none;
+    }
     .card:hover .card-delete,
     .card-delete:focus-visible {
       opacity: 1;
