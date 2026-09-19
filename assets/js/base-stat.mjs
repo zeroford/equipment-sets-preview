@@ -66,6 +66,22 @@ export function subStatRange(slot, grade, statId) {
 }
 
 /**
+ * substat ที่โรลไม่ได้ (min = max) คืนค่าเดียวที่เป็นไปได้ — ตัวที่โรลได้คืน null
+ *
+ * NOTE: คู่กับ subStatRange ที่คืน null ให้ stat แบบนี้ — ฟอร์มจะได้เติมค่าให้เลย
+ * ไม่ต้องให้คนกรอกเองทั้งที่มีทางเลือกเดียว
+ */
+export function subStatFixed(slot, grade, statId) {
+  const code = Number(grade) || GRADE_KEYS.indexOf(String(grade)) + 1;
+  const range = ((SUB_RANGES[slot - 1] || {})[code] || {})[statId];
+  if (!range || range[0] !== range[1]) {
+    return null;
+  }
+  const bonus = 1 + (slot in SUB_BONUS_BY_SLOT ? SUB_BONUS_BY_SLOT[slot] : DEFAULT_SUB_BONUS);
+  return range[0] * bonus;
+}
+
+/**
  * ค่าที่ได้อยู่ตรงไหนของช่วง — 0 = ต่ำสุด, 1 = สูงสุด, ไม่รู้ช่วงคืน null
  */
 export function subStatRatio(slot, grade, statId, value) {

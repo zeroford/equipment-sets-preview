@@ -2,7 +2,7 @@ import { postToWebApp } from './data.mjs';
 import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { emptyCellHtml, equipIconPath, renderCard, statTagsHtml } from './render.mjs';
-import { computeBaseStat, subStatRange } from './base-stat.mjs';
+import { computeBaseStat, subStatFixed, subStatRange } from './base-stat.mjs';
 import { STATS, formatPower, formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
 
@@ -48,17 +48,24 @@ function slotOptions(selected) {
 }
 
 /**
+ * Rarity เป็นปุ่มสลับ ไม่ใช่ dropdown — มีให้เลือกไม่กี่ตัว เห็นพร้อมกันหมดเลยเร็วกว่า
+ *
  * NOTE: โชว์เฉพาะ rarity ที่มีสีกรอบใน GRADES — rarity อื่นยังไม่มีทั้งสีและไฟล์ไอคอน
  * ในรีโป เลือกไปการ์ดจะพัง อยากเปิดเพิ่มก็ใส่สีใน constants.mjs + วางรูปใน assets
+ *
+ * NOTE: ค่าจริงอยู่ใน input ที่ซ่อนไว้ ตอนกดปุ่มถึงยิง change ให้เอง — โค้ดที่เหลือ
+ * เลยอ่าน form.elements.grade ได้เหมือนตอนเป็น <select>
  */
-function gradeOptions(selected) {
-  return GRADE_KEYS.map((key, i) => [key, i + 1])
+function rarityToggleHtml(selected) {
+  const buttons = GRADE_KEYS.map((key, i) => [key, i + 1])
     .filter(([key]) => GRADES[key])
     .map(
       ([key, code]) =>
-        `<option value="${code}"${key === selected ? ' selected' : ''}>${code} · ${escapeHtml(key)}</option>`,
+        `<button type="button" class="rarity-option" data-grade="${code}" aria-pressed="${key === selected}">${escapeHtml(key)}</button>`,
     )
     .join('');
+  const code = GRADE_KEYS.indexOf(selected) + 1;
+  return `<div class="rarity-group glass-chip" role="group" aria-label="Rarity">${buttons}</div><input type="hidden" name="grade" value="${code}" />`;
 }
 
 function statOptions(selected) {
@@ -104,8 +111,7 @@ function previewHtml(set, slot, mode) {
  *
  * NOTE: ใช้คลาสเดียวกับการ์ดบนหน้าเว็บ (.card/.name-bar/.stats) ไม่ต้องดูแล layout สองชุด
  */
-function formCardHtml(slot) {
-  const grade = GRADE_KEYS[GRADE_KEYS.length - 1];
+function formCardHtml(slot, grade) {
   const chrome = cardChrome(slot, grade);
   const baseStat = baseStatForSlot(slot);
 
@@ -152,10 +158,6 @@ function formCardHtml(slot) {
       <label for="editPower">Power (M)</label>
       <input id="editPower" name="power" type="number" step="any" />
     </div>
-    <div class="edit-row">
-      <label for="editGrade">Rarity</label>
-      <select id="editGrade" name="grade">${gradeOptions(grade)}</select>
-    </div>
   </div>`;
 }
 
@@ -166,6 +168,7 @@ function formCardHtml(slot) {
  * การ์ด Set A ทั้งที่ฝั่งขวามีแค่ช่องเลือก slot บรรทัดเดียว
  */
 function dialogHtml(pair, slot, modeFor) {
+  const grade = GRADE_KEYS[GRADE_KEYS.length - 1];
   return `<form method="dialog">
     <div class="edit-cols">
       <div class="edit-col">${pair.map((set) => previewHtml(set, slot, modeFor(set.setKey))).join('')}</div>
@@ -174,19 +177,22 @@ function dialogHtml(pair, slot, modeFor) {
           <label for="editSlot">Slot</label>
           <select id="editSlot" name="slot">${slotOptions(slot)}</select>
         </div>
-        ${formCardHtml(slot)}
+        <div class="edit-row">
+          <span class="edit-row-label">Rarity</span>
+          ${rarityToggleHtml(grade)}
+        </div>
+        ${formCardHtml(slot, grade)}
+        <p class="edit-status" id="editStatus"></p>
+        <div class="edit-actions">
+          <button type="submit" value="cancel">Cancel</button>
+          ${pair
+            .map(
+              (set, i) =>
+                `<button type="submit" value="replace${i}" class="edit-replace">Replace ${escapeHtml(set.title)}</button>`,
+            )
+            .join('')}
+        </div>
       </div>
-    </div>
-
-    <p class="edit-status" id="editStatus"></p>
-    <div class="edit-actions">
-      <button type="submit" value="cancel">Cancel</button>
-      ${pair
-        .map(
-          (set, i) =>
-            `<button type="submit" value="replace${i}" class="edit-replace">Replace ${escapeHtml(set.title)}</button>`,
-        )
-        .join('')}
     </div>
   </form>`;
 }
@@ -301,12 +307,31 @@ export function createEditUi({ onSaved, modeFor }) {
       const power = Number(form.elements.power.value);
       form.querySelector('[data-power-badge]').textContent = power > 0 ? formatPower(power) : '—';
     };
-    /** ช่วงค่าที่ substat ตัวที่เลือกออกได้ — ขึ้นกับ slot + rarity เลยต้องคิดใหม่ทุกครั้งที่เปลี่ยน */
-    const refreshSubRanges = () => {
+    /**
+     * ช่วงค่าของ substat ที่เลือก — ขึ้นกับ slot + rarity เลยต้องคิดใหม่ทุกครั้งที่เปลี่ยน
+     *
+     * NOTE: stat ที่โรลไม่ได้ (Skill Haste) เติมค่าให้แล้วล็อกช่องไว้ มีทางเลือกเดียว
+     * จะให้กรอกเองก็มีแต่จะกรอกผิด
+     */
+    const refreshSubs = () => {
       const grade = Number(form.elements.grade.value);
       for (let i = 1; i <= SUB_COUNT; i += 1) {
         const statId = form.elements[`sub${i}Type`].value;
+        const input = form.elements[`sub${i}Value`];
         const range = statId ? subStatRange(slot, grade, statId) : null;
+        const fixed = statId && !range ? subStatFixed(slot, grade, statId) : null;
+
+        if (fixed !== null) {
+          input.value = toInput(statId, fixed);
+          input.readOnly = true;
+        } else {
+          // เพิ่งเปลี่ยนออกจาก stat ที่ล็อกไว้ — ค่าเดิมไม่เกี่ยวกับ stat ใหม่แล้ว
+          if (input.readOnly) {
+            input.value = '';
+          }
+          input.readOnly = false;
+        }
+
         form.querySelector(`[data-sub-range="${i}"]`).textContent = range
           ? formatStatRange(statId, range[0], range[1])
           : '';
@@ -314,21 +339,34 @@ export function createEditUi({ onSaved, modeFor }) {
     };
 
     refreshBase();
-    refreshSubRanges();
+    refreshSubs();
     form.elements.level.addEventListener('input', refreshBase);
     form.elements.power.addEventListener('input', refreshBase);
     form.elements.grade.addEventListener('change', refreshBase);
-    form.elements.grade.addEventListener('change', refreshSubRanges);
+    form.elements.grade.addEventListener('change', refreshSubs);
     for (let i = 1; i <= SUB_COUNT; i += 1) {
-      form.elements[`sub${i}Type`].addEventListener('change', refreshSubRanges);
+      form.elements[`sub${i}Type`].addEventListener('change', refreshSubs);
     }
 
-    form.addEventListener('change', (event) => {
-      const select = event.target.closest('select[name="grade"]');
-      if (!select) {
+    // ปุ่ม rarity เขียนค่าลง input ที่ซ่อนไว้ แล้วยิง change ให้ตัวที่ฟังอยู่ทำงานต่อ
+    form.addEventListener('click', (event) => {
+      const btn = event.target.closest('.rarity-option');
+      if (!btn) {
         return;
       }
-      const chrome = cardChrome(slot, GRADE_KEYS[Number(select.value) - 1]);
+      form.querySelectorAll('.rarity-option').forEach((el) => {
+        el.setAttribute('aria-pressed', el === btn ? 'true' : 'false');
+      });
+      form.elements.grade.value = btn.dataset.grade;
+      form.elements.grade.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    form.addEventListener('change', (event) => {
+      const field = event.target.closest('[name="grade"]');
+      if (!field) {
+        return;
+      }
+      const chrome = cardChrome(slot, GRADE_KEYS[Number(field.value) - 1]);
       const card = form.querySelector('.edit-card[data-card]');
       card.className = `card ${chrome.grade} edit-card`;
       card.style.setProperty('--frame', chrome.frame);

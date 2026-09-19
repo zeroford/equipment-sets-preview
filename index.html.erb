@@ -306,7 +306,8 @@
     }
 
     /* NOTE: ใช้ padding/gap ชุดเดียวกับ .set-tabs-list ให้จังหวะขอบตรงกัน */
-    .mode-group {
+    .mode-group,
+    .rarity-group {
       display: flex;
       gap: 0.25rem;
       padding: 0.25rem;
@@ -325,7 +326,8 @@
       white-space: nowrap;
     }
 
-    .mode-option {
+    .mode-option,
+    .rarity-option {
       display: flex;
       align-items: center;
       gap: 0.4rem;
@@ -342,14 +344,16 @@
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
-    .mode-option:hover {
+    .mode-option:hover,
+    .rarity-option:hover {
       color: var(--text);
     }
     .mode-option.icon-only {
       padding: 0 0.7rem;
     }
 
-    .mode-option[aria-pressed="true"] {
+    .mode-option[aria-pressed="true"],
+    .rarity-option[aria-pressed="true"] {
       background: var(--pill-active);
       color: #ecedee;
       box-shadow:
@@ -518,6 +522,7 @@
     .edit-card .level,
     .edit-card .stats li {
       grid-template-columns: minmax(0, 1fr) 5.5rem;
+      align-items: start;
       min-height: 2.4rem;
       column-gap: 0.4rem;
     }
@@ -538,6 +543,19 @@
       flex-direction: column;
       gap: 0.1rem;
       min-width: 0;
+    }
+
+    /* NOTE: ล็อกความสูงทั้งคู่ — select กับ input คิดความสูงจาก UA คนละแบบ
+       ปล่อยตาม padding อย่างเดียวจะไม่มีวันเท่ากัน */
+    .edit-card .stats select,
+    .edit-inline {
+      height: 1.85rem;
+    }
+
+    .edit-inline[readonly] {
+      background: rgba(0, 0, 0, 0.5);
+      color: var(--muted);
+      cursor: default;
     }
 
     .edit-inline {
@@ -592,9 +610,13 @@
       align-items: center;
       gap: 0.6rem;
     }
-    .edit-row > label {
+    .edit-row > label,
+    .edit-row-label {
       font-size: 0.8rem;
       color: var(--muted);
+    }
+    .rarity-group {
+      justify-self: start;
     }
     .edit-dialog input,
     .edit-dialog select {
