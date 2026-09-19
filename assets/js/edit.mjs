@@ -8,6 +8,8 @@ import { escapeHtml } from './utils.mjs';
 
 const KEY_STORAGE = 'equipment-sets-edit-key';
 const SLOT_COUNT = 12;
+/** ยังไม่เลือก slot — เปิดฟอร์มมาใหม่ทุกครั้งจะอยู่สถานะนี้ */
+const NO_SLOT = 0;
 const SUB_COUNT = 2;
 
 function readStoredKey() {
@@ -64,9 +66,11 @@ function slotButtonsHtml(selected, grade) {
 function rarityToggleHtml(selected) {
   const buttons = GRADE_KEYS.map((key, i) => [key, i + 1])
     .filter(([key]) => GRADES[key])
+    // เกรดสูงสุดขึ้นก่อน — เป็นตัวที่เลือกบ่อยสุด
+    .reverse()
     .map(
       ([key, code]) =>
-        `<button type="button" class="rarity-option" data-grade="${code}" aria-pressed="${key === selected}">${escapeHtml(key)}</button>`,
+        `<button type="button" class="rarity-option" data-grade="${code}" aria-pressed="${key === selected}">${escapeHtml(titleCase(key))}</button>`,
     )
     .join('');
   const code = GRADE_KEYS.indexOf(selected) + 1;
@@ -101,6 +105,12 @@ function cardChrome(slot, grade) {
  * ไม่ highlight อะไรเลย ดูไม่เหมือนใบเดียวกันกับที่อยู่บนหน้าเว็บ
  */
 function previewHtml(set, slot, mode) {
+  if (!slot) {
+    return `<div class="edit-preview">
+      <p class="edit-col-title">${escapeHtml(set.title)}</p>
+      <div class="edit-blank">Pick a slot</div>
+    </div>`;
+  }
   const item = (set.items || [])[slot - 1] || null;
   const bestStats = bestSubstatFor(mode).rows[Math.floor((slot - 1) / 3)] || [];
   const tags = statTagsHtml(bestStats);
@@ -119,6 +129,9 @@ function previewHtml(set, slot, mode) {
 function formCardHtml(slot, grade) {
   const chrome = cardChrome(slot, grade);
   const baseStat = baseStatForSlot(slot);
+  const iconHtml = slot
+    ? `<img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" />`
+    : '<svg class="slot-pick-hint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>';
 
   let subRows = '';
   for (let i = 1; i <= SUB_COUNT; i += 1) {
@@ -143,10 +156,10 @@ function formCardHtml(slot, grade) {
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
       <div class="name-bar edit-name-bar">
         <span class="name-bar-icon-wrap">
-          <button type="button" class="slot-pick" data-slot-pick aria-expanded="false" aria-label="Pick a slot" title="Pick a slot"><img class="name-bar-icon" src="${escapeHtml(chrome.icon)}" alt="" width="36" height="36" decoding="async" /></button>
+          <button type="button" class="slot-pick" data-slot-pick aria-expanded="false" aria-label="Pick a slot" title="Pick a slot">${iconHtml}</button>
         </span>
         <div class="edit-name-lines">
-          <span class="name-bar-text">${escapeHtml(chrome.name)}</span>
+          <span class="name-bar-text${slot ? '' : ' is-blank'}">${escapeHtml(slot ? chrome.name : 'Pick a slot')}</span>
           <div class="edit-name-controls">
             <span class="edit-lv">Lv.<input name="level" type="number" min="1" step="1" class="level-input" aria-label="Level" autofocus /></span>
             ${rarityToggleHtml(grade)}
@@ -156,7 +169,7 @@ function formCardHtml(slot, grade) {
       <div class="card-body">
         <div class="stat-primary-block">
           <span class="primary-cell">
-            <span class="label">${escapeHtml(statLabel(baseStat))}</span>
+            <span class="label">${escapeHtml(slot ? statLabel(baseStat) : '—')}</span>
             <span class="value" data-base-display>—</span>
           </span>
           <span class="primary-cell is-power">
@@ -201,7 +214,7 @@ function dialogHtml(pair, slot, modeFor) {
           ${pair
             .map(
               (set, i) =>
-                `<button type="submit" value="replace${i}" class="edit-replace">Replace ${escapeHtml(set.title)}</button>`,
+                `<button type="submit" value="replace${i}" class="edit-replace"${slot ? '' : ' disabled'}>Replace ${escapeHtml(set.title)}</button>`,
             )
             .join('')}
         </div>
@@ -222,7 +235,8 @@ export function createEditUi({ onSaved, modeFor }) {
   let dialog = null;
   let menu = null;
   let trigger = null;
-  let slot = 1;
+  let slot = NO_SLOT;
+  let openPicker = () => {};
 
   const pair = () => sets.slice(0, 2);
 
@@ -322,6 +336,7 @@ export function createEditUi({ onSaved, modeFor }) {
       pickBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     };
     pickBtn.addEventListener('click', () => setPickerOpen(picker.hidden));
+    openPicker = () => setPickerOpen(true);
     // กดที่อื่นในฟอร์มแล้วปิด เหมือน dropdown ทั่วไป
     form.addEventListener('click', (event) => {
       if (!picker.hidden && !picker.contains(event.target) && !pickBtn.contains(event.target)) {
@@ -339,7 +354,7 @@ export function createEditUi({ onSaved, modeFor }) {
 
     const refreshBase = () => {
       const cell = form.querySelector('[data-base-display]');
-      const value = baseValue(form, slot);
+      const value = slot ? baseValue(form, slot) : null;
       cell.textContent = value === null ? '—' : formatStat(baseStatForSlot(slot), value);
     };
     /**
@@ -370,9 +385,7 @@ export function createEditUi({ onSaved, modeFor }) {
         form.querySelector(`[data-sub-range="${i}"]`).textContent = range
           ? formatStatRange(statId, range[0], range[1])
           : '';
-        form.querySelector(`[data-sub-unit="${i}"]`).style.visibility = isPercent(statId)
-          ? 'visible'
-          : 'hidden';
+        form.querySelector(`[data-sub-unit="${i}"]`).hidden = !isPercent(statId);
       }
     };
 
@@ -454,8 +467,11 @@ export function createEditUi({ onSaved, modeFor }) {
      * อยู่แล้ว (ไอคอนในการ์ด) และ `slot` จำค่าล่าสุดไว้ เปิดซ้ำก็ได้ช่องเดิม
      */
     trigger.addEventListener('click', () => {
+      slot = NO_SLOT;
       renderDialog();
       dialog.showModal();
+      // NOTE: ต้องหลัง showModal — ตำแหน่งตารางวัดจาก rect ของจริง ซึ่งยังไม่มีตอน dialog ปิดอยู่
+      openPicker();
     });
   }
 

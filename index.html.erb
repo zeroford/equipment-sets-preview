@@ -537,6 +537,29 @@
       width: 100%;
     }
 
+    /*
+     * ยังไม่เลือก slot — ไม่มีชื่อ ไอคอน หรือ base stat ให้โชว์ เพราะทั้งสามอย่าง
+     * เป็นฟังก์ชันของ slot ล้วนๆ เดาแทนผู้ใช้ไม่ได้
+     */
+    .edit-blank {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 9rem;
+      border-radius: 14px;
+      border: 2px dashed rgba(255, 255, 255, 0.14);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .name-bar-text.is-blank {
+      opacity: 0.6;
+    }
+    .slot-pick-hint {
+      width: 40%;
+      height: 40%;
+      color: rgba(0, 0, 0, 0.45);
+    }
+
     /* ไอคอนในการ์ดฟอร์มเป็นปุ่มเปิดตารางเลือก slot */
     .slot-pick {
       display: flex;
@@ -610,7 +633,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.12rem;
-      height: 1.85rem;
+      height: 1.7rem;
       padding: 0 0.55rem;
       border-radius: 999px;
       background: rgba(0, 0, 0, 0.42);
@@ -625,7 +648,7 @@
       background: rgba(0, 0, 0, 0.28);
     }
     .edit-name-controls .rarity-option {
-      height: 1.57rem;
+      height: 1.42rem;
       padding: 0 0.55rem;
       font-size: 0.72rem;
       color: rgba(0, 0, 0, 0.55);
@@ -654,21 +677,39 @@
     }
 
     /*
-     * NOTE: กันที่ให้ % และช่วงค่าไว้ตลอด ไม่ว่าจะมีของจริงหรือยัง — % ใช้ visibility
-     * ส่วนช่วงค่ากันด้วย min-height ไม่งั้นแถวจะกระโดดทุกครั้งที่เปลี่ยนชนิด stat
+     * NOTE: กรอบของฟิลด์อยู่ที่ตัวห่อ ไม่ใช่ที่ <input> — % เลยอยู่ในกรอบเดียวกับตัวเลข
+     * ไม่ต้องกันที่ไว้ข้างนอก โผล่/หายก็ไม่กระทบความกว้างของช่อง
      */
     .edit-sub-input {
       display: flex;
       align-items: center;
       gap: 0.15rem;
       min-width: 0;
+      height: 1.85rem;
+      padding: 0 0.55rem;
+      border-radius: 0.65rem;
+      background-color: rgba(255, 255, 255, 0.07);
+    }
+    .edit-sub-input:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .edit-sub-input:focus-within {
+      outline: 2px solid rgba(255, 255, 255, 0.35);
+      outline-offset: 1px;
+    }
+    .edit-sub-input:has(.edit-inline[readonly]) {
+      background-color: rgba(255, 255, 255, 0.03);
     }
     .edit-unit {
       flex-shrink: 0;
-      width: 0.6rem;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: rgba(255, 255, 255, 0.55);
     }
+    .edit-unit[hidden] {
+      display: none;
+    }
+
+    /* ช่วงค่ายังต้องกันที่ไว้ ไม่งั้นแถวยุบตอนเลือก stat ที่ไม่มีช่วง */
     .edit-card .stat-range {
       min-height: 0.72rem;
     }
@@ -681,9 +722,8 @@
       height: auto;
     }
     /*
-     * การ์ดจริงใช้ <ul> เป็นกล่องเทามีเส้นในตัว เพราะข้างในเป็นข้อความล้วน
-     * แต่ในฟอร์ม แต่ละแถวเป็นช่องกรอกที่มีกรอบของตัวเองอยู่แล้ว ซ้อนกล่องอีกชั้นเลยรก
-     * — ถอดกล่องออก เหลือแค่แถวเรียงลงมาโดยมีระยะห่างเท่ากันทุกด้าน
+     * การ์ดจริงใช้ <ul> เป็นกล่องเทาที่แถวชนขอบพอดี เพราะข้างในเป็นข้อความล้วน
+     * ในฟอร์มแถวเป็นช่องกรอกที่มีกรอบของตัวเอง เลยต้องมี padding กันไม่ให้ชนขอบกล่อง
      */
     .edit-card .card-body {
       padding: 0.7rem;
@@ -692,9 +732,10 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      border-radius: 0;
+      padding: 0.55rem;
+      border-radius: 10px;
       overflow: visible;
-      background: none;
+      background: rgba(0, 0, 0, 0.22);
     }
     .edit-card .stats li {
       grid-template-columns: minmax(0, 1fr) 5.5rem;
@@ -730,22 +771,27 @@
 
     /* NOTE: ล็อกความสูงทั้งคู่ — select กับ input คิดความสูงจาก UA คนละแบบ
        ปล่อยตาม padding อย่างเดียวจะไม่มีวันเท่ากัน */
-    .edit-card .stats select,
-    .edit-inline {
+    .edit-card .stats select {
       height: 1.85rem;
     }
 
     .edit-inline[readonly] {
-      background-color: rgba(255, 255, 255, 0.03);
       color: var(--muted);
       cursor: default;
     }
 
-    .edit-inline {
+    /* input เปลือย — กรอบเป็นหน้าที่ของ .edit-sub-input ที่ห่ออยู่ */
+    .edit-dialog .edit-sub-input .edit-inline {
       width: 100%;
       min-width: 0;
-      padding: 0.15rem 0.5rem;
+      height: auto;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
       text-align: right;
+    }
+    .edit-dialog .edit-sub-input .edit-inline:focus {
+      outline: none;
     }
     /* Power กรอกตรงช่องที่ค่ามันจะไปโผล่ — ทรงและขนาดชุดเดียวกับชิป Lv. */
     .edit-dialog .power-input {
@@ -862,7 +908,7 @@
     }
     .edit-actions button[disabled] {
       opacity: 0.55;
-      cursor: progress;
+      cursor: not-allowed;
     }
     .edit-status {
       margin: 0 0 -0.35rem;
