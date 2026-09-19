@@ -120,10 +120,9 @@ function previewHtml(set, slot, mode) {
   }
   const item = (set.items || [])[slot - 1] || null;
   const bestStats = bestSubstatFor(mode).rows[Math.floor((slot - 1) / 3)] || [];
-  const tags = statTagsHtml(bestStats);
   return `<div class="edit-preview">
     <p class="edit-col-title">${escapeHtml(set.title)}${item ? '' : ' · empty'}</p>
-    ${tags ? `<p class="edit-tags">${tags}</p>` : ''}
+    <p class="edit-tags">${statTagsHtml(bestStats)}</p>
     ${item ? renderCard(item, slot - 1, bestStats) : emptyCellHtml(slot - 1)}
   </div>`;
 }
@@ -143,7 +142,10 @@ function formCardHtml(slot, grade) {
     // NOTE: ช่วงค่าใต้ช่องกรอกใช้หน่วยเดียวกับที่พิมพ์ (8.53 ไม่ใช่ 0.0853) จะได้เทียบกันตรงๆ
     subRows += `<li>
       <span class="edit-sub-label">Substat ${i}</span>
-      <select name="sub${i}Type" aria-label="Substat ${i} type"><option value="">— none —</option>${statOptions('')}</select>
+      <span class="ui-select">
+        <select name="sub${i}Type" aria-label="Substat ${i} type" hidden><option value="">— none —</option>${statOptions('')}</select>
+        <button type="button" class="ui-select-trigger" data-select="${i}" aria-haspopup="listbox" aria-expanded="false"><span class="ui-select-text" data-select-text="${i}">— none —</span><svg class="ui-select-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></button>
+      </span>
       <span class="edit-sub-value">
         <span class="edit-sub-input">
           <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Substat ${i} value" />
@@ -165,7 +167,7 @@ function formCardHtml(slot, grade) {
           <button type="button" class="slot-pick" data-slot-pick aria-expanded="false" aria-label="Pick a slot" title="Pick a slot">${iconHtml}</button>
         </span>
         <div class="edit-name-lines">
-          <span class="name-bar-text${slot ? '' : ' is-blank'}">${escapeHtml(slot ? chrome.name : 'Pick a slot')}</span>
+          <span class="name-bar-text">${escapeHtml(slot ? chrome.name : '')}</span>
           <div class="edit-name-controls">
             <span class="edit-lv">Lv.<input name="level" type="number" min="1" step="1" class="level-input" aria-label="Level" autofocus /></span>
             ${rarityToggleHtml(grade)}
@@ -188,6 +190,7 @@ function formCardHtml(slot, grade) {
     </article>
 
     <div class="slot-picker glass-chip" data-slot-picker role="group" aria-label="Slot" hidden>${slotButtonsHtml(slot, grade)}</div>
+    <div class="ui-select-list" data-select-list role="listbox" hidden></div>
   </div>`;
 }
 
@@ -406,6 +409,61 @@ export function createEditUi({ onSaved, modeFor }) {
       }
     };
 
+    /*
+     * Dropdown ที่วาดเอง — <select> ตัวจริงยังอยู่ (ซ่อนไว้) เป็นที่เก็บค่า
+     * โค้ดส่วนอื่นเลยอ่าน form.elements.subNType ได้เหมือนเดิม แค่ยิง change ให้ตอนเลือก
+     */
+    const list = form.querySelector('[data-select-list]');
+    const closeList = () => {
+      list.hidden = true;
+      form.querySelectorAll('[data-select]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
+    };
+    const openList = (index) => {
+      const select = form.elements[`sub${index}Type`];
+      list.innerHTML = Array.from(select.options)
+        .map(
+          (opt) =>
+            `<button type="button" class="ui-select-option" role="option" aria-selected="${opt.value === select.value}" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.textContent)}</button>`,
+        )
+        .join('');
+      list.dataset.for = String(index);
+      const h = host.getBoundingClientRect();
+      const trigger = form.querySelector(`[data-select="${index}"]`).getBoundingClientRect();
+      list.style.left = `${trigger.left - h.left}px`;
+      list.style.top = `${trigger.bottom - h.top + 6}px`;
+      list.style.width = `${trigger.width}px`;
+      list.hidden = false;
+      form.querySelector(`[data-select="${index}"]`).setAttribute('aria-expanded', 'true');
+    };
+
+    form.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-select]');
+      if (trigger) {
+        const index = trigger.dataset.select;
+        const wasOpen = !list.hidden && list.dataset.for === index;
+        closeList();
+        if (!wasOpen) {
+          openList(index);
+        }
+        return;
+      }
+
+      const option = event.target.closest('.ui-select-option');
+      if (option) {
+        const index = list.dataset.for;
+        const select = form.elements[`sub${index}Type`];
+        select.value = option.dataset.value;
+        form.querySelector(`[data-select-text="${index}"]`).textContent = option.textContent;
+        closeList();
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        return;
+      }
+
+      if (!list.hidden) {
+        closeList();
+      }
+    });
+
     /**
      * วาดส่วนที่ผูกกับ slot/rarity ใหม่
      *
@@ -422,9 +480,7 @@ export function createEditUi({ onSaved, modeFor }) {
       card.style.setProperty('--glow', chrome.glow);
       pickBtn.innerHTML = slotIconHtml(slot, chrome.icon);
 
-      const text = card.querySelector('.name-bar-text');
-      text.textContent = slot ? chrome.name : 'Pick a slot';
-      text.classList.toggle('is-blank', !slot);
+      card.querySelector('.name-bar-text').textContent = slot ? chrome.name : '';
 
       card.querySelector('.primary-cell .label').textContent = slot
         ? statLabel(baseStatForSlot(slot))
