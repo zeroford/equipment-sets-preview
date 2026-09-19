@@ -1,7 +1,7 @@
 import { postToWebApp } from './data.mjs';
 import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
-import { emptyCellHtml, equipIconPath, renderCard } from './render.mjs';
+import { emptyCellHtml, equipIconPath, renderCard, statTagsHtml } from './render.mjs';
 import { computeBaseStat } from './base-stat.mjs';
 import { STATS, formatPower, formatStat, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
@@ -91,8 +91,10 @@ function cardChrome(slot, grade) {
 function previewHtml(set, slot, mode) {
   const item = (set.items || [])[slot - 1] || null;
   const bestStats = bestSubstatFor(mode).rows[Math.floor((slot - 1) / 3)] || [];
+  const tags = statTagsHtml(bestStats);
   return `<div class="edit-preview">
     <p class="edit-col-title">${escapeHtml(set.title)}${item ? '' : ' · empty'}</p>
+    ${tags ? `<p class="edit-tags">${tags}</p>` : ''}
     ${item ? renderCard(item, slot - 1, bestStats) : emptyCellHtml(slot - 1)}
   </div>`;
 }

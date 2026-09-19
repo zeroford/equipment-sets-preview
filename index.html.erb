@@ -1084,8 +1084,15 @@
       color: rgba(255, 255, 255, 0.5);
     }
 
+    .edit-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
     /* การ์ดกว้างแค่ 175px — tag ต้องเล็กกว่าบนหัวแถบปกติ ไม่งั้นตกบรรทัดยาวเป็นพรืด */
-    .compare-set .best-tag {
+    .compare-set .best-tag,
+    .edit-tags .best-tag {
       padding: 0.15rem 0.4rem;
       font-size: 0.62rem;
     }
