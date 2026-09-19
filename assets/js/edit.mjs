@@ -141,8 +141,6 @@ function formCardHtml(slot, grade) {
    * badge คือ level, ช่องขวาบนคือ power กรอกแล้วเห็นผลทันทีในที่เดียวกัน
    */
   return `<div class="edit-form-card">
-    <p class="edit-col-title">New item</p>
-
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
       <div class="name-bar edit-name-bar">
         <span class="name-bar-icon-wrap">
@@ -151,7 +149,7 @@ function formCardHtml(slot, grade) {
         <div class="edit-name-lines">
           <span class="name-bar-text">${escapeHtml(chrome.name)}</span>
           <div class="edit-name-controls">
-            <span class="edit-lv">Lv.<input name="level" type="number" min="1" step="1" class="level-input" aria-label="Level" /></span>
+            <span class="edit-lv">Lv.<input name="level" type="number" min="1" step="1" class="level-input" aria-label="Level" autofocus /></span>
             ${rarityToggleHtml(grade)}
           </div>
         </div>
@@ -184,21 +182,27 @@ function formCardHtml(slot, grade) {
 function dialogHtml(pair, slot, modeFor) {
   const grade = GRADE_KEYS[GRADE_KEYS.length - 1];
   return `<form method="dialog">
+    <header class="edit-header">
+      <h2 class="edit-title">New item</h2>
+      <button type="submit" value="cancel" class="edit-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></button>
+    </header>
+
     <div class="edit-cols">
       <div class="edit-col">${pair.map((set) => previewHtml(set, slot, modeFor(set.setKey))).join('')}</div>
       <div class="edit-col">
         ${formCardHtml(slot, grade)}
-        <p class="edit-status" id="editStatus"></p>
-        <div class="edit-actions">
-          <button type="submit" value="cancel">Cancel</button>
-          ${pair
-            .map(
-              (set, i) =>
-                `<button type="submit" value="replace${i}" class="edit-replace">Replace ${escapeHtml(set.title)}</button>`,
-            )
-            .join('')}
-        </div>
       </div>
+    </div>
+
+    <p class="edit-status" id="editStatus"></p>
+    <div class="edit-actions">
+      <button type="submit" value="cancel">Cancel</button>
+      ${pair
+        .map(
+          (set, i) =>
+            `<button type="submit" value="replace${i}" class="edit-replace">Replace ${escapeHtml(set.title)}</button>`,
+        )
+        .join('')}
     </div>
   </form>`;
 }

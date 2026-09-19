@@ -401,6 +401,48 @@
       gap: 0.85rem;
       padding: 1.15rem;
     }
+
+    .edit-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--divider);
+    }
+    .edit-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #f4f4f5;
+    }
+    .edit-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 1.9rem;
+      height: 1.9rem;
+      padding: 0;
+      border: none;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #a1a1aa;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .edit-close:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: var(--text);
+    }
+    .edit-close:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.35);
+      outline-offset: 1px;
+    }
+    .edit-close svg {
+      width: 0.95rem;
+      height: 0.95rem;
+    }
     .edit-cols {
       display: grid;
       /* ซ้ายพอดีการ์ด ที่เหลือให้ฟอร์ม — ฟอร์มมีช่องกรอก ต้องการที่มากกว่า */
@@ -617,7 +659,7 @@
     }
 
     .edit-inline[readonly] {
-      background: rgba(0, 0, 0, 0.5);
+      background-color: rgba(255, 255, 255, 0.03);
       color: var(--muted);
       cursor: default;
     }
@@ -625,12 +667,7 @@
     .edit-inline {
       width: 100%;
       min-width: 0;
-      padding: 0.15rem 0.35rem;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 0.35rem;
-      background: rgba(0, 0, 0, 0.3);
-      color: inherit;
-      font: inherit;
+      padding: 0.15rem 0.5rem;
       text-align: right;
     }
     /*
@@ -655,12 +692,9 @@
     .edit-card .stats select {
       width: 100%;
       min-width: 0;
-      padding: 0.15rem 0.2rem;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 0.35rem;
-      background: rgba(0, 0, 0, 0.3);
-      color: inherit;
-      font: inherit;
+      padding: 0.15rem 1.6rem 0.15rem 0.5rem;
+      background-position: right 0.45rem center;
+      background-size: 0.75rem;
       font-size: 0.72rem;
     }
 
@@ -687,27 +721,47 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
+    /*
+     * ทรงฟิลด์แบบ HeroUI — พื้นทึบอ่อน ไม่มีเส้นขอบ มุมมน ลูกศรของ select วาดเอง
+     * NOTE: ต้อง appearance: none ก่อน ไม่งั้นลูกศรของระบบยังค้างอยู่ทับอันที่วาดเอง
+     */
     .edit-dialog input,
     .edit-dialog select {
       width: 100%;
-      padding: 0.45rem 0.6rem;
-      border: 1px solid var(--divider);
-      border-radius: 0.5rem;
-      background: rgba(0, 0, 0, 0.28);
+      padding: 0.45rem 0.7rem;
+      border: none;
+      border-radius: 0.65rem;
+      background-color: rgba(255, 255, 255, 0.07);
       color: var(--text);
       font: inherit;
       font-size: 0.85rem;
     }
+    .edit-dialog select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 1.9rem;
+      background-image: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a1a1aa%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E');
+      background-repeat: no-repeat;
+      background-position: right 0.6rem center;
+      background-size: 0.85rem;
+      cursor: pointer;
+    }
+    .edit-dialog input:hover,
+    .edit-dialog select:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
     .edit-dialog input:focus,
     .edit-dialog select:focus {
-      outline: 2px solid rgba(255, 255, 255, 0.45);
+      outline: 2px solid rgba(255, 255, 255, 0.35);
       outline-offset: 1px;
     }
     .edit-actions {
       display: flex;
       gap: 0.5rem;
       justify-content: flex-end;
-      margin-top: 0.25rem;
+      margin-top: auto;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--divider);
     }
     .edit-actions button {
       padding: 0.5rem 0.95rem;
