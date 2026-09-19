@@ -25,6 +25,7 @@ function normalizeItem(item, index) {
   return {
     level,
     grade,
+    isNew: Boolean(item.isNew),
     name: item.name || itemNameFor(slot, grade),
     power: toStatNumber(item.power),
     stats: [[baseStatForSlot(slot), computeBaseStat(slot, grade, level) || 0], ...subs],

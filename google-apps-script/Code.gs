@@ -115,16 +115,20 @@ function columnIndex(layout, name) {
   return index === undefined ? -1 : index;
 }
 
-/** แถวในชีต (1-based) ของ setKey+slot นั้น, ไม่เจอคืน 0 */
+/** แถวที่ยังใช้งานอยู่ (1-based) ของ setKey+slot นั้น, ไม่เจอคืน 0 */
 function findItemRow(layout, setKey, slot) {
   var setCol = columnIndex(layout, 'setKey');
   var slotCol = columnIndex(layout, 'slot');
   if (setCol < 0 || slotCol < 0) {
     throw new Error(SHEET_ITEMS + ': needs setKey and slot columns');
   }
+  var archivedCol = columnIndex(layout, 'archived');
 
   var values = layout.sheet.getDataRange().getValues();
   for (var r = 1; r < values.length; r += 1) {
+    if (archivedCol >= 0 && isTruthy(values[r][archivedCol])) {
+      continue;
+    }
     if (
       String(values[r][setCol]).trim() === String(setKey).trim() &&
       Math.round(toNumber(values[r][slotCol])) === Math.round(toNumber(slot))
@@ -146,15 +150,29 @@ function writeItem(setKey, slot, item) {
 
   var layout = itemsSheetLayout();
   var row = findItemRow(layout, setKey, slotNumber);
+
+  /*
+   * มีคอลัมน์ archived = เก็บของเก่าไว้ ไม่เขียนทับ — ปิดแถวเดิมแล้วต่อแถวใหม่ท้ายตาราง
+   * ไม่มีคอลัมน์ = ชีตรุ่นเก่า เขียนทับแบบเดิมไปก่อน (ถ้าต่อแถวใหม่จะกลายเป็น slot ซ้ำ)
+   */
+  if (row && columnIndex(layout, 'archived') >= 0) {
+    setCell(layout, row, 'archived', true, '');
+    setCell(layout, row, 'isNew', false, '');
+    row = 0;
+  }
+
   if (!row) {
     row = layout.sheet.getLastRow() + 1;
     setCell(layout, row, 'setKey', setKey, '');
     setCell(layout, row, 'slot', slotNumber, '');
+    setCell(layout, row, 'archived', false, '');
   }
 
   setCell(layout, row, 'level', Math.round(toNumber(item.level)), '');
   setCell(layout, row, 'grade', item.grade, '');
   setCell(layout, row, 'power', toNumber(item.power), '');
+  // เขียนทับผ่านฟอร์ม = ของใหม่เสมอ ลบเครื่องหมายเองในชีตได้เมื่อไม่อยากให้เด่นแล้ว
+  setCell(layout, row, 'isNew', true, '');
 
   var subs = item.subs || [];
   for (var i = 1; i <= MAX_SUBSTATS; i += 1) {
@@ -164,10 +182,17 @@ function writeItem(setKey, slot, item) {
   }
 }
 
+/** เอาออกจากกริด — มีคอลัมน์ archived ก็แค่ปิดแถวไว้ ไม่ลบข้อมูลทิ้ง */
 function clearSlot(setKey, slot) {
   var layout = itemsSheetLayout();
   var row = findItemRow(layout, setKey, Math.round(toNumber(slot)));
-  if (row) {
+  if (!row) {
+    return;
+  }
+  if (columnIndex(layout, 'archived') >= 0) {
+    setCell(layout, row, 'archived', true, '');
+    setCell(layout, row, 'isNew', false, '');
+  } else {
     layout.sheet.deleteRow(row);
   }
 }
@@ -264,6 +289,10 @@ function buildItems(rows, setKey) {
 
   for (i = 0; i < rows.length; i += 1) {
     var row = rows[i];
+    // ของเก่าที่ถูกแทนที่ไปแล้ว ยังอยู่ในชีตแต่ไม่เอามาแสดง
+    if (isTruthy(field(row, 'archived'))) {
+      continue;
+    }
     var raw = field(row, 'slot');
     var slot = Math.round(toNumber(raw));
     if (!(slot >= 1 && slot <= SLOT_COUNT)) {
@@ -279,6 +308,7 @@ function buildItems(rows, setKey) {
       level: Math.round(toNumber(field(row, 'level'))),
       grade: field(row, 'grade'),
       power: toNumber(field(row, 'power')),
+      isNew: isTruthy(field(row, 'isNew')),
       subs: readSubStats(row),
     };
     var name = field(row, 'name');
@@ -362,6 +392,12 @@ function normalizeKey(header) {
 function field(row, name) {
   var value = row[normalizeKey(name)];
   return value == null ? '' : value;
+}
+
+/** ชีตพิมพ์ได้หลายแบบ — TRUE/true/1/yes/y ถือว่าใช่ทั้งหมด */
+function isTruthy(raw) {
+  var text = String(raw == null ? '' : raw).trim().toLowerCase();
+  return text === 'true' || text === '1' || text === 'yes' || text === 'y';
 }
 
 function toNumber(raw) {
