@@ -1,8 +1,8 @@
 import { postToWebApp } from './data.mjs';
 import { GRADE_KEYS, baseStatForSlot, itemNameFor } from './catalog.mjs';
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
-import { emptyCellHtml, equipIconPath, renderCard, statTagsHtml } from './render.mjs';
-import { computeBaseStat, subStatFixed, subStatRange } from './base-stat.mjs';
+import { emptyCellHtml, equipIconPath, renderCard, rollMarkHtml, statTagsHtml } from './render.mjs';
+import { computeBaseStat, subStatFixed, subStatRange, subStatRatio } from './base-stat.mjs';
 import { STATS, formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { escapeHtml } from './utils.mjs';
 
@@ -148,6 +148,7 @@ function formCardHtml(slot, grade) {
       </span>
       <span class="edit-sub-value">
         <span class="edit-sub-input">
+          <span class="edit-sub-mark" data-sub-mark="${i}" aria-hidden="true"></span>
           <input name="sub${i}Value" type="number" step="any" class="edit-inline" value="" aria-label="Substat ${i} value" />
           <span class="edit-unit" data-sub-unit="${i}" aria-hidden="true">%</span>
         </span>
@@ -383,6 +384,18 @@ export function createEditUi({ onSaved, modeFor }) {
      * NOTE: stat ที่โรลไม่ได้ (Skill Haste) เติมค่าให้แล้วล็อกช่องไว้ มีทางเลือกเดียว
      * จะให้กรอกเองก็มีแต่จะกรอกผิด
      */
+    const refreshMarks = () => {
+      const grade = Number(form.elements.grade.value);
+      for (let i = 1; i <= SUB_COUNT; i += 1) {
+        const statId = form.elements[`sub${i}Type`].value;
+        const raw = form.elements[`sub${i}Value`].value;
+        const ratio =
+          statId && raw !== '' ? subStatRatio(slot, grade, statId, fromInput(statId, raw)) : null;
+        form.querySelector(`[data-sub-mark="${i}"]`).innerHTML =
+          ratio === null ? '' : rollMarkHtml(ratio);
+      }
+    };
+
     const refreshSubs = () => {
       const grade = Number(form.elements.grade.value);
       for (let i = 1; i <= SUB_COUNT; i += 1) {
@@ -407,6 +420,7 @@ export function createEditUi({ onSaved, modeFor }) {
           : '';
         form.querySelector(`[data-sub-unit="${i}"]`).hidden = !isPercent(statId);
       }
+      refreshMarks();
     };
 
     /*
@@ -502,6 +516,7 @@ export function createEditUi({ onSaved, modeFor }) {
     form.elements.grade.addEventListener('change', applySlot);
     for (let i = 1; i <= SUB_COUNT; i += 1) {
       form.elements[`sub${i}Type`].addEventListener('change', refreshSubs);
+      form.elements[`sub${i}Value`].addEventListener('input', refreshMarks);
     }
 
     // ปุ่ม rarity เขียนค่าลง input ที่ซ่อนไว้ แล้วยิง change ให้ตัวที่ฟังอยู่ทำงานต่อ

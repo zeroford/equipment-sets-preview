@@ -699,6 +699,21 @@
     .edit-sub-input:has(.edit-inline[readonly]) {
       background-color: rgba(255, 255, 255, 0.03);
     }
+    /*
+     * เครื่องหมายคุณภาพโรลนำหน้าตัวเลข — ชุดเดียวกับที่การ์ดใช้
+     * NOTE: .roll-mark ตั้ง margin/vertical-align ไว้สำหรับอยู่ในสายตัวอักษร
+     * ในกล่อง flex นี้ไม่ต้องใช้ ต้องล้างทิ้ง
+     */
+    .edit-sub-mark {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .edit-sub-mark .roll-mark {
+      margin: 0;
+      vertical-align: baseline;
+    }
+
     .edit-unit {
       flex-shrink: 0;
       font-size: 0.7rem;

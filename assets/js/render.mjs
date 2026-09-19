@@ -27,7 +27,7 @@ const CHEVRON_PATHS = {
   chevronsDown: '<path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/>',
 };
 
-function rollMarkHtml(ratio) {
+export function rollMarkHtml(ratio) {
   if (ratio === null) {
     return '';
   }
