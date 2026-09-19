@@ -38,17 +38,23 @@ const fromInput = (statId, value) => round6(isPercent(statId) ? Number(value) / 
 
 const titleCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
-/** ตารางไอคอน 6×2 — ใช้ทั้งเมนูปุ่ม + และตัวเลือก slot ในการ์ดฟอร์ม */
-function slotButtonsHtml(selected) {
+/**
+ * ตารางไอคอน 6×2 — ใช้ทั้งเมนูปุ่ม + และตัวเลือก slot ในการ์ดฟอร์ม
+ *
+ * NOTE: ส่ง grade มาด้วยจะได้รูปของจริงของเกรดนั้น (ในฟอร์มรู้ rarity อยู่แล้ว)
+ * ถ้าไม่ส่ง (เมนูปุ่ม +) ใช้แผ่นเปล่าไปก่อน เพราะยังไม่รู้ว่าจะเป็นเกรดไหน
+ */
+function slotButtonsHtml(selected, grade) {
   let html = '';
   for (let n = 1; n <= SLOT_COUNT; n += 1) {
     const type = SLOT_TYPES[n - 1] || '';
     const name = titleCase(type);
+    const src = grade ? equipIconPath({ grade }, n - 1) : `assets/plates/icon_plate_${type}.png`;
     html += `<button type="button" class="add-slot" role="menuitem" data-slot="${n}" aria-pressed="${n === selected}" title="${escapeHtml(
       name,
-    )}" aria-label="${escapeHtml(name)}"><img src="assets/plates/icon_plate_${escapeHtml(
-      type,
-    )}.png" alt="" width="30" height="30" decoding="async" /></button>`;
+    )}" aria-label="${escapeHtml(name)}"><img src="${escapeHtml(
+      src,
+    )}" alt="" width="30" height="30" decoding="async" /></button>`;
   }
   return html;
 }
@@ -169,7 +175,7 @@ function formCardHtml(slot, grade) {
       </div>
     </article>
 
-    <div class="slot-picker glass-chip" data-slot-picker role="group" aria-label="Slot" hidden>${slotButtonsHtml(slot)}</div>
+    <div class="slot-picker glass-chip" data-slot-picker role="group" aria-label="Slot" hidden>${slotButtonsHtml(slot, grade)}</div>
   </div>`;
 }
 
@@ -306,10 +312,24 @@ export function createEditUi({ onSaved, modeFor }) {
     // ไอคอนในการ์ด = ปุ่มเปิดตารางเลือก slot
     const picker = form.querySelector('[data-slot-picker]');
     const pickBtn = form.querySelector('[data-slot-pick]');
-    pickBtn.addEventListener('click', () => {
-      const open = picker.hidden;
+    const host = form.querySelector('.edit-form-card');
+    const setPickerOpen = (open) => {
+      if (open) {
+        // NOTE: วัดจากของจริงตอนเปิด ขนาดหัวการ์ดเปลี่ยนเมื่อไหร่ตำแหน่งก็ตามเอง
+        const h = host.getBoundingClientRect();
+        const b = pickBtn.getBoundingClientRect();
+        picker.style.left = `${b.left - h.left}px`;
+        picker.style.top = `${b.bottom - h.top + 6}px`;
+      }
       picker.hidden = !open;
       pickBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    pickBtn.addEventListener('click', () => setPickerOpen(picker.hidden));
+    // กดที่อื่นในฟอร์มแล้วปิด เหมือน dropdown ทั่วไป
+    form.addEventListener('click', (event) => {
+      if (!picker.hidden && !picker.contains(event.target) && !pickBtn.contains(event.target)) {
+        setPickerOpen(false);
+      }
     });
     picker.addEventListener('click', (event) => {
       const btn = event.target.closest('.add-slot');
@@ -386,7 +406,9 @@ export function createEditUi({ onSaved, modeFor }) {
       if (!field) {
         return;
       }
-      const chrome = cardChrome(slot, GRADE_KEYS[Number(field.value) - 1]);
+      const gradeKey = GRADE_KEYS[Number(field.value) - 1];
+      picker.innerHTML = slotButtonsHtml(slot, gradeKey);
+      const chrome = cardChrome(slot, gradeKey);
       const card = form.querySelector('.edit-card[data-card]');
       card.className = `card ${chrome.grade} edit-card`;
       card.style.setProperty('--frame', chrome.frame);

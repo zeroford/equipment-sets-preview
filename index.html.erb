@@ -560,6 +560,7 @@
     }
 
     .edit-form-card {
+      position: relative;
       width: 100%;
     }
 
@@ -578,14 +579,15 @@
     }
 
     /*
-     * NOTE: ไม่ใช่ popover — .card มี overflow: hidden ถ้าลอยอยู่ในการ์ดจะโดนตัด
-     * วางเป็นบล็อกใต้การ์ดไปเลย เปิดแล้วดันของข้างล่างลง ไม่ต้องคำนวณตำแหน่ง
+     * NOTE: ลอยเทียบกับ .edit-form-card ไม่ใช่ .card — .card มี overflow: hidden
+     * ถ้าอยู่ข้างในจะโดนตัดหายไปเกือบหมด ส่วน top/left ตั้งจาก JS ตอนเปิด
      */
     .slot-picker {
+      position: absolute;
+      z-index: 20;
       display: grid;
-      /* ขนาดคงที่เท่าเมนูปุ่ม + ไม่ยืดเต็มการ์ด (พ่อเป็น flex column, justify-self ไม่มีผล) */
+      /* ขนาดคงที่เท่าเมนูปุ่ม + */
       grid-template-columns: repeat(6, 2.5rem);
-      align-self: flex-start;
       gap: 0.25rem;
       padding: 0.35rem;
       border-radius: 1rem;
