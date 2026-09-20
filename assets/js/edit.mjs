@@ -394,10 +394,6 @@ export function createEditUi({ onSaved, modeFor }) {
       if (!owner || !card || !slotNumber) {
         return;
       }
-      if (!removing && btn.classList.contains('is-on')) {
-        return; // ปักหมุดอยู่แล้ว
-      }
-
       const name = card.querySelector('.name-bar-text').textContent;
       if (removing && !window.confirm(`Remove ${name}?`)) {
         return;
