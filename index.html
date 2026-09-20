@@ -312,7 +312,8 @@
     }
     @media (prefers-reduced-motion: reduce) {
       .page-loading-spinner,
-      .card.is-busy::after {
+      .card.is-busy::after,
+      .edit-actions button.is-loading::after {
         animation-duration: 2.4s;
       }
     }
@@ -941,6 +942,30 @@
     .edit-actions button[disabled]:hover {
       opacity: 0.4;
       cursor: not-allowed;
+    }
+
+    /*
+     * กำลังบันทึก — วงหมุนอยู่ในปุ่มที่เพิ่งกด ไม่ใช่ข้อความที่อื่น
+     * NOTE: ซ่อนข้อความด้วย color: transparent ไม่ใช่เอาออก — ปุ่มจะได้ไม่หดตอนหมุน
+     */
+    .edit-actions button.is-loading,
+    .edit-actions button.is-loading[disabled] {
+      position: relative;
+      opacity: 1;
+      color: transparent;
+      cursor: progress;
+    }
+    .edit-actions button.is-loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      width: 0.9rem;
+      height: 0.9rem;
+      margin: auto;
+      border: 2px solid rgba(24, 24, 27, 0.25);
+      border-top-color: #18181b;
+      border-radius: 50%;
+      animation: card-busy-spin 0.7s linear infinite;
     }
     .edit-status {
       margin: 0 0 -0.35rem;

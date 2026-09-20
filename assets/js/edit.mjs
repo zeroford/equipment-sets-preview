@@ -341,7 +341,13 @@ export function createEditUi({ onSaved, modeFor }) {
     return latest;
   }
 
-  async function send(form, requests) {
+  /**
+   * @param trigger ปุ่มที่ถูกกด — ขึ้นวงหมุนในตัวมันเอง จะได้รู้ว่ากำลังทำอะไรอยู่ตรงไหน
+   *
+   * NOTE: ไม่ใช้ข้อความ "Saving…" ที่แถบสถานะแล้ว — มันอยู่คนละที่กับปุ่มที่เพิ่งกด
+   * แถบสถานะเหลือไว้บอก error อย่างเดียว
+   */
+  async function send(form, requests, trigger) {
     const status = form.querySelector('.edit-status');
     const key = resolveKey();
     if (!key) {
@@ -350,11 +356,15 @@ export function createEditUi({ onSaved, modeFor }) {
       return false;
     }
 
-    form.querySelectorAll('button').forEach((btn) => {
+    const buttons = Array.from(form.querySelectorAll('button'));
+    buttons.forEach((btn) => {
       btn.disabled = true;
     });
+    if (trigger) {
+      trigger.classList.add('is-loading');
+    }
     status.dataset.tone = '';
-    status.textContent = 'Saving…';
+    status.textContent = '';
 
     try {
       await postAll(key, requests);
@@ -362,7 +372,10 @@ export function createEditUi({ onSaved, modeFor }) {
     } catch (err) {
       status.dataset.tone = 'error';
       status.textContent = (err && err.message) || 'Save failed';
-      form.querySelectorAll('button').forEach((btn) => {
+      if (trigger) {
+        trigger.classList.remove('is-loading');
+      }
+      buttons.forEach((btn) => {
         btn.disabled = false;
       });
       return false;
@@ -704,14 +717,18 @@ export function createEditUi({ onSaved, modeFor }) {
       event.preventDefault();
       const set = pair()[Number(action.slice('replace'.length))];
       const targetSlot = slot;
-      const ok = await send(form, [
-        {
-          action: 'updateItem',
-          setKey: set.setKey,
-          slot: targetSlot,
-          item: collect(form, targetSlot),
-        },
-      ]);
+      const ok = await send(
+        form,
+        [
+          {
+            action: 'updateItem',
+            setKey: set.setKey,
+            slot: targetSlot,
+            item: collect(form, targetSlot),
+          },
+        ],
+        event.submitter,
+      );
       if (ok) {
         dialog.close();
       }
