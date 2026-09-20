@@ -18,7 +18,7 @@ const SUB_BONUS_BY_SLOT = {
 };
 
 const BONUS_BY_SLOT = {
-  4: 0.57, // helmet
+  4: 0.81, // helmet
   11: 1.23, // book — วัดจากของจริงได้ +123% ไม่ใช่ +105%
 };
 
