@@ -26,6 +26,7 @@ function normalizeItem(item, index) {
     level,
     grade,
     isMain: Boolean(item.isMain),
+    isNew: Boolean(item.isNew),
     // เลขแถวในชีต — ใช้ชี้เป้าตอนลบ ไม่มีก็ได้ (สคริปต์รุ่นเก่าไม่ได้ส่งมา)
     row: Number(item.row) || 0,
     name: item.name || itemNameFor(slot, grade),

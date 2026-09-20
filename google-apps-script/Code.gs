@@ -173,6 +173,8 @@ function writeItem(setKey, slot, item) {
   // เพิ่งเพิ่มเข้าไป = ตั้งเป็นตัวหลักของช่องนั้นเลย ใบเก่าเลิกเป็นหลัก
   clearMainFlags(layout, setKey, slotNumber, row);
   setCell(layout, row, 'isMain', true, '');
+  // ติดจุดแดงไว้ให้รู้ว่าเพิ่งเพิ่ม ลบเองในชีตเมื่ออ่านแล้ว
+  setCell(layout, row, 'isNew', true, '');
 
   var subs = item.subs || [];
   for (var i = 1; i <= MAX_SUBSTATS; i += 1) {
@@ -313,7 +315,8 @@ function buildItems(rows, setKey) {
       row: row.__row,
       level: Math.round(toNumber(field(row, 'level'))),
       grade: field(row, 'grade'),
-      isMain: isTruthy(field(row, 'isMain') || field(row, 'isNew')),
+      isMain: isTruthy(field(row, 'isMain')),
+      isNew: isTruthy(field(row, 'isNew')),
       subs: readSubStats(row),
     };
     var name = field(row, 'name');

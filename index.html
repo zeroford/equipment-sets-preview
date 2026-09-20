@@ -1250,6 +1250,21 @@
     }
 
     /* เลเวลเป็นป้ายเล็กกึ่งกลางล่างไอคอน — ขอบล่างเป็นบริเวณที่ทับงานศิลป์น้อยสุด */
+    /*
+     * จุดแดงบอกว่าเพิ่งเพิ่มเข้ามา (isNew ในชีต)
+     * NOTE: กรอบรูปมี overflow: hidden + มุมมน — ต้องขยับเข้ามาหน่อย ไม่งั้นโดนตัดมุม
+     */
+    .new-dot {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 0.42rem;
+      height: 0.42rem;
+      border-radius: 50%;
+      background: #fa5252;
+      box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.35);
+    }
+
     .level-badge {
       position: absolute;
       left: 50%;

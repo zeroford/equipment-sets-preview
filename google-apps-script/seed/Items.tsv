@@ -1,23 +1,23 @@
-setKey	slot	level	grade	isMain	isActive	sub1Type	sub1Value	sub2Type	sub2Value
-boss	1	97	10	TRUE	TRUE	skillAmp	0.0853	critDmg	0.1462
-boss	2	98	10	TRUE	TRUE	skillAmp	0.0871	accuracy	160.91
-boss	3	101	10	TRUE	TRUE	skillAmp	0.0885	critDmg	0.1239
-boss	4	99	10	TRUE	TRUE	dmgReduction	0.0433	critRes	0.1462
-boss	5	99	9	TRUE	TRUE	dmgReduction	0.0343	critRes	0.1329
-boss	6	97	10	TRUE	TRUE	dmgReduction	0.0621	critRes	0.206
-boss	7	99	9	TRUE	TRUE	skillAmp	0.0731	focus	167.72
-boss	8	94	10	TRUE	TRUE	critRate	0.2125	skillAmp	0.092
-boss	9	97	10	TRUE	TRUE	accuracy	151.5	skillAmp	0.0862
-boss	10	101	10	TRUE	TRUE	dmgReduction	0.0609	critRes	0.2182
-boss	11	100	10	TRUE	TRUE	focus	214.46	skillHaste	4.6
-boss	12	96	10	TRUE	TRUE	dmgReduction	0.063	resistance	140.08
-pve	1	94	9	TRUE	TRUE	skillAmp	0.0729	accuracy	110.54
-pve	2	89	9	TRUE	TRUE	skillAmp	0.0717	accuracy	135.48
-pve	3	91	10	TRUE	TRUE	critDmg	0.1265	accuracy	157.18
-pve	4	93	10	TRUE	TRUE	dmgReduction	0.0476	critRes	0.1252
-pve	5	94	10	TRUE	TRUE	evasion	54.63	dmgReduction	0.0436
-pve	7	96	10	TRUE	TRUE	focus	191.38	skillHaste	4.6
-pve	8	95	9	TRUE	TRUE	skillAmp	0.0708	accuracy	143.99
-pve	9	93	9	TRUE	TRUE	resistance	77.94	skillAmp	0.0731
-pve	11	85	9	TRUE	TRUE	focus	176.64	critRes	0.1639
-pve	12	90	9	TRUE	TRUE	focus	187.04	critRes	0.149
+setKey	slot	level	grade	isMain	isNew	isActive	sub1Type	sub1Value	sub2Type	sub2Value
+boss	1	97	10	TRUE	FALSE	TRUE	skillAmp	0.0853	critDmg	0.1462
+boss	2	98	10	TRUE	FALSE	TRUE	skillAmp	0.0871	accuracy	160.91
+boss	3	101	10	TRUE	FALSE	TRUE	skillAmp	0.0885	critDmg	0.1239
+boss	4	99	10	TRUE	FALSE	TRUE	dmgReduction	0.0433	critRes	0.1462
+boss	5	99	9	TRUE	FALSE	TRUE	dmgReduction	0.0343	critRes	0.1329
+boss	6	97	10	TRUE	FALSE	TRUE	dmgReduction	0.0621	critRes	0.206
+boss	7	99	9	TRUE	FALSE	TRUE	skillAmp	0.0731	focus	167.72
+boss	8	94	10	TRUE	FALSE	TRUE	critRate	0.2125	skillAmp	0.092
+boss	9	97	10	TRUE	FALSE	TRUE	accuracy	151.5	skillAmp	0.0862
+boss	10	101	10	TRUE	FALSE	TRUE	dmgReduction	0.0609	critRes	0.2182
+boss	11	100	10	TRUE	FALSE	TRUE	focus	214.46	skillHaste	4.6
+boss	12	96	10	TRUE	FALSE	TRUE	dmgReduction	0.063	resistance	140.08
+pve	1	94	9	TRUE	FALSE	TRUE	skillAmp	0.0729	accuracy	110.54
+pve	2	89	9	TRUE	FALSE	TRUE	skillAmp	0.0717	accuracy	135.48
+pve	3	91	10	TRUE	FALSE	TRUE	critDmg	0.1265	accuracy	157.18
+pve	4	93	10	TRUE	FALSE	TRUE	dmgReduction	0.0476	critRes	0.1252
+pve	5	94	10	TRUE	FALSE	TRUE	evasion	54.63	dmgReduction	0.0436
+pve	7	96	10	TRUE	FALSE	TRUE	focus	191.38	skillHaste	4.6
+pve	8	95	9	TRUE	FALSE	TRUE	skillAmp	0.0708	accuracy	143.99
+pve	9	93	9	TRUE	FALSE	TRUE	resistance	77.94	skillAmp	0.0731
+pve	11	85	9	TRUE	FALSE	TRUE	focus	176.64	critRes	0.1639
+pve	12	90	9	TRUE	FALSE	TRUE	focus	187.04	critRes	0.149
