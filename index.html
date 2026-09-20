@@ -16,8 +16,8 @@
       --tab-active: rgba(255, 255, 255, 0.86);
       --tab-active-text: #18181b;
       --pill-active: #3f3f46;
-      --card-min: 168px;
-      --card-max: 180px;
+      --card-min: 150px;
+      --card-max: 165px;
       --card-gap: 1rem;
       --dock-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
       --dock-scroll-pad: calc(4.35rem + env(safe-area-inset-bottom, 0px));
@@ -865,21 +865,8 @@
       font-weight: 600;
     }
 
-    .edit-card .primary-cell {
-      gap: 0.1rem;
-    }
-    .edit-card .primary-cell.is-power {
-      gap: 0.2rem;
-    }
-
-    /*
-     * ค่า base stat กับช่อง Power ต้องอยู่ระนาบเดียวกัน — ตัวเลขเป็นข้อความสูงตาม
-     * บรรทัด ส่วน input สูงตามที่ตั้งไว้ ถ้าไม่บังคับให้สูงเท่ากันจะเหลื่อมกันเสมอ
-     */
+    /* ในฟอร์มค่า base stat คือผลลัพธ์ที่คำนวณให้ ตัวใหญ่หน่อยให้ตรวจง่าย */
     .edit-card .stat-primary-block .value {
-      display: flex;
-      align-items: center;
-      min-height: 1.85rem;
       font-size: 1.5rem;
       line-height: 1.1;
     }
@@ -1293,26 +1280,18 @@
       color: #422006;
     }
 
-    /* base stat ชิดซ้าย / power ชิดขวา — ทรงและสีเหมือนกัน ต่างแค่ฝั่ง */
+    /* NOTE: padding ขวาต้องเท่า .stats li ไม่งั้นตัวเลขหลุดแนวเลข substat ข้างล่าง */
     .stat-primary-block {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 0.4rem;
-      /* NOTE: padding ขวาต้องเท่า .stats li ไม่งั้น Power หลุดแนวตัวเลข substat */
       padding: 0.15rem 0.4rem 0.6rem;
     }
 
+    /* ชื่อซ้าย ค่าขวา บรรทัดเดียว — แนวเดียวกับแถว substat */
     .primary-cell {
       display: flex;
-      flex-direction: column;
-      gap: 0.05rem;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.4rem;
       min-width: 0;
-      align-items: flex-start;
-    }
-
-    .primary-cell.is-power {
-      align-items: flex-end;
     }
 
     .stat-primary-block .label {
