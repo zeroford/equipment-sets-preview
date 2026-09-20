@@ -153,23 +153,20 @@ function writeItem(setKey, slot, item) {
   var layout = itemsSheetLayout();
 
   /*
-   * "Add" = ต่อแถวใหม่อย่างเดียว ไม่ไปแตะของเก่า — ช่องนั้นจะมีหลายใบซ้อนกัน
-   * ให้เทียบ แล้วค่อยกดกากบาทลบใบที่ไม่เอาเอง
+   * "Add" = ต่อแถวใหม่อย่างเดียว ไม่ไปแตะของเก่า
    *
-   * NOTE: ชีตที่ไม่มีคอลัมน์ isActive ต่อแถวใหม่ไม่ได้ (จะกลายเป็น slot ซ้ำที่ปิดไม่ได้)
-   * เลยต้องเขียนทับแถวเดิมแทน
+   * NOTE: ต้องมีคอลัมน์ isActive ก่อน ไม่งั้นแถวเก่าปิดไม่ได้เลยสักแถว — เมื่อก่อนโค้ด
+   * ตรงนี้ถอยไปเขียนทับแถวเดิมแบบเงียบๆ ซึ่งกลายเป็นว่า "เพิ่ม" แล้วของเก่าหายไปดื้อๆ
+   * โดยไม่มีอะไรบอก ตอนนี้ให้ฟ้องไปเลยดีกว่า
    */
-  var row = 0;
   if (columnIndex(layout, 'isActive') < 0) {
-    row = findItemRow(layout, setKey, slotNumber);
+    throw new Error(SHEET_ITEMS + ': needs an isActive column before adding items');
   }
 
-  if (!row) {
-    row = layout.sheet.getLastRow() + 1;
-    setCell(layout, row, 'setKey', setKey, '');
-    setCell(layout, row, 'slot', slotNumber, '');
-    setCell(layout, row, 'isActive', true, '');
-  }
+  var row = layout.sheet.getLastRow() + 1;
+  setCell(layout, row, 'setKey', setKey, '');
+  setCell(layout, row, 'slot', slotNumber, '');
+  setCell(layout, row, 'isActive', true, '');
 
   setCell(layout, row, 'level', Math.round(toNumber(item.level)), '');
   setCell(layout, row, 'grade', item.grade, '');
