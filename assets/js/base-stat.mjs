@@ -15,9 +15,6 @@ const DEFAULT_SUB_BONUS = 1.3;
 
 const SUB_BONUS_BY_SLOT = {
   4: 0.7, // helmet
-  // NOTE: armor ต้องอยู่ที่ 0.7 — ลองตั้งเป็นค่า default (1.3) แล้วค่า DMG RDN ของจริง
-  // ในชีต (3.43% / 3.19%) หลุดต่ำกว่าขอบล่างของช่วงที่คำนวณได้ (4.14%)
-  5: 0.7, // armor
 };
 
 const BONUS_BY_SLOT = {
