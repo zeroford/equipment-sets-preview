@@ -41,7 +41,14 @@ function normalizeItem(item, index) {
  */
 function normalizeSlot(entry, index) {
   const list = Array.isArray(entry) ? entry : [entry];
-  return list.map((item) => normalizeItem(item, index)).filter(Boolean);
+  const items = list.map((item) => normalizeItem(item, index)).filter(Boolean);
+  /*
+   * ใบหลักขึ้นบนสุดเสมอ — ที่เหลือคงลำดับเดิมไว้
+   *
+   * NOTE: Apps Script เรียงมาให้แล้ว แต่เรียงซ้ำตรงนี้ด้วย เผื่อสคริปต์เป็นรุ่นเก่า
+   * หรือมีคนสลับแถวในชีตเอง — ใบแรกคือตัวที่ใช้คิดยอดรวมกับหน้า Compare
+   */
+  return items.filter((item) => item.isMain).concat(items.filter((item) => !item.isMain));
 }
 
 export function buildMetaFromSets(sets) {
