@@ -1,7 +1,7 @@
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { gradeTier } from './catalog.mjs';
 import { escapeHtml, statBestMatch } from './utils.mjs';
-import { formatPower, formatStat, formatStatRange, statLabel } from './stats.mjs';
+import { formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { subStatRange, subStatRatio } from './base-stat.mjs';
 import { buildSetSummary } from './summary.mjs';
 
@@ -70,10 +70,13 @@ export function renderCard(item, gridIndex, bestStats) {
     return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${mark}${escapeHtml(formatStat(statId, value))}${rangeHtml}</span></li>`;
   });
 
-  // NOTE: ปุ่มลบอยู่ในทุกการ์ด แต่ CSS โชว์เฉพาะตอน .can-edit (ต่อ Web App ได้จริง)
-  const deleteBtn = `<button type="button" class="card-delete" data-delete-slot="${gridIndex + 1}" aria-label="Remove this item" title="Remove this item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></button>`;
+  /*
+   * ปุ่มมุมขวาบน: ปักหมุด (ตัวหลักของช่อง) กับ ลบ
+   * NOTE: อยู่ในทุกการ์ด แต่ CSS โชว์เฉพาะตอน .can-edit (ต่อ Web App ได้จริง)
+   */
+  const actions = `<div class="card-actions"><button type="button" class="card-pin${item.isMain ? ' is-on' : ''}" data-pin-slot="${gridIndex + 1}" aria-pressed="${item.isMain ? 'true' : 'false'}" aria-label="Set as main" title="${item.isMain ? 'Main item' : 'Set as main'}"><svg viewBox="0 0 24 24" fill="${item.isMain ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5M9 10.76V3h6v7.76a2 2 0 0 0 .55 1.38l1.9 2A2 2 0 0 1 18 15.5V17H6v-1.5a2 2 0 0 1 .55-1.38l1.9-2A2 2 0 0 0 9 10.76z" /></svg></button><button type="button" class="card-delete" data-delete-slot="${gridIndex + 1}" aria-label="Remove this item" title="Remove this item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></button></div>`;
 
-  return `<article class="card ${escapeHtml(item.grade)}${item.isNew ? ' is-new' : ''}" data-slot="${gridIndex + 1}" data-row="${escapeHtml(item.row || '')}" style="--frame:${g.frame};--glow:${g.glow}">${deleteBtn}<div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">Lv.${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="primary-cell"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></span><span class="primary-cell is-power"><span class="label">Power</span><span class="value">${escapeHtml(formatPower(item.power))}</span></span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
+  return `<article class="card ${escapeHtml(item.grade)}${item.isMain ? ' is-main' : ''}" data-slot="${gridIndex + 1}" data-row="${escapeHtml(item.row || '')}" style="--frame:${g.frame};--glow:${g.glow}">${actions}<div class="name-bar"><span class="name-bar-icon-wrap"><img class="name-bar-icon" src="${escapeHtml(equipIconPath(item, gridIndex))}" alt="" width="36" height="36" decoding="async" /><span class="level-badge">Lv.${escapeHtml(item.level)}</span></span><span class="name-bar-text-wrap"><span class="name-bar-text">${escapeHtml(item.name)}</span></span></div><div class="card-body"><div class="stat-primary-block"><span class="primary-cell"><span class="label">${escapeHtml(statLabel(primary[0]))}</span><span class="value">${escapeHtml(formatStat(primary[0], primary[1]))}</span></span></div><ul class="stats">${subRows.join('')}</ul></div></article>`;
 }
 
 export function statTagsHtml(statIds) {

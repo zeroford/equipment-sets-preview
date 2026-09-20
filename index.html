@@ -17,7 +17,7 @@
       --tab-active-text: #18181b;
       --pill-active: #3f3f46;
       --card-min: 168px;
-      --card-max: 188.86px;
+      --card-max: 180px;
       --card-gap: 1rem;
       --dock-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
       --dock-scroll-pad: calc(4.35rem + env(safe-area-inset-bottom, 0px));
@@ -1073,16 +1073,29 @@
     .card-body { padding: 8px; }
 
     /*
-     * ปุ่มลบมุมขวาบนของการ์ด — โผล่ตอน hover เท่านั้น
+     * ปุ่มมุมขวาบนของการ์ด (ปักหมุด / ลบ) — โผล่ตอน hover เท่านั้น
      * NOTE: .can-edit ติดที่ body ตอนต่อ Web App ได้ ถ้าดูจากข้อมูลสำรองในเว็บก็ไม่มีปุ่ม
      * เพราะกดไปก็เขียนอะไรไม่ได้
      */
-    .card-delete {
+    .card-actions {
       position: absolute;
       z-index: 2;
       top: 0.5rem;
       right: 0.5rem;
       display: none;
+      gap: 0.25rem;
+    }
+    .can-edit .card-actions {
+      display: flex;
+    }
+    /* การ์ดตัวอย่างใน dialog อ่านอย่างเดียว — สั่งอะไรจากตรงนั้นไม่ได้ */
+    .can-edit .edit-preview .card-actions {
+      display: none;
+    }
+
+    .card-pin,
+    .card-delete {
+      display: flex;
       align-items: center;
       justify-content: center;
       width: 1.6rem;
@@ -1097,20 +1110,27 @@
       transition: opacity 0.12s ease, background 0.12s ease;
       -webkit-tap-highlight-color: transparent;
     }
-    .can-edit .card-delete {
-      display: flex;
-    }
-    /* การ์ดตัวอย่างใน dialog อ่านอย่างเดียว — ลบจากตรงนั้นไม่ได้ */
-    .can-edit .edit-preview .card-delete {
-      display: none;
-    }
+    .card:hover .card-pin,
     .card:hover .card-delete,
+    .card-pin:focus-visible,
     .card-delete:focus-visible {
       opacity: 1;
+    }
+    /* ใบที่ปักหมุดอยู่ต้องเห็นตลอด ไม่ใช่เห็นตอน hover — มันคือสถานะ ไม่ใช่ปุ่มเฉยๆ */
+    .card-pin.is-on {
+      opacity: 1;
+      background: #4dabf7;
+      color: #0f1114;
+      cursor: default;
+    }
+    .card-pin:hover {
+      background: #4dabf7;
+      color: #0f1114;
     }
     .card-delete:hover {
       background: #e03131;
     }
+    .card-pin[disabled],
     .card-delete[disabled] {
       opacity: 0.5;
       cursor: progress;
@@ -1124,7 +1144,7 @@
     .card.is-busy {
       pointer-events: none;
     }
-    .card.is-busy > *:not(.card-delete) {
+    .card.is-busy > *:not(.card-actions) {
       opacity: 0.35;
     }
     .card.is-busy::after {
@@ -1146,6 +1166,10 @@
         transform: rotate(360deg);
       }
     }
+    .card-pin svg {
+      width: 0.8rem;
+      height: 0.8rem;
+    }
     .card-delete svg {
       width: 0.82rem;
       height: 0.82rem;
@@ -1165,8 +1189,8 @@
       height: auto;
     }
 
-    /* ของที่เพิ่งเปลี่ยนเข้าไป (isNew ในชีต) — กรอบฟ้าให้หาเจอในกริดได้เร็ว */
-    .card.is-new {
+    /* ใบหลักของช่อง (isMain ในชีต) — กรอบฟ้าให้รู้ว่าใบไหนคือตัวที่ใช้อยู่ */
+    .card.is-main {
       box-shadow:
         0 0 0 2px #4dabf7,
         0 0 12px rgba(77, 171, 247, 0.45);
@@ -1687,7 +1711,7 @@
     <div class="set-tabs-list glass-chip" id="setTabList" role="tablist"></div>
   </nav>
   <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-  <script type="application/json" id="equipment-sets-data">[{"setKey":"boss","title":"Set A","items":[{"level":97,"grade":10,"power":287.59,"subs":[["skillAmp",0.0853],["critDmg",0.1462]]},{"level":98,"grade":10,"power":218.42,"subs":[["skillAmp",0.0871],["accuracy",160.91]]},{"level":101,"grade":10,"power":185.72,"subs":[["skillAmp",0.0885],["critDmg",0.1239]]},{"level":99,"grade":10,"power":103.56,"subs":[["dmgReduction",0.0433],["critRes",0.1462]]},{"level":99,"grade":9,"power":209.31,"subs":[["dmgReduction",0.0343],["critRes",0.1329]]},{"level":97,"grade":10,"power":250.07,"subs":[["dmgReduction",0.0621],["critRes",0.206]]},{"level":99,"grade":9,"power":179.87,"subs":[["skillAmp",0.0731],["focus",167.72]]},{"level":94,"grade":10,"power":213.84,"subs":[["critRate",0.2125],["skillAmp",0.092]]},{"level":97,"grade":10,"power":209.82,"subs":[["accuracy",151.5],["skillAmp",0.0862]]},{"level":101,"grade":10,"power":179.85,"subs":[["dmgReduction",0.0609],["critRes",0.2182]]},{"level":100,"grade":10,"power":152.61,"subs":[["focus",214.46],["skillHaste",4.6]]},{"level":96,"grade":10,"power":155.27,"subs":[["dmgReduction",0.063],["resistance",140.08]]}]},{"setKey":"pve","title":"Set B","items":[{"level":94,"grade":9,"power":184.58,"subs":[["skillAmp",0.0729],["accuracy",110.54]]},{"level":89,"grade":9,"power":125.07,"subs":[["skillAmp",0.0717],["accuracy",135.48]]},{"level":91,"grade":10,"power":119.28,"subs":[["critDmg",0.1265],["accuracy",157.18]]},{"level":93,"grade":10,"power":73.94,"subs":[["dmgReduction",0.0476],["critRes",0.1252]]},{"level":94,"grade":10,"power":143.46,"subs":[["evasion",54.63],["dmgReduction",0.0436]]},null,{"level":96,"grade":10,"power":135.2,"subs":[["focus",191.38],["skillHaste",4.6]]},{"level":95,"grade":9,"power":113.99,"subs":[["skillAmp",0.0708],["accuracy",143.99]]},{"level":93,"grade":9,"power":148.09,"subs":[["resistance",77.94],["skillAmp",0.0731]]},null,{"level":85,"grade":9,"power":110.69,"subs":[["focus",176.64],["critRes",0.1639]]},{"level":90,"grade":9,"power":110.74,"subs":[["focus",187.04],["critRes",0.149]]}]},{"setKey":"set3","title":"Set C","items":[null,null,null,null,null,null,null,null,null,null,null,null]}]</script>
+  <script type="application/json" id="equipment-sets-data">[{"setKey":"boss","title":"Set A","items":[{"level":97,"grade":10,"subs":[["skillAmp",0.0853],["critDmg",0.1462]]},{"level":98,"grade":10,"subs":[["skillAmp",0.0871],["accuracy",160.91]]},{"level":101,"grade":10,"subs":[["skillAmp",0.0885],["critDmg",0.1239]]},{"level":99,"grade":10,"subs":[["dmgReduction",0.0433],["critRes",0.1462]]},{"level":99,"grade":9,"subs":[["dmgReduction",0.0343],["critRes",0.1329]]},{"level":97,"grade":10,"subs":[["dmgReduction",0.0621],["critRes",0.206]]},{"level":99,"grade":9,"subs":[["skillAmp",0.0731],["focus",167.72]]},{"level":94,"grade":10,"subs":[["critRate",0.2125],["skillAmp",0.092]]},{"level":97,"grade":10,"subs":[["accuracy",151.5],["skillAmp",0.0862]]},{"level":101,"grade":10,"subs":[["dmgReduction",0.0609],["critRes",0.2182]]},{"level":100,"grade":10,"subs":[["focus",214.46],["skillHaste",4.6]]},{"level":96,"grade":10,"subs":[["dmgReduction",0.063],["resistance",140.08]]}]},{"setKey":"pve","title":"Set B","items":[{"level":94,"grade":9,"subs":[["skillAmp",0.0729],["accuracy",110.54]]},{"level":89,"grade":9,"subs":[["skillAmp",0.0717],["accuracy",135.48]]},{"level":91,"grade":10,"subs":[["critDmg",0.1265],["accuracy",157.18]]},{"level":93,"grade":10,"subs":[["dmgReduction",0.0476],["critRes",0.1252]]},{"level":94,"grade":10,"subs":[["evasion",54.63],["dmgReduction",0.0436]]},null,{"level":96,"grade":10,"subs":[["focus",191.38],["skillHaste",4.6]]},{"level":95,"grade":9,"subs":[["skillAmp",0.0708],["accuracy",143.99]]},{"level":93,"grade":9,"subs":[["resistance",77.94],["skillAmp",0.0731]]},null,{"level":85,"grade":9,"subs":[["focus",176.64],["critRes",0.1639]]},{"level":90,"grade":9,"subs":[["focus",187.04],["critRes",0.149]]}]},{"setKey":"set3","title":"Set C","items":[null,null,null,null,null,null,null,null,null,null,null,null]}]</script>
   <script type="application/json" id="equipment-sheets-config">{"webAppUrl":"https://script.google.com/macros/s/AKfycbw7PadlOwS_HfJKhU9g8Tacz-fPNewAbdV4JvLMsu_iHrfDAAzXEUWpceiuad1EDfVo/exec"}</script>
   <script type="module" src="assets/js/main.mjs"></script>
 </body>

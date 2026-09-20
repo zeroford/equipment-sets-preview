@@ -3,7 +3,7 @@ import { baseStatForSlot, itemNameFor, resolveGrade } from './catalog.mjs';
 import { computeBaseStat } from './base-stat.mjs';
 
 /**
- * ชีตส่งมาแค่ { level, grade, power, subs } — ที่เหลือคำนวณเอาเอง:
+ * ชีตส่งมาแค่ { level, grade, subs } — ที่เหลือคำนวณเอาเอง:
  * ชื่อของกับชนิด base stat มาจาก slot + grade (catalog.mjs)
  * ส่วนค่า base stat คำนวณจาก slot + grade + level (base-stat.mjs)
  *
@@ -25,11 +25,10 @@ function normalizeItem(item, index) {
   return {
     level,
     grade,
-    isNew: Boolean(item.isNew),
+    isMain: Boolean(item.isMain),
     // เลขแถวในชีต — ใช้ชี้เป้าตอนลบ ไม่มีก็ได้ (สคริปต์รุ่นเก่าไม่ได้ส่งมา)
     row: Number(item.row) || 0,
     name: item.name || itemNameFor(slot, grade),
-    power: toStatNumber(item.power),
     stats: [[baseStatForSlot(slot), computeBaseStat(slot, grade, level) || 0], ...subs],
   };
 }

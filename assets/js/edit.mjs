@@ -201,7 +201,7 @@ function formCardHtml(slot, grade, best) {
 
   /*
    * ทุกช่องกรอกอยู่ในการ์ด และอยู่ตรงที่ค่านั้นจะไปโผล่จริง — ไอคอนคือ slot,
-   * badge คือ level, ช่องขวาบนคือ power กรอกแล้วเห็นผลทันทีในที่เดียวกัน
+   * badge คือ level กรอกแล้วเห็นผลทันทีในที่เดียวกัน
    */
   return `<div class="edit-form-card" data-grade="${escapeHtml(grade)}" style="--glow:${chrome.glow}">
     <article class="card ${escapeHtml(grade)} edit-card" data-card style="--frame:${chrome.frame};--glow:${chrome.glow}">
@@ -222,13 +222,6 @@ function formCardHtml(slot, grade, best) {
           <span class="primary-cell">
             <span class="label">${escapeHtml(slot ? statLabel(baseStat) : '—')}</span>
             <span class="value" data-base-display>—</span>
-          </span>
-          <span class="primary-cell is-power">
-            <span class="label">Power</span>
-            <span class="edit-field edit-power-field">
-              <input name="power" type="number" step="any" class="power-input" placeholder="—" aria-label="Power in millions" />
-              <span class="edit-unit" aria-hidden="true">M</span>
-            </span>
           </span>
         </div>
         <ul class="stats">${subRows}</ul>
@@ -291,7 +284,7 @@ export function createEditUi({ onSaved, modeFor }) {
   let menu = null;
   let trigger = null;
   let slot = NO_SLOT;
-  let deleteBound = false;
+  let cardActionsBound = false;
 
   const pair = () => sets.slice(0, 2);
 
@@ -318,7 +311,6 @@ export function createEditUi({ onSaved, modeFor }) {
     }
     return {
       level: Number(form.elements.level.value) || 0,
-      power: Number(form.elements.power.value) || 0,
       grade: Number(form.elements.grade.value),
       subs,
     };
@@ -378,32 +370,36 @@ export function createEditUi({ onSaved, modeFor }) {
   }
 
   /**
-   * ปุ่มกากบาทบนการ์ด — เอาของออกจากช่องนั้น
+   * ปุ่มบนการ์ด — ปักหมุดเป็นตัวหลัก / เอาของออกจากช่องนั้น
    *
    * NOTE: ผูกที่ #equipmentPage ครั้งเดียว ไม่ได้ผูกรายการ์ด เพราะกริดถูกวาดใหม่
    * ทุกครั้งที่บันทึกสำเร็จ listener รายใบจะหายไปพร้อมการ์ดเก่า
    */
-  function bindDelete() {
+  function bindCardActions() {
     const page = document.getElementById('equipmentPage');
-    if (!page || deleteBound) {
+    if (!page || cardActionsBound) {
       return;
     }
-    deleteBound = true;
+    cardActionsBound = true;
 
     page.addEventListener('click', async (event) => {
-      const btn = event.target.closest('.card-delete');
+      const btn = event.target.closest('.card-delete, .card-pin');
       if (!btn) {
         return;
       }
       const owner = btn.closest('[data-set-key]');
-      const slotNumber = Number(btn.dataset.deleteSlot);
-      if (!owner || !slotNumber) {
+      const card = btn.closest('.card');
+      const removing = btn.classList.contains('card-delete');
+      const slotNumber = Number(removing ? btn.dataset.deleteSlot : btn.dataset.pinSlot);
+      if (!owner || !card || !slotNumber) {
         return;
       }
+      if (!removing && btn.classList.contains('is-on')) {
+        return; // ปักหมุดอยู่แล้ว
+      }
 
-      const card = btn.closest('.card');
       const name = card.querySelector('.name-bar-text').textContent;
-      if (!window.confirm(`Remove ${name}?`)) {
+      if (removing && !window.confirm(`Remove ${name}?`)) {
         return;
       }
 
@@ -418,17 +414,17 @@ export function createEditUi({ onSaved, modeFor }) {
       try {
         await postAll(key, [
           {
-            action: 'clearSlot',
+            action: removing ? 'clearSlot' : 'setMain',
             setKey: owner.dataset.setKey,
             slot: slotNumber,
-            // ช่องเดียวมีได้หลายใบ — ต้องบอกแถวไม่งั้นลบใบแรกที่เจอเสมอ
+            // ช่องเดียวมีได้หลายใบ — ต้องบอกแถวไม่งั้นไปโดนใบแรกที่เจอเสมอ
             row: Number(card.dataset.row) || 0,
           },
         ]);
       } catch (err) {
         btn.disabled = false;
         card.classList.remove('is-busy');
-        window.alert((err && err.message) || 'Remove failed');
+        window.alert((err && err.message) || (removing ? 'Remove failed' : 'Could not set main'));
       }
     });
   }
@@ -606,7 +602,7 @@ export function createEditUi({ onSaved, modeFor }) {
     /**
      * วาดส่วนที่ผูกกับ slot/rarity ใหม่
      *
-     * NOTE: ไม่ render ทั้ง dialog ใหม่ — ไม่งั้น level/power/substat ที่พิมพ์ไว้แล้ว
+     * NOTE: ไม่ render ทั้ง dialog ใหม่ — ไม่งั้น level/substat ที่พิมพ์ไว้แล้ว
      * หายหมดทุกครั้งที่สลับ slot
      */
     function applySlot() {
@@ -737,7 +733,7 @@ export function createEditUi({ onSaved, modeFor }) {
     // แก้ข้อมูลได้ต่อเมื่อต่อ Web App ได้จริง — CSS ใช้คลาสนี้ตัดสินใจว่าจะโชว์ปุ่มลบมั้ย
     document.body.classList.toggle('can-edit', Boolean(webAppUrl));
     if (webAppUrl) {
-      bindDelete();
+      bindCardActions();
     }
 
     menu.hidden = !webAppUrl || pair().length < 2;

@@ -7,7 +7,7 @@
  *
  * อ่าน 2 แท็บ (header row บรรทัดแรก, ชื่อคอลัมน์ไม่สนตัวพิมพ์/ช่องว่าง/ขีด):
  *   Sets  — setKey | title | order
- *   Items — setKey | slot | level | grade | power | sub1Type | sub1Value | sub2Type | sub2Value
+ *   Items — setKey | slot | level | grade | sub1Type | sub1Value | sub2Type | sub2Value
  *
  * เก็บเท่าที่จำเป็น ที่เหลือ derive ฝั่ง JS:
  *   grade    9 = legendary, 10 = eternal (พิมพ์ 'eternal' ก็ได้)
@@ -49,7 +49,7 @@ function doGet() {
  * ซึ่ง Apps Script ไม่ตอบ OPTIONS เลย request ตายก่อนถึงที่นี่
  *
  * body: { key, action: 'updateItem' | 'clearSlot', setKey, slot, item? }
- * item: { level, grade, power, subs: [[statId, value, format], …] }
+ * item: { level, grade, subs: [[statId, value, format], …] }
  */
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -63,6 +63,8 @@ function doPost(e) {
 
     if (body.action === 'clearSlot') {
       clearSlot(body.setKey, body.slot, body.row);
+    } else if (body.action === 'setMain') {
+      setMain(body.setKey, body.slot, body.row);
     } else if (body.action === 'updateItem') {
       writeItem(body.setKey, body.slot, body.item || {});
     } else {
@@ -149,16 +151,17 @@ function writeItem(setKey, slot, item) {
   }
 
   var layout = itemsSheetLayout();
-  var row = findItemRow(layout, setKey, slotNumber);
 
   /*
-   * มีคอลัมน์ isActive = เก็บของเก่าไว้ ไม่เขียนทับ — ปิดแถวเดิมแล้วต่อแถวใหม่ท้ายตาราง
-   * ไม่มีคอลัมน์ = ชีตรุ่นเก่า เขียนทับแบบเดิมไปก่อน (ถ้าต่อแถวใหม่จะกลายเป็น slot ซ้ำ)
+   * "Add" = ต่อแถวใหม่อย่างเดียว ไม่ไปแตะของเก่า — ช่องนั้นจะมีหลายใบซ้อนกัน
+   * ให้เทียบ แล้วค่อยกดกากบาทลบใบที่ไม่เอาเอง
+   *
+   * NOTE: ชีตที่ไม่มีคอลัมน์ isActive ต่อแถวใหม่ไม่ได้ (จะกลายเป็น slot ซ้ำที่ปิดไม่ได้)
+   * เลยต้องเขียนทับแถวเดิมแทน
    */
-  if (row && columnIndex(layout, 'isActive') >= 0) {
-    setCell(layout, row, 'isActive', false, '');
-    setCell(layout, row, 'isNew', false, '');
-    row = 0;
+  var row = 0;
+  if (columnIndex(layout, 'isActive') < 0) {
+    row = findItemRow(layout, setKey, slotNumber);
   }
 
   if (!row) {
@@ -170,9 +173,9 @@ function writeItem(setKey, slot, item) {
 
   setCell(layout, row, 'level', Math.round(toNumber(item.level)), '');
   setCell(layout, row, 'grade', item.grade, '');
-  setCell(layout, row, 'power', toNumber(item.power), '');
-  // เขียนทับผ่านฟอร์ม = ของใหม่เสมอ ลบเครื่องหมายเองในชีตได้เมื่อไม่อยากให้เด่นแล้ว
-  setCell(layout, row, 'isNew', true, '');
+  // เพิ่งเพิ่มเข้าไป = ตั้งเป็นตัวหลักของช่องนั้นเลย ใบเก่าเลิกเป็นหลัก
+  clearMainFlags(layout, setKey, slotNumber, row);
+  setCell(layout, row, 'isMain', true, '');
 
   var subs = item.subs || [];
   for (var i = 1; i <= MAX_SUBSTATS; i += 1) {
@@ -195,7 +198,7 @@ function clearSlot(setKey, slot, targetRow) {
   }
   if (columnIndex(layout, 'isActive') >= 0) {
     setCell(layout, row, 'isActive', false, '');
-    setCell(layout, row, 'isNew', false, '');
+    setCell(layout, row, 'isMain', false, '');
   } else {
     layout.sheet.deleteRow(row);
   }
@@ -313,8 +316,7 @@ function buildItems(rows, setKey) {
       row: row.__row,
       level: Math.round(toNumber(field(row, 'level'))),
       grade: field(row, 'grade'),
-      power: toNumber(field(row, 'power')),
-      isNew: isTruthy(field(row, 'isNew')),
+      isMain: isTruthy(field(row, 'isMain') || field(row, 'isNew')),
       subs: readSubStats(row),
     };
     var name = field(row, 'name');
@@ -325,7 +327,57 @@ function buildItems(rows, setKey) {
     slots[slot - 1].unshift(item);
   }
 
+  /*
+   * ใบที่ปักหมุดไว้ขึ้นก่อนเสมอ — หน้าเว็บใช้ใบแรกเป็นตัวหลัก (ยอดรวม stat, หน้า Compare)
+   * NOTE: ไม่ใช้ sort() เพราะ Apps Script ไม่การันตีว่า sort เสถียร — ลำดับที่เหลือจะเพี้ยน
+   */
+  for (i = 0; i < slots.length; i += 1) {
+    var main = [];
+    var rest = [];
+    slots[i].forEach(function (it) {
+      (it.isMain ? main : rest).push(it);
+    });
+    slots[i] = main.concat(rest);
+  }
+
   return slots;
+}
+
+/** ปักหมุดแถวนี้เป็นตัวหลักของช่อง แถวอื่นในช่องเดียวกันเลิกเป็นหลัก */
+function setMain(setKey, slot, targetRow) {
+  var layout = itemsSheetLayout();
+  var row = Math.round(toNumber(targetRow));
+  if (!row) {
+    throw new Error('setMain needs a row');
+  }
+  clearMainFlags(layout, setKey, slot, row);
+  setCell(layout, row, 'isMain', true, '');
+}
+
+/** ล้างหมุดของทุกแถวที่ยัง active ใน (setKey, slot) นั้น ยกเว้นแถวที่ยกเว้นไว้ */
+function clearMainFlags(layout, setKey, slot, exceptRow) {
+  var setCol = columnIndex(layout, 'setKey');
+  var slotCol = columnIndex(layout, 'slot');
+  var activeCol = columnIndex(layout, 'isActive');
+  if (setCol < 0 || slotCol < 0) {
+    return;
+  }
+
+  var values = layout.sheet.getDataRange().getValues();
+  for (var r = 1; r < values.length; r += 1) {
+    if (r + 1 === exceptRow) {
+      continue;
+    }
+    if (activeCol >= 0 && isInactive(values[r][activeCol])) {
+      continue;
+    }
+    if (
+      String(values[r][setCol]).trim() === String(setKey).trim() &&
+      Math.round(toNumber(values[r][slotCol])) === Math.round(toNumber(slot))
+    ) {
+      setCell(layout, r + 1, 'isMain', false, '');
+    }
+  }
 }
 
 /** [[stat code/id, ค่า], …] */
