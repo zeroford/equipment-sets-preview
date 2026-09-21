@@ -42,8 +42,14 @@ function normalizeItem(item, index) {
  */
 function normalizeSlot(entry, index) {
   const list = Array.isArray(entry) ? entry : [entry];
-  // ลำดับตามที่ชีตส่งมา (ใบที่เพิ่งเพิ่มอยู่บนสุด) — ใบหลักดูจาก isMain ไม่ใช่ตำแหน่ง
-  return list.map((item) => normalizeItem(item, index)).filter(Boolean);
+  const items = list.map((item) => normalizeItem(item, index)).filter(Boolean);
+  /*
+   * ใบที่ปักหมุดขึ้นบนสุด ที่เหลือคงลำดับเดิม (ของที่เพิ่งเพิ่มอยู่ท้ายสุด)
+   *
+   * NOTE: Apps Script เรียงมาให้แล้ว แต่เรียงซ้ำตรงนี้ด้วย เผื่อสคริปต์เป็นรุ่นเก่า
+   * หรือมีคนสลับแถวในชีตเอง
+   */
+  return items.filter((item) => item.isMain).concat(items.filter((item) => !item.isMain));
 }
 
 export function buildMetaFromSets(sets) {

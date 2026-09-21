@@ -325,8 +325,23 @@ function buildItems(rows, setKey) {
     if (name !== '') {
       item.name = name;
     }
-    // แถวล่าสุดขึ้นก่อน — เพิ่งเพิ่มเข้าไปย่อมเป็นตัวที่สนใจที่สุด
-    slots[slot - 1].unshift(item);
+    // ตามลำดับแถวในชีต = เก่าไปใหม่ ของที่เพิ่งเพิ่มเลยไปต่อท้าย
+    slots[slot - 1].push(item);
+  }
+
+  /*
+   * ใบที่ปักหมุดไว้ขึ้นบนสุด ที่เหลือเรียงตามลำดับในชีต (ใหม่สุดอยู่ท้าย)
+   * ของที่เพิ่งเพิ่มเลยไปต่อท้ายจนกว่าจะโดนปักหมุด แล้วค่อยเด้งขึ้นบน
+   *
+   * NOTE: ไม่ใช้ sort() เพราะ Apps Script ไม่การันตีว่า sort เสถียร — ลำดับที่เหลือจะเพี้ยน
+   */
+  for (i = 0; i < slots.length; i += 1) {
+    var main = [];
+    var rest = [];
+    slots[i].forEach(function (it) {
+      (it.isMain ? main : rest).push(it);
+    });
+    slots[i] = main.concat(rest);
   }
 
   return slots;
