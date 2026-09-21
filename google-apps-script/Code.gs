@@ -170,9 +170,11 @@ function writeItem(setKey, slot, item) {
 
   setCell(layout, row, 'level', Math.round(toNumber(item.level)), '');
   setCell(layout, row, 'grade', item.grade, '');
-  // เพิ่งเพิ่มเข้าไป = ตั้งเป็นตัวหลักของช่องนั้นเลย ใบเก่าเลิกเป็นหลัก
-  clearMainFlags(layout, setKey, slotNumber, row);
-  setCell(layout, row, 'isMain', true, '');
+  /*
+   * ไม่ตั้งเป็นตัวหลักให้เอง — เพิ่งเพิ่มไม่ได้แปลว่าจะใช้ใบนี้
+   * ใบใหม่ไปอยู่บนสุดของกองอยู่แล้ว ถ้าจะใช้ก็กดหมุดเอง
+   */
+  setCell(layout, row, 'isMain', false, '');
   // ติดจุดแดงไว้ให้รู้ว่าเพิ่งเพิ่ม ลบเองในชีตเมื่ออ่านแล้ว
   setCell(layout, row, 'isNew', true, '');
 
@@ -325,19 +327,6 @@ function buildItems(rows, setKey) {
     }
     // แถวล่าสุดขึ้นก่อน — เพิ่งเพิ่มเข้าไปย่อมเป็นตัวที่สนใจที่สุด
     slots[slot - 1].unshift(item);
-  }
-
-  /*
-   * ใบที่ปักหมุดไว้ขึ้นก่อนเสมอ — หน้าเว็บใช้ใบแรกเป็นตัวหลัก (ยอดรวม stat, หน้า Compare)
-   * NOTE: ไม่ใช้ sort() เพราะ Apps Script ไม่การันตีว่า sort เสถียร — ลำดับที่เหลือจะเพี้ยน
-   */
-  for (i = 0; i < slots.length; i += 1) {
-    var main = [];
-    var rest = [];
-    slots[i].forEach(function (it) {
-      (it.isMain ? main : rest).push(it);
-    });
-    slots[i] = main.concat(rest);
   }
 
   return slots;

@@ -1,6 +1,6 @@
 import { GRADES, SLOT_TYPES, bestSubstatFor } from './constants.mjs';
 import { gradeTier } from './catalog.mjs';
-import { escapeHtml, statBestMatch } from './utils.mjs';
+import { escapeHtml, mainItem, statBestMatch } from './utils.mjs';
 import { formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { subStatRange, subStatRatio } from './base-stat.mjs';
 import { buildSetSummary } from './summary.mjs';

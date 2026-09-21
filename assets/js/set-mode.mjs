@@ -163,7 +163,15 @@ export function createSetModeUi() {
     toggle = document.getElementById('setModeToggle');
     tabs = Array.from(document.querySelectorAll('.set-tab'));
     panels = Array.from(document.querySelectorAll('.section[role="tabpanel"]'));
-    activeSetKey = tabs.length ? tabs[0].dataset.setKey : '';
+
+    /*
+     * อยู่แท็บไหนก็อยู่ต่อ — bind() ถูกเรียกใหม่ทุกครั้งที่บันทึกสำเร็จ
+     * ถ้ารีเซ็ตเป็นแท็บแรกเสมอ กด Add ที่ Set B แล้วจะเด้งกลับ Set A ทุกที
+     */
+    const stillThere = tabs.some((tab) => tab.dataset.setKey === activeSetKey);
+    if (!stillThere) {
+      activeSetKey = tabs.length ? tabs[0].dataset.setKey : '';
+    }
 
     tabs.forEach((tab) => {
       tab.addEventListener('click', () => showSet(tab.dataset.setKey));

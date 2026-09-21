@@ -11,7 +11,7 @@ import {
   subStatRatio,
 } from './base-stat.mjs';
 import { STATS, formatStat, formatStatRange, statLabel } from './stats.mjs';
-import { escapeHtml } from './utils.mjs';
+import { escapeHtml, mainItem } from './utils.mjs';
 
 const KEY_STORAGE = 'equipment-sets-edit-key';
 const SLOT_COUNT = 12;
@@ -160,7 +160,7 @@ function previewHtml(set, slot, mode) {
       <div class="edit-blank">Pick a slot</div>
     </div>`;
   }
-  const item = ((set.items || [])[slot - 1] || [])[0] || null;
+  const item = mainItem((set.items || [])[slot - 1]);
   const bestStats = bestSubstatFor(mode).rows[Math.floor((slot - 1) / 3)] || [];
   return `<div class="edit-preview">
     <p class="edit-col-title">${escapeHtml(set.title)}${item ? '' : ' · empty'}</p>

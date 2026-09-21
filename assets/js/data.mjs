@@ -42,14 +42,8 @@ function normalizeItem(item, index) {
  */
 function normalizeSlot(entry, index) {
   const list = Array.isArray(entry) ? entry : [entry];
-  const items = list.map((item) => normalizeItem(item, index)).filter(Boolean);
-  /*
-   * ใบหลักขึ้นบนสุดเสมอ — ที่เหลือคงลำดับเดิมไว้
-   *
-   * NOTE: Apps Script เรียงมาให้แล้ว แต่เรียงซ้ำตรงนี้ด้วย เผื่อสคริปต์เป็นรุ่นเก่า
-   * หรือมีคนสลับแถวในชีตเอง — ใบแรกคือตัวที่ใช้คิดยอดรวมกับหน้า Compare
-   */
-  return items.filter((item) => item.isMain).concat(items.filter((item) => !item.isMain));
+  // ลำดับตามที่ชีตส่งมา (ใบที่เพิ่งเพิ่มอยู่บนสุด) — ใบหลักดูจาก isMain ไม่ใช่ตำแหน่ง
+  return list.map((item) => normalizeItem(item, index)).filter(Boolean);
 }
 
 export function buildMetaFromSets(sets) {
@@ -124,8 +118,11 @@ export async function postToWebApp(url, body) {
   return normalizeSetsPayload(payload.sets || []);
 }
 
-/** Web App ตอบช้าได้ถึง ~8 วิ — เกินนี้ถือว่าไม่ไหว ใช้ของที่มีอยู่ไปก่อนดีกว่าค้าง */
-const FETCH_TIMEOUT_MS = 15000;
+/*
+ * Apps Script ตอบ 3-8 วิเป็นปกติ แต่เคยวัดได้ถึง 22 วิตอนชีตใหญ่/cold start
+ * ตั้งไว้กว้างหน่อยดีกว่าตัดทิ้งทั้งที่ของกำลังจะมา — ระหว่างรอมีของใน cache ขึ้นให้ดูอยู่แล้ว
+ */
+const FETCH_TIMEOUT_MS = 30000;
 
 export async function fetchSetsFromWebApp(url) {
   const sep = url.includes('?') ? '&' : '?';

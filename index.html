@@ -313,6 +313,7 @@
     @media (prefers-reduced-motion: reduce) {
       .page-loading-spinner,
       .card.is-busy::after,
+      .refresh-spinner,
       .edit-actions button.is-loading::after {
         animation-duration: 2.4s;
       }
@@ -351,6 +352,36 @@
       height: 1.9rem;
       object-fit: contain;
     }
+    /*
+     * กำลังดึงของใหม่จาก Web App อยู่ — หน้าเว็บวาดของที่ cache ไว้ไปก่อนแล้ว
+     * ป้ายนี้บอกว่ายังไม่จบ ไม่งั้นข้อมูลเปลี่ยนเองเฉยๆ โดยไม่มีอะไรบอก
+     */
+    .refresh-badge {
+      position: fixed;
+      z-index: 1001;
+      left: 50%;
+      top: 0.75rem;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .refresh-badge[hidden] {
+      display: none;
+    }
+    .refresh-spinner {
+      width: 0.7rem;
+      height: 0.7rem;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: rgba(255, 255, 255, 0.75);
+      border-radius: 50%;
+      animation: card-busy-spin 0.7s linear infinite;
+    }
+
     .edit-dialog {
       /* NOTE: * { margin: 0 } ข้างบนลบ margin: auto ที่เบราว์เซอร์ใช้จัดกลาง dialog — ต้องใส่คืน */
       margin: auto;
@@ -1712,6 +1743,9 @@
     >
       <i data-lucide="plus" aria-hidden="true"></i>
     </button>
+  </div>
+  <div class="refresh-badge glass-chip" id="refreshBadge" role="status" hidden>
+    <span class="refresh-spinner" aria-hidden="true"></span>Refreshing…
   </div>
   <dialog class="edit-dialog" id="editDialog"></dialog>
   <div class="page" id="equipmentPage">
