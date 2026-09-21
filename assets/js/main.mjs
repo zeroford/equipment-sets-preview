@@ -18,11 +18,6 @@ const editUi = createEditUi({
   modeFor: setModeUi.modeFor,
 });
 
-/**
- * ป้ายเล็กๆ บอกว่ากำลังดึงของใหม่อยู่
- *
- * NOTE: อยู่นอก #equipmentPage เพราะ renderAppShell เขียนทับข้างในทั้งก้อน
- */
 function setRefreshing(on) {
   const badge = document.getElementById('refreshBadge');
   if (badge) {
@@ -30,18 +25,13 @@ function setRefreshing(on) {
   }
 }
 
-/** รอของจริงเท่านี้ก่อน ถ้ายังไม่มาค่อยเอาของใน cache ขึ้นคั่นไว้ */
 const CACHE_FALLBACK_MS = 10000;
 
 async function bootstrap() {
   const cached = loadCachedPayload();
   const pending = loadSetsPayload();
 
-  /*
-   * รอบแรกให้ค้างที่ spinner ไปก่อน — ของจริงมักมาใน 3-8 วิ ขึ้นของเก่าแวบนึง
-   * แล้วเปลี่ยนเป็นของใหม่ทันทีอ่านไม่ทันอยู่ดี เกิน 10 วิ เมื่อไหร่ค่อยเอาของเก่าขึ้นคั่น
-   */
-  let timer = 0;
+   let timer = 0;
   if (cached) {
     timer = setTimeout(() => {
       configureBestSubstats(cached.bestStats);
@@ -54,15 +44,13 @@ async function bootstrap() {
   clearTimeout(timer);
   setRefreshing(false);
 
-  // โหลดไม่สำเร็จแต่มีของที่เคยโหลดไว้ — ของเก่าของจริงดีกว่าข้อมูลสำรองที่ฝังในเว็บ
-  const fallBackToCache = Boolean(payload.loadError && cached);
+   const fallBackToCache = Boolean(payload.loadError && cached);
   const sets = fallBackToCache ? cached.sets : payload.sets;
   if (!sets.length) {
     throw new Error('No equipment sets found');
   }
 
-  // NOTE: ต้องตั้งก่อน paint — การ์ดอ่าน best stat ตอน render รอบแรกเลย
-  configureBestSubstats(fallBackToCache ? cached.bestStats : payload.bestStats);
+   configureBestSubstats(fallBackToCache ? cached.bestStats : payload.bestStats);
   paint(
     sets,
     fallBackToCache
@@ -73,7 +61,6 @@ async function bootstrap() {
   editUi.bind();
 }
 
-// NOTE: ไม่มีตรงนี้ = error ตอน bootstrap จะเงียบสนิท หน้าเว็บค้างที่ loading
 bootstrap().catch((err) => {
   const page = document.getElementById('equipmentPage');
   if (page) {

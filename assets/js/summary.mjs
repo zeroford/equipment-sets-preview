@@ -1,14 +1,8 @@
 import { formatStat, statLabel } from './stats.mjs';
 import { mainItem } from './utils.mjs';
 
-/**
- * Aggregates equipped item stats for the summary popover.
- *
- * NOTE: รวมตาม stat id แล้วค่อย format ทีเดียวตอนท้าย — ไม่ต้อง parse ข้อความอย่าง "8.53%" อีก
- */
 export function buildSetSummary(set) {
-  // NOTE: ช่องละหลายใบได้ แต่ยอดรวมนับเฉพาะใบที่ปักหมุดไว้ ไม่ได้สวมพร้อมกันทุกใบ
-  const equipped = (set.items || []).map(mainItem).filter(Boolean);
+   const equipped = (set.items || []).map(mainItem).filter(Boolean);
   const totals = new Map();
 
   equipped.forEach((item) => {
@@ -17,8 +11,7 @@ export function buildSetSummary(set) {
     });
   });
 
-  // NOTE: เรียงด้วย < > ดิบๆ ไม่ใช่ localeCompare — ให้ลำดับตรงกับของเดิม
-  const aggregatedStats = Array.from(totals, ([statId, total]) => ({
+   const aggregatedStats = Array.from(totals, ([statId, total]) => ({
     label: statLabel(statId),
     display: formatStat(statId, total),
   })).sort((a, b) => (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));

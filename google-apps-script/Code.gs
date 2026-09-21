@@ -1,37 +1,9 @@
-/**
- * Google Apps Script Web App — คืน JSON ให้ equipment-sets-preview
- *
- * Deploy: Deploy → New deployment → Web app
- * - Execute as: Me
- * - Who has access: Anyone (อ่านอย่างเดียว)
- *
- * อ่าน 2 แท็บ (header row บรรทัดแรก, ชื่อคอลัมน์ไม่สนตัวพิมพ์/ช่องว่าง/ขีด):
- *   Sets  — setKey | title | order
- *   Items — setKey | slot | level | grade | sub1Type | sub1Value | sub2Type | sub2Value
- *
- * เก็บเท่าที่จำเป็น ที่เหลือ derive ฝั่ง JS:
- *   grade    9 = legendary, 10 = eternal (พิมพ์ 'eternal' ก็ได้)
- *   base stat ไม่ต้องเก็บ — คำนวณจาก slot + grade + level (assets/js/base-stat.mjs)
- *   sub*Type stat id เช่น skillAmp (พิมพ์ 'Skill AMP' ก็ได้ — assets/js/stats.mjs)
- *   ชื่อของ  ไม่ต้องเก็บ ผูกกับ (slot, grade); ใส่คอลัมน์ name เพื่อ override ได้
- *
- * NOTE: ใช้ getValues() ไม่ใช่ getDisplayValues() — stat แบบ % เก็บเป็นเศษส่วน
- * พิมพ์ 8.53% ชีตเก็บ 0.0853 ซึ่งเป็นค่าที่เราต้องการ ส่วน display จะได้ "8.53%" ซึ่งผิดรูป
- *
- * ── เขียนกลับ ──────────────────────────────────────────────────
- * ต้องตั้ง Script Property ชื่อ EDIT_KEY (Project Settings → Script Properties)
- * ไม่ตั้ง = ปิดการเขียนทั้งหมด
- *
- * ‼️ Web App นี้เปิด public (Anyone) — EDIT_KEY คือสิ่งเดียวที่กันคนอื่นเขียนชีต
- *    ตัว key เดินทางไปฝั่ง browser ด้วย เลยไม่ใช่ความลับระดับ production
- *    ถ้าหลุด: เปลี่ยนค่าใน Script Properties ได้ทันที ไม่ต้อง redeploy
- */
 
 var SHEET_SETS = 'Sets';
 var SHEET_ITEMS = 'Items';
-var SHEET_BEST = 'BestStats'; // ไม่บังคับ — ไม่มีแท็บนี้ก็ใช้ค่าตั้งต้นในโค้ดหน้าเว็บ
+var SHEET_BEST = 'BestStats';
 
-var SLOT_COUNT = 12; // grid 3×4
+var SLOT_COUNT = 12;
 var MAX_SUBSTATS = 5;
 
 function doGet() {
@@ -42,15 +14,6 @@ function doGet() {
   }
 }
 
-/**
- * เขียนกลับลงแท็บ Items — ส่งเป็น text/plain เท่านั้น
- *
- * NOTE: ห้ามส่ง Content-Type: application/json — จะโดน CORS preflight
- * ซึ่ง Apps Script ไม่ตอบ OPTIONS เลย request ตายก่อนถึงที่นี่
- *
- * body: { key, action: 'updateItem' | 'clearSlot', setKey, slot, item? }
- * item: { level, grade, subs: [[statId, value, format], …] }
- */
 function doPost(e) {
   var lock = LockService.getScriptLock();
   try {
@@ -71,8 +34,7 @@ function doPost(e) {
       throw new Error('Unknown action: ' + body.action);
     }
 
-    // คืน sets ชุดใหม่ไปเลย หน้าเว็บจะได้ไม่ต้องยิง GET ตามอีกรอบ
-    return jsonResponse({ ok: true, sets: buildSets() });
+       return jsonResponse({ ok: true, sets: buildSets() });
   } catch (err) {
     return jsonResponse({ error: String((err && err.message) || err) });
   } finally {
@@ -96,7 +58,6 @@ var NUMBER_FORMATS = {
   decimal: '0.00',
 };
 
-/** { header ที่ normalize แล้ว → index คอลัมน์ (0-based) } */
 function itemsSheetLayout() {
   var sheet = getSheet(SHEET_ITEMS);
   if (!sheet) {
@@ -117,7 +78,6 @@ function columnIndex(layout, name) {
   return index === undefined ? -1 : index;
 }
 
-/** แถวที่ยังใช้งานอยู่ (1-based) ของ setKey+slot นั้น, ไม่เจอคืน 0 */
 function findItemRow(layout, setKey, slot) {
   var setCol = columnIndex(layout, 'setKey');
   var slotCol = columnIndex(layout, 'slot');
@@ -152,14 +112,7 @@ function writeItem(setKey, slot, item) {
 
   var layout = itemsSheetLayout();
 
-  /*
-   * "Add" = ต่อแถวใหม่อย่างเดียว ไม่ไปแตะของเก่า
-   *
-   * NOTE: ต้องมีคอลัมน์ isActive ก่อน ไม่งั้นแถวเก่าปิดไม่ได้เลยสักแถว — เมื่อก่อนโค้ด
-   * ตรงนี้ถอยไปเขียนทับแถวเดิมแบบเงียบๆ ซึ่งกลายเป็นว่า "เพิ่ม" แล้วของเก่าหายไปดื้อๆ
-   * โดยไม่มีอะไรบอก ตอนนี้ให้ฟ้องไปเลยดีกว่า
-   */
-  if (columnIndex(layout, 'isActive') < 0) {
+   if (columnIndex(layout, 'isActive') < 0) {
     throw new Error(SHEET_ITEMS + ': needs an isActive column before adding items');
   }
 
@@ -170,13 +123,8 @@ function writeItem(setKey, slot, item) {
 
   setCell(layout, row, 'level', Math.round(toNumber(item.level)), '');
   setCell(layout, row, 'grade', item.grade, '');
-  /*
-   * ไม่ตั้งเป็นตัวหลักให้เอง — เพิ่งเพิ่มไม่ได้แปลว่าจะใช้ใบนี้
-   * ใบใหม่ไปอยู่บนสุดของกองอยู่แล้ว ถ้าจะใช้ก็กดหมุดเอง
-   */
-  setCell(layout, row, 'isMain', false, '');
-  // ติดจุดแดงไว้ให้รู้ว่าเพิ่งเพิ่ม ลบเองในชีตเมื่ออ่านแล้ว
-  setCell(layout, row, 'isNew', true, '');
+   setCell(layout, row, 'isMain', false, '');
+   setCell(layout, row, 'isNew', true, '');
 
   var subs = item.subs || [];
   for (var i = 1; i <= MAX_SUBSTATS; i += 1) {
@@ -186,11 +134,6 @@ function writeItem(setKey, slot, item) {
   }
 }
 
-/**
- * เอาออกจากกริด — มีคอลัมน์ isActive ก็แค่ปิดแถวไว้ ไม่ลบข้อมูลทิ้ง
- *
- * NOTE: รับเลขแถวมาด้วยได้ ตอน slot มีหลายใบจะได้ลบถูกใบ ไม่ใช่ใบแรกที่เจอ
- */
 function clearSlot(setKey, slot, targetRow) {
   var layout = itemsSheetLayout();
   var row = Math.round(toNumber(targetRow)) || findItemRow(layout, setKey, Math.round(toNumber(slot)));
@@ -205,7 +148,6 @@ function clearSlot(setKey, slot, targetRow) {
   }
 }
 
-/** คอลัมน์ที่ชีตไม่มีก็ข้ามไป — ไม่พังถ้าชีตมีคอลัมน์น้อยกว่าที่ส่งมา */
 function setCell(layout, row, name, value, format) {
   var col = columnIndex(layout, name);
   if (col < 0) {
@@ -218,15 +160,6 @@ function setCell(layout, row, name, value, format) {
   }
 }
 
-/**
- * แท็บ BestStats (ไม่บังคับ): mode | row | stats
- *   mode  = pve | boss
- *   row   = 1-4 (แถวของกริด: 1 = slot 1-3, 2 = 4-6, 3 = 7-9, 4 = 10-12)
- *   stats = ชื่อ stat คั่นด้วยจุลภาค เช่น "skillAmp, accuracy" หรือ "Skill AMP, Accuracy"
- *
- * แถวไหนไม่ได้เขียนไว้ = ว่าง (ไม่ highlight อะไรในแถวนั้น)
- * ไม่มีแท็บนี้เลย = หน้าเว็บใช้ค่าตั้งต้นของมันเอง
- */
 function buildBestStats() {
   var sheet = getSheet(SHEET_BEST);
   if (!sheet) {
@@ -287,12 +220,6 @@ function buildSets() {
     });
 }
 
-/**
- * 12 ช่องเรียงตาม grid — แต่ละช่องเป็น "รายการ" ของที่ยังใช้งานอยู่
- *
- * NOTE: ปกติมีใบเดียว แต่ถ้าชีตมีหลายแถว active ใน slot เดียวกันจะส่งไปทั้งหมด
- * ให้หน้าเว็บเรียงให้เห็นครบ — ดีกว่าเลือกมาใบเดียวแล้วอีกใบหายไปเงียบๆ
- */
 function buildItems(rows, setKey) {
   var slots = [];
   var i;
@@ -302,8 +229,7 @@ function buildItems(rows, setKey) {
 
   for (i = 0; i < rows.length; i += 1) {
     var row = rows[i];
-    // ของเก่าที่ถูกแทนที่/ลบไปแล้ว ยังอยู่ในชีตแต่ไม่เอามาแสดง
-    if (isInactive(field(row, 'isActive'))) {
+       if (isInactive(field(row, 'isActive'))) {
       continue;
     }
     var raw = field(row, 'slot');
@@ -325,17 +251,10 @@ function buildItems(rows, setKey) {
     if (name !== '') {
       item.name = name;
     }
-    // ตามลำดับแถวในชีต = เก่าไปใหม่ ของที่เพิ่งเพิ่มเลยไปต่อท้าย
-    slots[slot - 1].push(item);
+       slots[slot - 1].push(item);
   }
 
-  /*
-   * ใบที่ปักหมุดไว้ขึ้นบนสุด ที่เหลือเรียงตามลำดับในชีต (ใหม่สุดอยู่ท้าย)
-   * ของที่เพิ่งเพิ่มเลยไปต่อท้ายจนกว่าจะโดนปักหมุด แล้วค่อยเด้งขึ้นบน
-   *
-   * NOTE: ไม่ใช้ sort() เพราะ Apps Script ไม่การันตีว่า sort เสถียร — ลำดับที่เหลือจะเพี้ยน
-   */
-  for (i = 0; i < slots.length; i += 1) {
+   for (i = 0; i < slots.length; i += 1) {
     var main = [];
     var rest = [];
     slots[i].forEach(function (it) {
@@ -347,7 +266,6 @@ function buildItems(rows, setKey) {
   return slots;
 }
 
-/** ปักหมุดแถวนี้เป็นตัวหลักของช่อง แถวอื่นในช่องเดียวกันเลิกเป็นหลัก */
 function setMain(setKey, slot, targetRow) {
   var layout = itemsSheetLayout();
   var row = Math.round(toNumber(targetRow));
@@ -358,7 +276,6 @@ function setMain(setKey, slot, targetRow) {
   setCell(layout, row, 'isMain', true, '');
 }
 
-/** ล้างหมุดของทุกแถวที่ยัง active ใน (setKey, slot) นั้น ยกเว้นแถวที่ยกเว้นไว้ */
 function clearMainFlags(layout, setKey, slot, exceptRow) {
   var setCol = columnIndex(layout, 'setKey');
   var slotCol = columnIndex(layout, 'slot');
@@ -384,12 +301,10 @@ function clearMainFlags(layout, setKey, slot, exceptRow) {
   }
 }
 
-/** [[stat code/id, ค่า], …] */
 function readSubStats(row) {
   var subs = [];
   for (var i = 1; i <= MAX_SUBSTATS; i += 1) {
-    // รับทั้ง sub1Type และ subStat1Type
-    var type = field(row, 'sub' + i + 'Type') || field(row, 'subStat' + i + 'Type');
+       var type = field(row, 'sub' + i + 'Type') || field(row, 'subStat' + i + 'Type');
     var value = field(row, 'sub' + i + 'Value') || field(row, 'subStat' + i + 'Value');
     if (type === '' && value === '') {
       continue;
@@ -399,7 +314,6 @@ function readSubStats(row) {
   return subs;
 }
 
-/** อ่านทั้งแท็บเป็น array ของ object โดยใช้ header row เป็น key */
 function readTable(name) {
   var sheet = getSheet(name);
   if (!sheet) {
@@ -421,8 +335,7 @@ function readTable(name) {
           obj[headers[i]] = String(row[i] == null ? '' : row[i]).trim();
         }
       }
-      // NOTE: ขึ้นต้น __ กันชนกับชื่อคอลัมน์จริง — field() มองไม่เห็นเพราะ normalizeKey ตัด _ ทิ้ง
-      obj.__row = index + 2;
+           obj.__row = index + 2;
       return obj;
     })
     .filter(function (obj) {
@@ -447,12 +360,6 @@ function groupBySetKey(rows, sheetName) {
   return grouped;
 }
 
-/**
- * หาแท็บโดยไม่สนช่องว่าง/ตัวพิมพ์ — `Best Stats` = `BestStats` = `best_stats`
- *
- * NOTE: ชื่อคอลัมน์ยืดหยุ่นอยู่แล้ว ชื่อแท็บก็ควรเหมือนกัน ไม่งั้นพิมพ์เว้นวรรคเข้าไป
- * แล้วสคริปต์หาไม่เจอโดยไม่มีอะไรบอก
- */
 function getSheet(name) {
   var book = SpreadsheetApp.getActiveSpreadsheet();
   var exact = book.getSheetByName(name);
@@ -481,18 +388,11 @@ function field(row, name) {
   return value == null ? '' : value;
 }
 
-/** ชีตพิมพ์ได้หลายแบบ — TRUE/true/1/yes/y ถือว่าใช่ทั้งหมด */
 function isTruthy(raw) {
   var text = String(raw == null ? '' : raw).trim().toLowerCase();
   return text === 'true' || text === '1' || text === 'yes' || text === 'y';
 }
 
-/**
- * ปิดอยู่หรือเปล่า — ต้องเขียน FALSE ชัดๆ เท่านั้น
- *
- * NOTE: ช่องว่างถือว่ายังใช้งานอยู่ ไม่งั้นแค่เพิ่มคอลัมน์ isActive เข้าไปเฉยๆ
- * ของทั้งชีตจะหายจากหน้าเว็บทันที
- */
 function isInactive(raw) {
   var text = String(raw == null ? '' : raw).trim().toLowerCase();
   return text === 'false' || text === '0' || text === 'no' || text === 'n';
@@ -504,8 +404,7 @@ function toNumber(raw) {
 }
 
 function jsonResponse(obj) {
-  // NOTE: ContentService ตั้ง HTTP status ไม่ได้ — error จึงอยู่ในตัว payload
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
+   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
     ContentService.MimeType.JSON,
   );
 }

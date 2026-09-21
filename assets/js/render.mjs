@@ -5,12 +5,6 @@ import { formatStat, formatStatRange, statLabel } from './stats.mjs';
 import { subStatRange, subStatRatio } from './base-stat.mjs';
 import { buildSetSummary } from './summary.mjs';
 
-/**
- * เครื่องหมายบอกคุณภาพโรล ต่อท้ายตัวเลข substat
- *
- * เรียงจากชั้นหายากสุดลงมาทั้งฝั่งบนและฝั่งล่าง เพราะ find() หยุดที่ชั้นแรกที่ผ่าน
- * (ไม่งั้น bottom 10% จะโดน bottom 25% กินไปก่อน)
- */
 const ROLL_TIERS = [
   { test: (r) => r >= 0.95, cls: 'is-top5', icon: 'star' },
   { test: (r) => r >= 0.9, cls: 'is-top10', icon: 'chevronsUp' },
@@ -19,7 +13,6 @@ const ROLL_TIERS = [
   { test: (r) => r <= 0.25, cls: 'is-bot25', icon: 'chevronDown' },
 ];
 
-// path ชุด lucide (viewBox 24) — star เป็นรูปทึบคนละ viewBox เลยไปอยู่ใน sprite ของหน้า
 const CHEVRON_PATHS = {
   chevronUp: '<path d="m18 15-6-6-6 6"/>',
   chevronsUp: '<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>',
@@ -59,23 +52,17 @@ export function renderCard(item, gridIndex, bestStats) {
   const primary = stats[0] || ['', 0];
   const subRows = stats.slice(1).map(([statId, value]) => {
     const best = statBestMatch(statId, bestStats);
-    // ช่วงค่าที่ substat ตัวนี้ออกได้ ไว้เทียบว่าที่ได้มาถือว่าดีแค่ไหน
-    const range = subStatRange(gridIndex + 1, item.grade, statId);
+       const range = subStatRange(gridIndex + 1, item.grade, statId);
     const rangeHtml = range
       ? `<small class="stat-range">${escapeHtml(formatStatRange(statId, range[0], range[1]))}</small>`
       : '';
 
-    // เครื่องหมายบอกว่าโรลได้ดีแค่ไหน — เทียบกับช่วงที่เป็นไปได้ของ stat ตัวนั้น
-    const mark = rollMarkHtml(subStatRatio(gridIndex + 1, item.grade, statId, value));
+       const mark = rollMarkHtml(subStatRatio(gridIndex + 1, item.grade, statId, value));
     return `<li${best ? ' class="stat-row-best"' : ''} data-stat-id="${escapeHtml(statId)}"><span class="label">${escapeHtml(statLabel(statId))}</span><span class="value">${mark}${escapeHtml(formatStat(statId, value))}${rangeHtml}</span></li>`;
   });
 
-  /*
-   * ปุ่มมุมขวาบน: ปักหมุด (ตัวหลักของช่อง) กับ ลบ
-   * NOTE: อยู่ในทุกการ์ด แต่ CSS โชว์เฉพาะตอน .can-edit (ต่อ Web App ได้จริง)
-   */
-  const pinBtn = item.isMain
-    ? '' // ปักอยู่แล้ว กดไปก็ไม่เกิดอะไร — กรอบฟ้าบอกสถานะพอแล้ว
+   const pinBtn = item.isMain
+    ? ''
     : `<button type="button" class="card-pin" data-pin-slot="${gridIndex + 1}" aria-label="Set as main" title="Set as main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5M9 10.76V3h6v7.76a2 2 0 0 0 .55 1.38l1.9 2A2 2 0 0 1 18 15.5V17H6v-1.5a2 2 0 0 1 .55-1.38l1.9-2A2 2 0 0 0 9 10.76z" /></svg></button>`;
 
   const actions = `<div class="card-actions">${pinBtn}<button type="button" class="card-delete" data-delete-slot="${gridIndex + 1}" aria-label="Remove this item" title="Remove this item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></button></div>`;
@@ -89,23 +76,11 @@ export function statTagsHtml(statIds) {
     .join('');
 }
 
-/**
- * แถบ best substat เหนือแต่ละแถว — 1 stat = 1 tag
- *
- * NOTE: สร้างจาก rows (ชุดเดียวกับที่ใช้ตัดสินว่า substat ไหน highlight)
- * ไม่ได้ใช้ข้อความ label แยกอีกแล้ว ป้ายกับ highlight เลยตรงกันเสมอ
- */
 export function bestTagsHtml(statIds) {
   const tags = statTagsHtml(statIds);
-  // แถวที่ไม่มี stat ก็ไม่ต้องมีป้ายหัวแถบ (เช่น set ที่ยังไม่ได้ตั้งโหมด)
-  return tags ? `<span class="best-label">Best Stat</span>${tags}` : '';
+   return tags ? `<span class="best-label">Best Stat</span>${tags}` : '';
 }
 
-/**
- * คำกำกับเหนือการ์ดในแท็บ Compare — ชื่อ set + best stat ของ set นั้น
- *
- * NOTE: set-mode.mjs เรียกซ้ำตอน toggle โหมด ป้ายเลยเปลี่ยนตามทันที
- */
 export function compareCaptionHtml(title, statIds) {
   return `<span class="compare-set-name">${escapeHtml(title)}</span>${statTagsHtml(statIds)}`;
 }
@@ -127,8 +102,7 @@ function renderSection(set, setIndex, summary, mode) {
       if (!list.length) {
         return emptyCellHtml(gridIndex);
       }
-      // ช่องเดียวมีได้หลายใบ — เรียงลงมาในช่องนั้น ไม่ไปกินช่องข้างๆ
-      return `<div class="slot-stack">${list.map((item) => renderCard(item, gridIndex, bestStats)).join('')}</div>`;
+           return `<div class="slot-stack">${list.map((item) => renderCard(item, gridIndex, bestStats)).join('')}</div>`;
     });
     rowsHtml += `<div class="grid-row-group" data-row-index="${rowIndex}"><p class="row-best-caption">${bestTagsHtml(bestStats)}</p><div class="grid">${cells.join('')}</div></div>`;
   }
@@ -149,12 +123,6 @@ export function emptyCellHtml(gridIndex) {
   return `<div class="grid-empty" aria-hidden="true"><img class="grid-empty-plate" src="${escapeHtml(platePath(gridIndex))}" alt="" width="72" height="72" decoding="async" /></div>`;
 }
 
-/**
- * แท็บ Compare — เอา slot เดียวกันของสอง set มาวางข้างกัน
- *
- * NOTE: highlight ของแต่ละใบยังใช้โหมดของ set ตัวเอง ไม่ได้บังคับให้เหมือนกัน
- * จะได้เห็นว่าแต่ละ set มองหา substat คนละชุด
- */
 function renderCompareSection(sets, modeFor) {
   const pair = sets.slice(0, 2);
   const bestOf = pair.map((set) => bestSubstatFor(modeFor(set.setKey)));
@@ -163,7 +131,7 @@ function renderCompareSection(sets, modeFor) {
   for (let slot = 1; slot <= 12; slot += 1) {
     const gridIndex = slot - 1;
     if (!pair.some((set) => ((set.items || [])[gridIndex] || []).length)) {
-      continue; // ไม่มีของทั้งสอง set ก็ไม่ต้องโชว์ช่องนี้
+      continue;
     }
 
     const slotName = SLOT_TYPES[gridIndex] || '';
@@ -174,8 +142,7 @@ function renderCompareSection(sets, modeFor) {
         const card = list.length
           ? `<div class="slot-stack">${list.map((item) => renderCard(item, gridIndex, bestStats)).join('')}</div>`
           : emptyCellHtml(gridIndex);
-        // NOTE: ติด setKey/rowIndex ไว้ให้ set-mode.mjs วาด highlight ใหม่ได้ตอนสลับโหมด
-        return `<div class="compare-cell" data-set-key="${escapeHtml(set.setKey)}" data-row-index="${Math.floor(
+               return `<div class="compare-cell" data-set-key="${escapeHtml(set.setKey)}" data-row-index="${Math.floor(
           gridIndex / 3,
         )}"><p class="compare-set">${compareCaptionHtml(set.title, bestStats)}</p>${card}</div>`;
       })
@@ -204,9 +171,6 @@ function renderTabs(sets, withCompare) {
   return tabs.join('');
 }
 
-/**
- * Renders set panels and tab bar into the page shell.
- */
 export function renderAppShell(sets, loadError, modeFor) {
   const page = document.getElementById('equipmentPage');
   const tabList = document.getElementById('setTabList');
@@ -218,8 +182,7 @@ export function renderAppShell(sets, loadError, modeFor) {
     ? `<p class="page-load-error" role="status">${escapeHtml(loadError)}</p>`
     : '';
 
-  // ต้องมีอย่างน้อย 2 set ถึงจะมีอะไรให้เทียบ
-  const withCompare = sets.length >= 2;
+   const withCompare = sets.length >= 2;
 
   page.innerHTML =
     errorHtml +

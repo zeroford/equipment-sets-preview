@@ -90,7 +90,6 @@
       --text: #f1f3f5;
       --muted: #868e96;
       --divider: rgba(255, 255, 255, 0.08);
-      /* tab bar ล่าง = ตัวเลือกหลัก, toggle/ปุ่ม Save = ระดับรอง */
       --tab-active: rgba(255, 255, 255, 0.86);
       --tab-active-text: #18181b;
       --pill-active: #3f3f46;
@@ -102,10 +101,6 @@
     }
 
     .glass-chip {
-      /*
-       * NOTE: พื้นต้องสว่างกว่า --bg พอสมควร ไม่งั้นปุ่มลอยกลืนไปกับพื้นหลัง
-       * ใช้ zinc-800 ชุดเดียวกับ .best-tag ให้ผิวลอยทั้งหน้าเป็นโทนเดียวกัน
-       */
       border: 1px solid rgba(255, 255, 255, 0.16);
       background: rgba(39, 39, 42, 0.85);
       backdrop-filter: blur(20px) saturate(1.2);
@@ -127,27 +122,14 @@
 
     .page { max-width: 1200px; margin: 0 auto; }
 
-    /* จอกว้าง: วาง row-group เป็น 2 คอลัมน์ ได้การ์ด 3 3 / 3 3 แทนที่จะเรียงลงยาว 4 แถว */
     @media (min-width: 1120px) {
       .page {
         max-width: none;
       }
       .section {
         display: grid;
-        /*
-         * กว้างสุดเท่าการ์ด 3 ใบ ไม่ใช้ 1fr — ไม่งั้นแถบ tag ด้านบนจะยืดเกินแนวการ์ด
-         * NOTE: ต้องเป็น minmax(0, …) ไม่ใช่ค่าตายตัว — ช่วงจอ 1120–1290px
-         * สองคอลัมน์รวมกันกว้างกว่าจอ ถ้าหดไม่ได้จะล้นออกนอกจอทั้งซ้ายและขวา
-         */
         grid-template-columns: repeat(2, minmax(0, calc(var(--card-max) * 3 + var(--card-gap) * 2)));
-        /* แถวหัวข้อ + แถวการ์ดอีก 2 */
         grid-template-rows: auto auto auto;
-        /*
-         * ไล่ลงก่อนแล้วค่อยข้ามคอลัมน์ ให้ slot เรียง
-         *   1 2 3 | 7 8 9
-         *   4 5 6 | 10 11 12
-         * ถ้าใช้ flow แบบแถว จะได้ 1-3 | 4-6 / 7-9 | 10-12 ซึ่งอ่านข้ามไปมา
-         */
         grid-auto-flow: column;
         justify-content: center;
         column-gap: 1.5rem;
@@ -230,7 +212,6 @@
       inset: 0;
       border-radius: 999px;
       background: var(--tab-active);
-      /* NOTE: เบลอฉากหลังด้วย ไม่งั้นขาวโปร่งจะดูเหมือนขาวหม่นเฉยๆ ไม่ใช่กระจกฝ้า */
       backdrop-filter: blur(10px) saturate(1.2);
       -webkit-backdrop-filter: blur(10px) saturate(1.2);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
@@ -288,7 +269,6 @@
       height: 1rem;
     }
 
-    /* ── toggle PvE / Boss ลอยมุมขวาบน ───────────────────────── */
     .mode-toggle {
       position: fixed;
       top: calc(1rem + env(safe-area-inset-top, 0px));
@@ -296,7 +276,6 @@
       z-index: 1002;
       display: flex;
       align-items: center;
-      /* NOTE: wrap ไว้ด้วย จอแคบสองแคปซูลจะได้ตกบรรทัดแทนที่จะล้นออกนอกจอ */
       flex-wrap: wrap;
       justify-content: flex-end;
       gap: 0.5rem;
@@ -305,7 +284,6 @@
       display: none;
     }
 
-    /* NOTE: ใช้ padding/gap ชุดเดียวกับ .set-tabs-list ให้จังหวะขอบตรงกัน */
     .mode-group,
     .rarity-group {
       display: flex;
@@ -314,7 +292,6 @@
       border-radius: 999px;
     }
 
-    /* ชื่อ set ในแคปซูลเดียวกับปุ่ม (แท็บ Compare) — เป็นป้ายเฉยๆ กดไม่ได้ */
     .mode-group-label {
       display: flex;
       align-items: center;
@@ -367,7 +344,6 @@
       height: 1rem;
     }
 
-    /* ── ระหว่างรอ API ────────────────────────────────────────── */
     .page-loading {
       position: fixed;
       inset: 0;
@@ -397,8 +373,6 @@
       }
     }
 
-    /* ── โหมดแก้ไข ───────────────────────────────────────────── */
-    /* NOTE: ระดับเดียวกับปุ่ม i ฝั่งซ้าย — เมื่อก่อนต้องยกขึ้นหลบปุ่ม swap ที่ตอนนี้ไม่มีแล้ว */
     .add-menu {
       position: fixed;
       right: 1rem;
@@ -430,10 +404,6 @@
       height: 1.9rem;
       object-fit: contain;
     }
-    /*
-     * กำลังดึงของใหม่จาก Web App อยู่ — หน้าเว็บวาดของที่ cache ไว้ไปก่อนแล้ว
-     * ป้ายนี้บอกว่ายังไม่จบ ไม่งั้นข้อมูลเปลี่ยนเองเฉยๆ โดยไม่มีอะไรบอก
-     */
     .refresh-badge {
       position: fixed;
       z-index: 1001;
@@ -461,7 +431,6 @@
     }
 
     .edit-dialog {
-      /* NOTE: * { margin: 0 } ข้างบนลบ margin: auto ที่เบราว์เซอร์ใช้จัดกลาง dialog — ต้องใส่คืน */
       margin: auto;
       width: min(40rem, calc(100vw - 2rem));
       max-height: calc(100vh - 2rem);
@@ -525,14 +494,11 @@
     }
     .edit-cols {
       display: grid;
-      /* ซ้ายพอดีการ์ด ที่เหลือให้ฟอร์ม — ฟอร์มมีช่องกรอก ต้องการที่มากกว่า */
       grid-template-columns: var(--card-max) minmax(0, 1fr);
       align-items: stretch;
       gap: 1.1rem;
     }
 
-    /* NOTE: grid ไม่มี column-rule — ต้องแปะเส้นที่คอลัมน์ขวาเอง (align-items: stretch
-       ข้างบนคือสิ่งที่ทำให้เส้นยาวเต็มความสูง ไม่ใช่แค่เท่าเนื้อหาในคอลัมน์) */
     .edit-cols > .edit-col + .edit-col {
       padding-left: 1.1rem;
       border-left: 1px solid var(--divider);
@@ -544,7 +510,6 @@
       gap: 0.85rem;
       min-width: 0;
     }
-    /* ความสูงแถวมาจากคอลัมน์ซ้าย (การ์ด 2 ใบ) — ขวายืดตาม ปุ่มเลยลงไปติดล่างได้ */
     .edit-cols > .edit-col {
       height: 100%;
     }
@@ -569,16 +534,10 @@
       width: 100%;
     }
 
-    /*
-     * ยังไม่เลือก slot — ไม่มีชื่อ ไอคอน หรือ base stat ให้โชว์ เพราะทั้งสามอย่าง
-     * เป็นฟังก์ชันของ slot ล้วนๆ เดาแทนผู้ใช้ไม่ได้
-     */
     .edit-blank {
       display: flex;
       align-items: center;
       justify-content: center;
-      /* NOTE: สูงเท่าบล็อกการ์ดจริง — คอลัมน์ซ้ายเป็นตัวกำหนดความสูง dialog ถ้าไม่เท่า
-         dialog จะเด้งทันทีที่เลือก slot เสร็จ */
       min-height: 13.175rem;
       border-radius: 14px;
       border: 2px dashed rgba(255, 255, 255, 0.14);
@@ -591,7 +550,6 @@
       color: rgba(0, 0, 0, 0.45);
     }
 
-    /* ไอคอนในการ์ดฟอร์มเป็นปุ่มเปิดตารางเลือก slot */
     .slot-pick {
       display: flex;
       align-items: center;
@@ -605,15 +563,10 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /*
-     * NOTE: ลอยเทียบกับ .edit-form-card ไม่ใช่ .card — .card มี overflow: hidden
-     * ถ้าอยู่ข้างในจะโดนตัดหายไปเกือบหมด ส่วน top/left ตั้งจาก JS ตอนเปิด
-     */
     .slot-picker {
       position: absolute;
       z-index: 20;
       display: grid;
-      /* ขนาดคงที่เท่าเมนูปุ่ม + */
       grid-template-columns: repeat(6, 2.5rem);
       gap: 0.25rem;
       padding: 0.35rem;
@@ -627,14 +580,9 @@
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
     }
 
-    /*
-     * แถบชื่อของการ์ดฟอร์มเป็น 2 บรรทัด: ชื่อ / Lv. + rarity
-     * ไอคอนเกาะบนสุด ไม่ใช่กลางแนวตั้ง เพราะฝั่งขวาสูงกว่าหนึ่งบรรทัด
-     */
     .edit-name-bar {
       align-items: flex-start;
     }
-    /* ใหญ่กว่าการ์ดจริง (45px) อยู่ดี — ไอคอนในนี้เป็นปุ่มเลือก slot ด้วย กดง่ายขึ้น */
     .edit-card .name-bar-icon-wrap {
       width: 61px;
       height: 61px;
@@ -659,7 +607,6 @@
       gap: 0.35rem;
     }
 
-    /* บนแถบชื่อสว่าง ตัวควบคุมต้องเป็นพื้นดำโปร่ง ไม่ใช่ขาวโปร่งแบบที่ใช้บนพื้นมืด */
     .edit-lv {
       display: inline-flex;
       align-items: center;
@@ -707,10 +654,6 @@
       color: rgba(255, 255, 255, 0.55);
     }
 
-    /*
-     * NOTE: กรอบของฟิลด์อยู่ที่ตัวห่อ ไม่ใช่ที่ <input> — หน่วย (% / M) กับเครื่องหมาย
-     * คุณภาพโรลเลยอยู่ในกรอบเดียวกับตัวเลข ไม่ต้องกันที่ไว้ข้างนอก
-     */
     .edit-field {
       display: flex;
       align-items: center;
@@ -734,11 +677,6 @@
     .edit-power-field {
       width: 5.5rem;
     }
-    /*
-     * เครื่องหมายคุณภาพโรลนำหน้าตัวเลข — ชุดเดียวกับที่การ์ดใช้
-     * NOTE: .roll-mark ตั้ง margin/vertical-align ไว้สำหรับอยู่ในสายตัวอักษร
-     * ในกล่อง flex นี้ไม่ต้องใช้ ต้องล้างทิ้ง
-     */
     .edit-sub-mark {
       display: flex;
       align-items: center;
@@ -758,22 +696,14 @@
       display: none;
     }
 
-    /* ช่วงค่ายังต้องกันที่ไว้ ไม่งั้นแถวยุบตอนเลือก stat ที่ไม่มีช่วง */
     .edit-card .stat-range {
       min-height: 0.72rem;
     }
 
-
-    /* NOTE: ต้องเป็น .card.edit-card — บล็อกนี้อยู่ก่อน .card ในไฟล์ ถ้าใช้คลาสเดียว
-       specificity เท่ากันแล้ว .card { height: 100% } ที่อยู่ทีหลังจะชนะ */
     .card.edit-card {
       width: 100%;
       height: auto;
     }
-    /*
-     * การ์ดจริงใช้ <ul> เป็นกล่องเทาที่แถวชนขอบพอดี เพราะข้างในเป็นข้อความล้วน
-     * ในฟอร์มแถวเป็นช่องกรอกที่มีกรอบของตัวเอง เลยต้องมี padding กันไม่ให้ชนขอบกล่อง
-     */
     .edit-card .card-body {
       display: flex;
       flex-direction: column;
@@ -783,11 +713,6 @@
     .edit-card .stats[hidden] {
       display: none;
     }
-    /*
-     * ช่องกรอกมีพื้นของตัวเองแล้ว ไม่ต้องมีกล่องครอบอีกชั้น
-     * NOTE: gap 0 ได้เพราะบรรทัดช่วงค่าใต้แต่ละแถวทำหน้าที่เว้นวรรคให้อยู่แล้ว
-     * ส่วน margin ติดลบดึงขอบล่างการ์ดเข้ามา ไม่ให้เหลือที่ว่างใต้แถวสุดท้ายเยอะ
-     */
     .edit-card .stats {
       display: flex;
       flex-direction: column;
@@ -806,11 +731,6 @@
       column-gap: 0.5rem;
     }
 
-    /*
-     * Dropdown ที่วาดเอง — <select> จริงถูกซ่อนไว้เก็บค่า ที่เห็นคือปุ่มกับรายการนี้
-     * NOTE: รายการเป็นลูกของ .edit-form-card ไม่ใช่ของปุ่ม เพราะ .card มี overflow:
-     * hidden ถ้าอยู่ข้างในจะโดนตัด — ตำแหน่งตั้งจาก JS ตอนเปิดเหมือนตารางเลือก slot
-     */
     .ui-select {
       display: block;
       min-width: 0;
@@ -891,7 +811,6 @@
       background: rgba(255, 255, 255, 0.12);
     }
 
-    /* stat ที่มีโอกาสเป็น best ของช่องนี้ — สีและน้ำหนักชุดเดียวกับที่การ์ดใช้ */
     .ui-select-option.is-best,
     .ui-select-text.is-best {
       font-weight: 700;
@@ -903,13 +822,11 @@
       color: #fdba74;
     }
 
-    /* ยังไม่ได้เลือก = ไม่ใช่ค่าจริง ให้จางกว่าตัวเลือกอื่น */
     .ui-select-option.is-none,
     .ui-select-text.is-none {
       color: var(--muted);
     }
 
-    /* หัวแถวกินเต็มความกว้าง — กำกับทั้งช่องเลือกและช่องกรอกในแถวเดียวกัน */
     .edit-sub-label {
       grid-column: 1 / -1;
       margin-bottom: 0.25rem;
@@ -920,13 +837,11 @@
       color: rgba(255, 255, 255, 0.5);
     }
 
-    /* ระยะห่างกับแถวข้างล่างเป็นหน้าที่ของ gap ใน .card-body */
     .edit-card .stat-primary-block {
       padding: 0;
       margin: 0;
     }
 
-    /* ลูกศรขึ้น/ลงของ input[type=number] เกะกะในช่องแคบๆ — ไม่ได้ใช้กดอยู่แล้ว */
     .edit-dialog input[type='number'] {
       appearance: textfield;
       -moz-appearance: textfield;
@@ -944,15 +859,11 @@
       min-width: 0;
     }
 
-    /* NOTE: ล็อกความสูงทั้งคู่ — select กับ input คิดความสูงจาก UA คนละแบบ
-       ปล่อยตาม padding อย่างเดียวจะไม่มีวันเท่ากัน */
-
     .edit-inline[readonly] {
       color: var(--muted);
       cursor: default;
     }
 
-    /* input เปลือย — กรอบเป็นหน้าที่ของ .edit-field ที่ห่ออยู่ */
     .edit-dialog .edit-field .edit-inline,
     .edit-dialog .edit-field .power-input {
       width: 100%;
@@ -975,13 +886,10 @@
       font-weight: 600;
     }
 
-    /* ในฟอร์มค่า base stat คือผลลัพธ์ที่คำนวณให้ ตัวใหญ่หน่อยให้ตรวจง่าย */
     .edit-card .stat-primary-block .value {
       font-size: 1.5rem;
       line-height: 1.1;
     }
-
-
 
     .edit-col-title {
       margin: 0;
@@ -991,7 +899,6 @@
       color: #e4e4e7;
     }
 
-    /* primary: พื้นสว่าง ตัวหนังสือเข้ม — ตัวที่อยากให้กด */
     .edit-actions .edit-replace {
       background: #e4e4e7;
       color: #18181b;
@@ -1009,7 +916,6 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
-    /* ทรงฟิลด์แบบ HeroUI — พื้นทึบอ่อน ไม่มีเส้นขอบ มุมมน */
     .edit-dialog input {
       width: 100%;
       padding: 0.45rem 0.7rem;
@@ -1033,7 +939,6 @@
       justify-content: flex-end;
       margin-top: auto;
     }
-    /* secondary: พื้นเทาทึบ ไม่มีขอบ */
     .edit-actions button {
       padding: 0.55rem 1.1rem;
       border: none;
@@ -1053,10 +958,6 @@
       cursor: not-allowed;
     }
 
-    /*
-     * กำลังบันทึก — วงหมุนอยู่ในปุ่มที่เพิ่งกด ไม่ใช่ข้อความที่อื่น
-     * NOTE: ซ่อนข้อความด้วย color: transparent ไม่ใช่เอาออก — ปุ่มจะได้ไม่หดตอนหมุน
-     */
     .edit-actions button.is-loading,
     .edit-actions button.is-loading[disabled] {
       position: relative;
@@ -1116,7 +1017,6 @@
     }
 
     .grid-row-group {
-      /* NOTE: คุมความกว้างที่ระดับ group ไม่ใช่ที่ .grid — แถบ tag จะได้ยาวเท่าการ์ด 3 ใบพอดี */
       max-width: calc(var(--card-max) * 3 + var(--card-gap) * 2);
       margin-inline: auto;
       margin-bottom: 1.1rem;
@@ -1135,11 +1035,9 @@
       padding: 0.3rem;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.06);
-      /* NOTE: กันความสูงไว้ให้แถวที่ไม่มี tag ด้วย ไม่งั้นกริดแต่ละแถวเหลื่อมกัน */
       min-height: 2.25rem;
     }
 
-    /* ป้ายหัวแถบ: เป็นข้อความในกรอบเฉยๆ ไม่มีพื้นของตัวเอง (ชุดเดียวกับ .mode-group-label) */
     .best-label {
       display: inline-flex;
       align-items: center;
@@ -1151,7 +1049,6 @@
       white-space: nowrap;
     }
 
-    /* ทรง chip ของ HeroUI: พื้นทึบ ไม่มีขอบ มนเต็ม */
     .best-tag {
       display: inline-flex;
       align-items: center;
@@ -1193,11 +1090,6 @@
 
     .card-body { padding: 8px; }
 
-    /*
-     * ปุ่มมุมขวาบนของการ์ด (ปักหมุด / ลบ) — โผล่ตอน hover เท่านั้น
-     * NOTE: .can-edit ติดที่ body ตอนต่อ Web App ได้ ถ้าดูจากข้อมูลสำรองในเว็บก็ไม่มีปุ่ม
-     * เพราะกดไปก็เขียนอะไรไม่ได้
-     */
     .card-actions {
       position: absolute;
       z-index: 2;
@@ -1209,7 +1101,6 @@
     .can-edit .card-actions {
       display: flex;
     }
-    /* การ์ดตัวอย่างใน dialog อ่านอย่างเดียว — สั่งอะไรจากตรงนั้นไม่ได้ */
     .can-edit .edit-preview .card-actions {
       display: none;
     }
@@ -1250,11 +1141,6 @@
       cursor: progress;
     }
 
-    /*
-     * กำลังลบ — การ์ดจางลงและมีวงหมุนทับ กันกดซ้ำระหว่างรอ Web App (หลายวินาที)
-     * NOTE: วงหมุนอยู่บน ::after ของการ์ด ไม่ได้เพิ่ม element เพราะ renderCard
-     * ใช้ร่วมกับหน้า Compare และ dialog ด้วย
-     */
     .card.is-busy {
       pointer-events: none;
     }
@@ -1289,10 +1175,6 @@
       height: 0.82rem;
     }
 
-    /*
-     * ช่องเดียวมีของหลายใบ (หลายแถว active ใน slot เดียวกัน) — เรียงลงมาในช่องนั้น
-     * NOTE: ปกติมีใบเดียว กล่องนี้เลยไม่เปลี่ยนหน้าตาอะไรเลยในกรณีทั่วไป
-     */
     .slot-stack {
       display: flex;
       flex-direction: column;
@@ -1303,18 +1185,13 @@
       height: auto;
     }
 
-    /* ใบหลักของช่อง (isMain ในชีต) — กรอบฟ้าให้รู้ว่าใบไหนคือตัวที่ใช้อยู่ */
     .card.is-main {
       box-shadow:
         0 0 0 2px #74c0fc,
         0 0 10px rgba(116, 192, 252, 0.3);
     }
 
-    /*
-     * eternal เป็นเกรดสูงสุด — ให้เด่นกว่าเกรดอื่นด้วยไล่สีที่ name-bar
-     */
     .card.eternal .name-bar {
-      /* แถบสว่างกลาง เข้มหัวท้าย — ทรงเดียวกับป้าย Eternal ในเกม */
       background: linear-gradient(
         180deg,
         color-mix(in srgb, var(--frame) 90%, #7e22ce) 0%,
@@ -1323,7 +1200,6 @@
         color-mix(in srgb, var(--frame) 94%, #7e22ce) 100%
       );
     }
-
 
     .name-bar {
       display: flex;
@@ -1358,11 +1234,6 @@
       border-radius: 12px;
     }
 
-    /* เลเวลเป็นป้ายเล็กกึ่งกลางล่างไอคอน — ขอบล่างเป็นบริเวณที่ทับงานศิลป์น้อยสุด */
-    /*
-     * จุดแดงบอกว่าเพิ่งเพิ่มเข้ามา (isNew ในชีต)
-     * NOTE: กรอบรูปมี overflow: hidden + มุมมน — ต้องขยับเข้ามาหน่อย ไม่งั้นโดนตัดมุม
-     */
     .new-dot {
       position: absolute;
       top: 3px;
@@ -1429,12 +1300,10 @@
       color: #422006;
     }
 
-    /* NOTE: padding ขวาต้องเท่า .stats li ไม่งั้นตัวเลขหลุดแนวเลข substat ข้างล่าง */
     .stat-primary-block {
       padding: 0.15rem 0.4rem 0.6rem;
     }
 
-    /* ชื่อซ้าย ค่าขวา บรรทัดเดียว — แนวเดียวกับแถว substat */
     .primary-cell {
       display: flex;
       align-items: baseline;
@@ -1482,27 +1351,10 @@
       align-self: center;
     }
 
-
-    /*
-     * เครื่องหมายคุณภาพโรลต่อท้ายตัวเลข substat
-     * ขึ้น: ฟ้า = top 25%, ฟ้าเขียว = top 10%, ดาวเหลือง = top 5%
-     * ลง: ส้ม = bottom 25%, ส้มแดง = bottom 10%
-     *
-     * NOTE: ใช้ drop-shadow ไม่ใช่ box-shadow — box-shadow เรืองเป็นกรอบสี่เหลี่ยม
-     * รอบไอคอน ไม่ใช่รอบตัวรูป
-     *
-     * NOTE: อยู่ในสายตัวอักษรหน้าตัวเลข — แถวที่มีเครื่องหมายตัวเลขจะถอยซ้ายตาม
-     * ความกว้างไอคอน ไม่ได้ชิดขวาตรงแนวเดียวกับแถวที่ไม่มี
-     */
     .roll-mark {
       width: 0.88em;
       height: 0.88em;
       margin-right: 0.2em;
-      /*
-       * NOTE: กลางไอคอนต้องตรงกลาง "ตัวเลข" ไม่ใช่กลางบรรทัด — ตัวเลขไม่มีหางล่าง
-       * สูงแค่ ~0.72em ของ font ส่วนบรรทัดสูง 1.15em ถ้าจัดกลางบรรทัดไอคอนจะดูต่ำ
-       * ค่าที่ได้ = (ความสูงตัวเลข - ความสูงไอคอน) / 2
-       */
       vertical-align: -0.079em;
     }
     .roll-mark.is-top25 {
@@ -1516,10 +1368,6 @@
     .roll-mark.is-top5 {
       width: 0.58em;
       height: 0.58em;
-      /*
-       * NOTE: ดาวต้องยกสูงกว่าสูตรอีกนิด — วัดน้ำหนักหมึกแล้วจุดถ่วงอยู่ใต้กลางกรอบ
-       * 3.9% เพราะปลายบนเรียวแต่ลำตัวล่างอ้วน จัดกลางตามกรอบเฉยๆ ตาจะเห็นว่าห้อยต่ำ
-       */
       vertical-align: 0.094em;
       color: #fcc419;
       filter: drop-shadow(0 0 4px rgba(252, 196, 25, 0.9));
@@ -1533,16 +1381,11 @@
       filter: drop-shadow(0 0 3px rgba(244, 81, 44, 0.8));
     }
 
-    /*
-     * แถวที่ไม่ใช่ best stat: เครื่องหมายจางลงและตัดแสงทิ้ง — โรลดีแค่ไหนก็ไม่ใช่ของ
-     * ที่ตามหา จึงไม่ควรดึงสายตาไปก่อนแถวที่ใช่
-     */
     .stats li:not(.stat-row-best) .roll-mark {
       opacity: 0.35;
       filter: none;
     }
 
-    /* ช่วงค่าที่เป็นไปได้ของ substat — เล็กและจาง อยู่ใต้ตัวเลขฝั่งขวา */
     .stat-range {
       display: block;
       margin-top: 0.1rem;
@@ -1561,7 +1404,6 @@
     .stats .label {
       color: rgba(255, 255, 255, 0.5);
       font-weight: 500;
-      /* เล็กกว่าตัวเลขนิดนึง — ชื่อเป็นข้อมูลรอง ค่าเป็นตัวหลัก */
       font-size: 0.72rem;
       justify-self: start;
     }
@@ -1576,7 +1418,6 @@
     .card.eternal .stat-row-best .ui-select-text,
     .card.eternal .stat-row-best .label,
     .card.eternal .stat-row-best .value {
-      /* NOTE: ผูกกับ --glow ของการ์ด — แก้สีเกรดใน constants.mjs แล้วตรงนี้ตามเอง */
       color: var(--glow);
       font-weight: 600;
     }
@@ -1588,7 +1429,6 @@
       font-weight: 600;
     }
 
-    /* ── แท็บ Compare ─────────────────────────────────────────── */
     .section.compare {
       display: flex;
       flex-wrap: wrap;
@@ -1596,17 +1436,14 @@
       gap: 0 1.5rem;
     }
 
-    /* NOTE: section เป็น flex — หัวข้อต้องกินเต็มบรรทัด ไม่งั้นไปเบียดอยู่ข้างกล่องแรก */
     .section.compare .section-header {
       width: 100%;
     }
 
     .compare-group {
-      /* กว้างเท่าการ์ด 2 ใบ ไม่ใช่ 3 เหมือนแถวปกติ */
       max-width: calc(var(--card-max) * 2 + var(--card-gap));
     }
 
-    /* หัวกล่องมีแค่ชื่อ slot ไม่มี tag ต่อท้าย เลยไม่ต้องมีแถบรอง */
     .compare-group .row-best-caption {
       margin-bottom: 0.45rem;
       padding: 0;
@@ -1622,11 +1459,6 @@
       font-size: 0.875rem;
     }
 
-    /*
-     * NOTE: แถวคำกำกับกับแถวการ์ดเป็นแถวของ .compare-grid ไม่ใช่ของแต่ละช่อง
-     * (subgrid) — ป้าย best stat ของสอง set ยาวไม่เท่ากันได้ แต่การ์ดยังเริ่ม
-     * ที่ความสูงเดียวกันเสมอ
-     */
     .compare-grid {
       grid-template-columns: repeat(2, minmax(var(--card-min), var(--card-max)));
       grid-template-rows: auto auto;
@@ -1650,7 +1482,6 @@
       padding-left: 0.2rem;
     }
 
-    /* กินเต็มบรรทัดในกล่อง flex ที่ wrap ได้ — tag เลยถูกดันลงบรรทัดถัดไปทั้งหมด */
     .compare-set-name {
       width: 100%;
       margin-bottom: 0.15rem;
@@ -1666,7 +1497,6 @@
       gap: 0.25rem;
     }
 
-    /* การ์ดกว้างแค่ 175px — tag ต้องเล็กกว่าบนหัวแถบปกติ ไม่งั้นตกบรรทัดยาวเป็นพรืด */
     .compare-set .best-tag,
     .edit-tags .best-tag {
       padding: 0.15rem 0.4rem;

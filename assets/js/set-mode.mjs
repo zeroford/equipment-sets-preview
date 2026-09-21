@@ -5,7 +5,6 @@ import { COMPARE_KEY, bestTagsHtml, compareCaptionHtml } from './render.mjs';
 
 const MODE_STORAGE = 'equipment-sets-mode';
 
-/** โหมดที่ผู้ใช้เลือกไว้ต่อ set — จำข้ามการ refresh */
 function readStoredModes() {
   try {
     const raw = JSON.parse(localStorage.getItem(MODE_STORAGE) || '{}');
@@ -19,15 +18,9 @@ function storeModes(modes) {
   try {
     localStorage.setItem(MODE_STORAGE, JSON.stringify(modes));
   } catch (err) {
-    /* private mode — ใช้ต่อได้ แค่ไม่จำ */
-  }
+     }
 }
 
-/**
- * Tab + toggle PvE/Boss ต่อ set
- *
- * NOTE: set ที่ไม่มีโหมดตั้งต้น (เช่น set3) จะไม่มี toggle และไม่ highlight อะไรเลย
- */
 export function createSetModeUi() {
   let modes = {};
   let setMeta = {};
@@ -52,13 +45,7 @@ export function createSetModeUi() {
     compareSets = sets.slice(0, 2).filter((set) => defaultModeFor(set.setKey));
   }
 
-  /**
-   * ปุ่มโหมดหนึ่งชุด
-   *
-   * label = ชื่อ set ที่อยู่ในแคปซูลเดียวกัน กดไม่ได้ (ใช้ในแท็บ Compare
-   * ที่มีสองชุดพร้อมกัน จะได้รู้ว่าชุดไหนคุมอะไร)
-   */
-  function modeGroupHtml(setKey, label) {
+   function modeGroupHtml(setKey, label) {
     const mode = modeFor(setKey);
     const iconOnly = Boolean(label);
     const buttons = MODES.map(
@@ -78,8 +65,7 @@ export function createSetModeUi() {
       return;
     }
 
-    // แท็บ Compare คุมได้ทั้งสอง set พร้อมกัน เลยโชว์สองแถว
-    if (activeSetKey === COMPARE_KEY) {
+       if (activeSetKey === COMPARE_KEY) {
       toggle.hidden = compareSets.length < 2;
       toggle.innerHTML = toggle.hidden
         ? ''
@@ -90,8 +76,7 @@ export function createSetModeUi() {
       toggle.innerHTML = mode ? modeGroupHtml(activeSetKey, '') : '';
     }
 
-    // NOTE: ต้องเรียกทุกครั้งที่เขียน innerHTML ใหม่ — lucide แทน <i data-lucide> ด้วย <svg> ตอนถูกเรียกเท่านั้น
-    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+       if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
     }
   }
@@ -112,8 +97,7 @@ export function createSetModeUi() {
         titleEl.textContent = meta.title;
       }
 
-      // panel ที่ไม่มีโหมด (เช่น Compare) ไม่มี row group ให้วาดตรงนี้
-      if (!modeFor(setKey)) {
+           if (!modeFor(setKey)) {
         return;
       }
 
@@ -129,8 +113,7 @@ export function createSetModeUi() {
       });
     });
 
-    // แท็บ Compare: แต่ละใบใช้โหมดของ set ที่มันมา ไม่ใช่โหมดของ panel
-    document.querySelectorAll('.compare-cell[data-set-key]').forEach((cell) => {
+       document.querySelectorAll('.compare-cell[data-set-key]').forEach((cell) => {
       const setKey = cell.dataset.setKey;
       const best = bestSubstatFor(modeFor(setKey));
       const bestStats = best.rows[Number(cell.dataset.rowIndex)] || [];
@@ -164,11 +147,7 @@ export function createSetModeUi() {
     tabs = Array.from(document.querySelectorAll('.set-tab'));
     panels = Array.from(document.querySelectorAll('.section[role="tabpanel"]'));
 
-    /*
-     * อยู่แท็บไหนก็อยู่ต่อ — bind() ถูกเรียกใหม่ทุกครั้งที่บันทึกสำเร็จ
-     * ถ้ารีเซ็ตเป็นแท็บแรกเสมอ กด Add ที่ Set B แล้วจะเด้งกลับ Set A ทุกที
-     */
-    const stillThere = tabs.some((tab) => tab.dataset.setKey === activeSetKey);
+       const stillThere = tabs.some((tab) => tab.dataset.setKey === activeSetKey);
     if (!stillThere) {
       activeSetKey = tabs.length ? tabs[0].dataset.setKey : '';
     }
@@ -177,13 +156,11 @@ export function createSetModeUi() {
       tab.addEventListener('click', () => showSet(tab.dataset.setKey));
     });
 
-    // NOTE: toggle อยู่ใน shell ไม่ได้สร้างใหม่ตอน re-render — ผูก listener ได้ครั้งเดียว
-    if (toggle && !toggleBound) {
+       if (toggle && !toggleBound) {
       toggleBound = true;
       toggle.addEventListener('click', (event) => {
         const btn = event.target.closest('.mode-option');
-        // ปุ่มบอกเองว่าคุม set ไหน — ในแท็บ Compare ปุ่มคนละแถวคุมคนละ set
-        const targetKey = btn && btn.dataset.setKey;
+               const targetKey = btn && btn.dataset.setKey;
         if (!targetKey) {
           return;
         }
