@@ -5,12 +5,9 @@ const DEFAULT_BONUS = 1.05;
 
 const DEFAULT_SUB_BONUS = 1.3;
 
-const SUB_BONUS_BY_SLOT = {
-  4: 0.7,
-};
+const SUB_BONUS_BY_SLOT = {};
 
 const BONUS_BY_SLOT = {
-  4: 0.81,
   11: 1.23,
 };
 
